@@ -69,22 +69,22 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                 children: [
                   Text(
                     widget.restaurantName,
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+                    style: const TextStyle(fontSize: AppFontSize.xl, fontWeight: AppFontWeight.extraBold),
                   ),
                   const SizedBox(height: 6),
                   const Row(
                     children: [
                       Icon(Icons.star_rounded, color: AppColors.warning, size: 20),
                       SizedBox(width: 4),
-                      Text('4.9 (320 đánh giá)', style: TextStyle(fontWeight: FontWeight.w700)),
+                      Text('4.9 (320 đánh giá)', style: TextStyle(fontWeight: AppFontWeight.bold, fontSize: AppFontSize.body)),
                       SizedBox(width: 12),
                       Icon(Iconsax.location5, color: AppColors.primary, size: 16),
                       SizedBox(width: 4),
-                      Text('0.8 km — 123 Nguyễn Trãi, Q5'),
+                      Text('0.8 km — 123 Nguyễn Trãi, Q5', style: TextStyle(fontSize: AppFontSize.body)),
                     ],
                   ),
                   const SizedBox(height: 24),
-                  const Text('Thực Đơn Món Ăn', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                  const Text('Thực Đơn Món Ăn', style: TextStyle(fontSize: AppFontSize.lg, fontWeight: AppFontWeight.extraBold)),
                   const SizedBox(height: 12),
 
                   // Menu Items List
@@ -170,11 +170,11 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                Text(name, style: const TextStyle(fontWeight: AppFontWeight.bold, fontSize: AppFontSize.base)),
                 const SizedBox(height: 4),
-                Text(description, style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight), maxLines: 2),
+                Text(description, style: const TextStyle(fontSize: AppFontSize.sm, color: AppColors.textSecondaryLight), maxLines: 2),
                 const SizedBox(height: 8),
-                Text('${price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}đ', style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.primary, fontSize: 15)),
+                Text('${price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}đ', style: const TextStyle(fontWeight: AppFontWeight.extraBold, color: AppColors.primary, fontSize: AppFontSize.base)),
               ],
             ),
           ),
@@ -193,7 +193,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                   icon: const Icon(Iconsax.minus_cirlce5, color: AppColors.textSecondaryLight, size: 28),
                   onPressed: () => _removeItem(id),
                 ),
-                Text('$count', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text('$count', style: const TextStyle(fontWeight: AppFontWeight.bold, fontSize: AppFontSize.title)),
                 IconButton(
                   icon: const Icon(Iconsax.add_circle5, color: AppColors.primary, size: 28),
                   onPressed: () => _addItem(id),

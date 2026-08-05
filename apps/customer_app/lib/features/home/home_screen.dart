@@ -23,8 +23,8 @@ class HomeScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Giao đến địa chỉ', style: TextStyle(fontSize: 11, color: AppColors.textSecondaryLight)),
-                        Text('123 Nguyễn Trãi, Q5, TP.HCM', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text('Giao đến địa chỉ', style: TextStyle(fontSize: AppFontSize.xs, color: AppColors.textSecondaryLight)),
+                        Text('123 Nguyễn Trãi, Q5, TP.HCM', style: TextStyle(fontSize: AppFontSize.md, fontWeight: AppFontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
                       ],
                     ),
                   ),
@@ -60,19 +60,19 @@ class HomeScreen extends StatelessWidget {
                         color: Colors.white,
                         borderRadius: BorderRadius.all(AppRadius.full),
                       ),
-                      child: const Text('MÃ KHUYẾN MÃI', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                      child: const Text('MÃ KHUYẾN MÃI', style: TextStyle(fontSize: AppFontSize.xs, fontWeight: AppFontWeight.extraBold, color: AppColors.primary)),
                     ),
                     const SizedBox(height: 12),
-                    const Text('Giảm 20k Cho Đơn Đầu Tiên 🍲', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
+                    const Text('Giảm 20k Cho Đơn Đầu Tiên 🍲', style: TextStyle(fontSize: AppFontSize.lg, fontWeight: AppFontWeight.extraBold, color: Colors.white)),
                     const SizedBox(height: 4),
-                    const Text('Nhập mã "SUMMER20" áp dụng ngay', style: TextStyle(fontSize: 13, color: Colors.white70)),
+                    const Text('Nhập mã "SUMMER20" áp dụng ngay', style: TextStyle(fontSize: AppFontSize.body, color: Colors.white70)),
                   ],
                 ),
               ),
               const SizedBox(height: 28),
 
               // Categories Header
-              const Text('Danh Mục Món Ăn', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+              const Text('Danh Mục Món Ăn', style: TextStyle(fontSize: AppFontSize.lg, fontWeight: AppFontWeight.extraBold)),
               const SizedBox(height: 14),
 
               // Category chips list
@@ -95,8 +95,8 @@ class HomeScreen extends StatelessWidget {
               const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Quán Ăn Gần Bạn', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-                  Text('Xem tất cả', style: TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w700)),
+                  Text('Quán Ăn Gần Bạn', style: TextStyle(fontSize: AppFontSize.lg, fontWeight: AppFontWeight.extraBold)),
+                  Text('Xem tất cả', style: TextStyle(fontSize: AppFontSize.body, color: AppColors.primary, fontWeight: AppFontWeight.bold)),
                 ],
               ),
               const SizedBox(height: 16),
@@ -147,8 +147,8 @@ class HomeScreen extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 13,
-          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+          fontSize: AppFontSize.body,
+          fontWeight: isSelected ? AppFontWeight.bold : AppFontWeight.medium,
           color: isSelected ? Colors.white : AppColors.textPrimaryLight,
         ),
       ),

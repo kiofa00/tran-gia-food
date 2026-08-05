@@ -37,6 +37,30 @@ class AppColors {
   static const info    = Color(0xFF0288D1);
 }
 
+/// Typography tokens for Tran Gia Food Design System
+class AppFontSize {
+  AppFontSize._();
+  static const double xs    = 11.0;
+  static const double sm    = 12.0;
+  static const double body  = 13.0;
+  static const double md    = 14.0;
+  static const double base  = 15.0;
+  static const double title = 16.0;
+  static const double lg    = 18.0;
+  static const double xl    = 22.0;
+  static const double h1    = 24.0;
+  static const double h2    = 28.0;
+}
+
+class AppFontWeight {
+  AppFontWeight._();
+  static const regular   = FontWeight.w400;
+  static const medium    = FontWeight.w500;
+  static const semiBold  = FontWeight.w600;
+  static const bold      = FontWeight.w700;
+  static const extraBold = FontWeight.w800;
+}
+
 /// Border radius constants
 class AppRadius {
   AppRadius._();

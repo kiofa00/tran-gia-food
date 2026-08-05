@@ -15,9 +15,9 @@ class _MainShellState extends State<MainShell> {
 
   final List<Widget> _pages = const [
     HomeScreen(),
-    Center(child: Text('Đơn Hàng Của Tôi 📦', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-    Center(child: Text('Giỏ Hàng 🛒', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-    Center(child: Text('Tài Khoản & Profile 👤', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+    Center(child: Text('Đơn Hàng Của Tôi 📦', style: TextStyle(fontSize: AppFontSize.lg, fontWeight: AppFontWeight.bold))),
+    Center(child: Text('Giỏ Hàng 🛒', style: TextStyle(fontSize: AppFontSize.lg, fontWeight: AppFontWeight.bold))),
+    Center(child: Text('Tài Khoản & Profile 👤', style: TextStyle(fontSize: AppFontSize.lg, fontWeight: AppFontWeight.bold))),
   ];
 
   @override
@@ -33,8 +33,8 @@ class _MainShellState extends State<MainShell> {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.textSecondaryLight,
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
-        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+        selectedLabelStyle: const TextStyle(fontWeight: AppFontWeight.bold, fontSize: AppFontSize.sm),
+        unselectedLabelStyle: const TextStyle(fontWeight: AppFontWeight.medium, fontSize: AppFontSize.sm),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Iconsax.home_1),

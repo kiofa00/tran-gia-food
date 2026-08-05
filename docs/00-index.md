@@ -24,6 +24,7 @@
 | [13-i18n-theme.md](./13-i18n-theme.md) | Đa ngôn ngữ (vi/en), theme switching (Light/Dark) |
 | [14-roadmap.md](./14-roadmap.md) | Lộ trình phát triển theo phase |
 | [15-monorepo.md](./15-monorepo.md) | Cấu trúc monorepo, shared packages, melos setup |
+| [16-design-tokens.md](./16-design-tokens.md) | Quy định & hướng dẫn triển khai hệ thống Design Tokens |
 
 ---
 

@@ -78,7 +78,7 @@ class RestaurantCard extends StatelessWidget {
                     ),
                     child: Text(
                       isOpen ? 'Đang mở' : 'Đã đóng',
-                      style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700),
+                      style: const TextStyle(color: Colors.white, fontSize: AppFontSize.xs, fontWeight: AppFontWeight.bold),
                     ),
                   ),
                 ),
@@ -94,8 +94,8 @@ class RestaurantCard extends StatelessWidget {
                   Text(
                     name,
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                      fontSize: AppFontSize.title,
+                      fontWeight: AppFontWeight.bold,
                       color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
                     ),
                     maxLines: 1,
@@ -110,12 +110,12 @@ class RestaurantCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         rating.toStringAsFixed(1),
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                        style: const TextStyle(fontSize: AppFontSize.body, fontWeight: AppFontWeight.bold),
                       ),
                       Text(
                         ' ($totalReviews)',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: AppFontSize.sm,
                           color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                         ),
                       ),
@@ -125,7 +125,7 @@ class RestaurantCard extends StatelessWidget {
                       Text(
                         '${distanceKm.toStringAsFixed(1)} km',
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: AppFontSize.body,
                           color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                         ),
                       ),
@@ -135,8 +135,8 @@ class RestaurantCard extends StatelessWidget {
                       Text(
                         '$estimatedMin min',
                         style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
+                          fontSize: AppFontSize.body,
+                          fontWeight: AppFontWeight.semiBold,
                           color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
                         ),
                       ),

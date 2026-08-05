@@ -46,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(width: 14),
                   const Text(
                     'Tran Gia Food',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.primary),
+                    style: TextStyle(fontSize: AppFontSize.h1, fontWeight: AppFontWeight.extraBold, color: AppColors.primary),
                   ),
                 ],
               ),
@@ -54,12 +54,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const Text(
                 'Chào mừng bạn đến với Tran Gia Food 👋',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+                style: TextStyle(fontSize: AppFontSize.xl, fontWeight: AppFontWeight.bold),
               ),
               const SizedBox(height: 8),
               const Text(
                 'Nhập số điện thoại để đặt món ăn yêu thích nhanh chóng',
-                style: TextStyle(fontSize: 14, color: AppColors.textSecondaryLight),
+                style: TextStyle(fontSize: AppFontSize.md, color: AppColors.textSecondaryLight),
               ),
               const SizedBox(height: 32),
 
@@ -87,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Expanded(child: Divider()),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text('Hoặc đăng nhập với', style: TextStyle(fontSize: 12, color: AppColors.textHintLight)),
+                    child: Text('Hoặc đăng nhập với', style: TextStyle(fontSize: AppFontSize.sm, color: AppColors.textHintLight)),
                   ),
                   Expanded(child: Divider()),
                 ],
@@ -97,8 +97,8 @@ class _LoginScreenState extends State<LoginScreen> {
               // Social logins
               OutlinedButton.icon(
                 onPressed: () => context.go('/main'),
-                icon: const Icon(Icons.g_mobiledata_rounded, size: 28, color: Colors.red),
-                label: const Text('Tiếp tục với Google', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600)),
+                icon: const Icon(Icons.g_mobiledata_rounded, size: 28, color: AppColors.error),
+                label: const Text('Tiếp tục với Google', style: TextStyle(color: AppColors.textPrimaryLight, fontWeight: AppFontWeight.semiBold)),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),
                   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(AppRadius.sm)),

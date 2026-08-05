@@ -41,7 +41,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Delivery Address Card
-            const Text('Địa Chỉ Giao Hàng', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const Text('Địa Chỉ Giao Hàng', style: TextStyle(fontSize: AppFontSize.title, fontWeight: AppFontWeight.bold)),
             const SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.all(16),
@@ -57,9 +57,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Nguyễn Văn A — 090 123 4567', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                        Text('Nguyễn Văn A — 090 123 4567', style: TextStyle(fontWeight: AppFontWeight.bold, fontSize: AppFontSize.md)),
                         SizedBox(height: 4),
-                        Text('123 Nguyễn Trãi, Phường 2, Quận 5, TP.HCM', style: TextStyle(fontSize: 13, color: AppColors.textSecondaryLight)),
+                        Text('123 Nguyễn Trãi, Phường 2, Quận 5, TP.HCM', style: TextStyle(fontSize: AppFontSize.body, color: AppColors.textSecondaryLight)),
                       ],
                     ),
                   ),
@@ -69,7 +69,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             const SizedBox(height: 24),
 
             // Payment Method Selector
-            const Text('Phương Thức Thanh Toán', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const Text('Phương Thức Thanh Toán', style: TextStyle(fontSize: AppFontSize.title, fontWeight: AppFontWeight.bold)),
             const SizedBox(height: 10),
             _buildPaymentOption('cash', 'Tiền mặt khi nhận hàng (COD)', Iconsax.money_change),
             _buildPaymentOption('momo', 'Ví Điện Tử MoMo', Iconsax.wallet_3),
@@ -113,7 +113,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           children: [
             Icon(icon, color: isSelected ? AppColors.primary : AppColors.textSecondaryLight),
             const SizedBox(width: 12),
-            Expanded(child: Text(title, style: TextStyle(fontWeight: isSelected ? FontWeight.bold : FontWeight.w500, fontSize: 14))),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontWeight: isSelected ? AppFontWeight.bold : AppFontWeight.medium,
+                  fontSize: AppFontSize.base,
+                  color: isSelected ? AppColors.primary : AppColors.textPrimaryLight,
+                ),
+              ),
+            ),
             if (isSelected) const Icon(Icons.check_circle_rounded, color: AppColors.primary),
           ],
         ),

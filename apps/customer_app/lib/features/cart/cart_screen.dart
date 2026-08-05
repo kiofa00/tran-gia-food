@@ -53,7 +53,7 @@ class _CartScreenState extends State<CartScreen> {
                 children: [
                   Icon(Iconsax.shop, color: AppColors.primary),
                   SizedBox(width: 10),
-                  Text('Phở Bắc Hà — Nguyễn Trãi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  Text('Phở Bắc Hà — Nguyễn Trãi', style: TextStyle(fontWeight: AppFontWeight.bold, fontSize: AppFontSize.base)),
                 ],
               ),
             ),
@@ -81,14 +81,14 @@ class _CartScreenState extends State<CartScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(AppRadius.sm)),
                   ),
-                  child: const Text('Áp Dụng', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: const Text('Áp Dụng', style: TextStyle(color: Colors.white, fontWeight: AppFontWeight.bold)),
                 ),
               ],
             ),
             const SizedBox(height: 28),
 
             // Order Summary
-            const Text('Chi Tiết Thanh Toán', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const Text('Chi Tiết Thanh Toán', style: TextStyle(fontSize: AppFontSize.title, fontWeight: AppFontWeight.bold)),
             const SizedBox(height: 12),
             _buildSummaryRow('Tiền đồ ăn', '130.000đ'),
             const SizedBox(height: 8),
@@ -115,10 +115,10 @@ class _CartScreenState extends State<CartScreen> {
   Widget _buildCartRow(String name, int qty, int price) {
     return Row(
       children: [
-        Text('${qty}x', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 16)),
+        Text('${qty}x', style: const TextStyle(fontWeight: AppFontWeight.bold, color: AppColors.primary, fontSize: AppFontSize.title)),
         const SizedBox(width: 12),
-        Expanded(child: Text(name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15))),
-        Text('${price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}đ', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+        Expanded(child: Text(name, style: const TextStyle(fontWeight: AppFontWeight.semiBold, fontSize: AppFontSize.base))),
+        Text('${price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}đ', style: const TextStyle(fontWeight: AppFontWeight.bold, fontSize: AppFontSize.base)),
       ],
     );
   }
@@ -127,8 +127,8 @@ class _CartScreenState extends State<CartScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: TextStyle(fontSize: isBold ? 16 : 14, fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
-        Text(value, style: TextStyle(fontSize: isBold ? 18 : 14, fontWeight: isBold ? FontWeight.bold : FontWeight.w600, color: color ?? (isBold ? AppColors.primary : null))),
+        Text(label, style: TextStyle(fontSize: isBold ? AppFontSize.title : AppFontSize.md, fontWeight: isBold ? AppFontWeight.bold : AppFontWeight.regular)),
+        Text(value, style: TextStyle(fontSize: isBold ? AppFontSize.lg : AppFontSize.md, fontWeight: isBold ? AppFontWeight.bold : AppFontWeight.semiBold, color: color ?? (isBold ? AppColors.primary : null))),
       ],
     );
   }

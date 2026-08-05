@@ -1,4 +1,4 @@
-# 🎨 Applying Design Tokens — Tran Gia Food
+# 🎨 16 — Quy Định Sử Dụng Design Tokens
 
 Tài liệu quy định và hướng dẫn sử dụng hệ thống Design Tokens dùng chung cho toàn bộ dự án Monorepo (3 Flutter Apps + 1 Next.js Admin Web).
 

@@ -37,8 +37,8 @@ class AppTextField extends StatelessWidget {
           Text(
             labelText!,
             style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+              fontSize: AppFontSize.md,
+              fontWeight: AppFontWeight.semiBold,
               color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
             ),
           ),
@@ -51,7 +51,7 @@ class AppTextField extends StatelessWidget {
           validator: validator,
           onChanged: onChanged,
           style: TextStyle(
-            fontSize: 15,
+            fontSize: AppFontSize.base,
             color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
           ),
           decoration: InputDecoration(

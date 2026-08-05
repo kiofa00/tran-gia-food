@@ -34,7 +34,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Đơn Hàng Mới Cần Nhận (1)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary)),
+            const Text('Đơn Hàng Mới Cần Nhận (1)', style: TextStyle(fontSize: AppFontSize.title, fontWeight: AppFontWeight.bold, color: AppColors.primary)),
             const SizedBox(height: 12),
             _buildOrderCard(
               orderId: '#12345',
@@ -48,7 +48,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
             ),
             const SizedBox(height: 24),
 
-            const Text('Đơn Đang Chế Biến (1)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const Text('Đơn Đang Chế Biến (1)', style: TextStyle(fontSize: AppFontSize.title, fontWeight: AppFontWeight.bold)),
             const SizedBox(height: 12),
             _buildOrderCard(
               orderId: '#12344',
@@ -88,20 +88,20 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(orderId, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+              Text(orderId, style: const TextStyle(fontWeight: AppFontWeight.extraBold, fontSize: AppFontSize.title)),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(color: statusColor.withOpacity(0.15), borderRadius: const BorderRadius.all(AppRadius.full)),
-                child: Text(status, style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 12)),
+                child: Text(status, style: TextStyle(color: statusColor, fontWeight: AppFontWeight.bold, fontSize: AppFontSize.sm)),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          Text('$customerName — $phone', style: const TextStyle(fontWeight: FontWeight.w600)),
+          Text('$customerName — $phone', style: const TextStyle(fontWeight: AppFontWeight.semiBold, fontSize: AppFontSize.base)),
           const SizedBox(height: 4),
-          Text(items, style: const TextStyle(color: AppColors.textSecondaryLight)),
+          Text(items, style: const TextStyle(color: AppColors.textSecondaryLight, fontSize: AppFontSize.md)),
           const SizedBox(height: 12),
-          Text('Tổng tiền: ${total.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}đ', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 15)),
+          Text('Tổng tiền: ${total.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}đ', style: const TextStyle(fontWeight: AppFontWeight.bold, color: AppColors.primary, fontSize: AppFontSize.base)),
           if (showActions) ...[
             const SizedBox(height: 14),
             Row(

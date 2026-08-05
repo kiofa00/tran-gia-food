@@ -49,8 +49,8 @@ class _AvailableOrdersScreenState extends State<AvailableOrdersScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Thu Nhập Hôm Nay', style: TextStyle(color: Colors.white70, fontSize: 12)),
-                      Text('385.000đ', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800)),
+                      Text('Thu Nhập Hôm Nay', style: TextStyle(color: Colors.white70, fontSize: AppFontSize.sm)),
+                      Text('385.000đ', style: TextStyle(color: Colors.white, fontSize: AppFontSize.xl, fontWeight: AppFontWeight.extraBold)),
                     ],
                   ),
                 ],
@@ -58,7 +58,7 @@ class _AvailableOrdersScreenState extends State<AvailableOrdersScreen> {
             ),
             const SizedBox(height: 24),
 
-            const Text('Đơn Hàng Đang Chờ Nhận (1)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const Text('Đơn Hàng Đang Chờ Nhận (1)', style: TextStyle(fontSize: AppFontSize.title, fontWeight: AppFontWeight.bold)),
             const SizedBox(height: 12),
 
             // Available Order Card
@@ -94,8 +94,8 @@ class _AvailableOrdersScreenState extends State<AvailableOrdersScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Thu nhập ship: +${shipFee.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}đ', style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.primary, fontSize: 16)),
-              Text('$distanceKm km', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textSecondaryLight)),
+              Text('Thu nhập ship: +${shipFee.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}đ', style: const TextStyle(fontWeight: AppFontWeight.extraBold, color: AppColors.primary, fontSize: AppFontSize.title)),
+              Text('$distanceKm km', style: const TextStyle(fontWeight: AppFontWeight.bold, color: AppColors.textSecondaryLight, fontSize: AppFontSize.body)),
             ],
           ),
           const SizedBox(height: 12),
@@ -109,8 +109,8 @@ class _AvailableOrdersScreenState extends State<AvailableOrdersScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(restaurantName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    Text(pickupAddress, style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight)),
+                    Text(restaurantName, style: const TextStyle(fontWeight: AppFontWeight.bold, fontSize: AppFontSize.md)),
+                    Text(pickupAddress, style: const TextStyle(fontSize: AppFontSize.sm, color: AppColors.textSecondaryLight)),
                   ],
                 ),
               ),
@@ -130,8 +130,8 @@ class _AvailableOrdersScreenState extends State<AvailableOrdersScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Khách hàng: Nguyễn Văn A', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    Text(deliveryAddress, style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight)),
+                    const Text('Khách hàng: Nguyễn Văn A', style: TextStyle(fontWeight: AppFontWeight.bold, fontSize: AppFontSize.md)),
+                    Text(deliveryAddress, style: const TextStyle(fontSize: AppFontSize.sm, color: AppColors.textSecondaryLight)),
                   ],
                 ),
               ),
