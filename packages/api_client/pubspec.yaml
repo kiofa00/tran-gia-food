@@ -3,8 +3,10 @@ description: Shared HTTP client and API services for Tran Gia Food apps
 version: 0.0.1
 publish_to: none
 
+resolution: workspace
+
 environment:
-  sdk: ">=3.3.0 <4.0.0"
+  sdk: '^3.12.2'
   flutter: ">=3.19.0"
 
 dependencies:
@@ -12,7 +14,6 @@ dependencies:
     sdk: flutter
 
   shared_models:
-    path: ../shared_models
 
   # HTTP
   dio: ^5.4.3+1

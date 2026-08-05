@@ -3,8 +3,10 @@ description: Shared Dart models, enums, and DTOs for Tran Gia Food apps
 version: 0.0.1
 publish_to: none
 
+resolution: workspace
+
 environment:
-  sdk: ">=3.3.0 <4.0.0"
+  sdk: '^3.12.2'
   flutter: ">=3.19.0"
 
 dependencies:
