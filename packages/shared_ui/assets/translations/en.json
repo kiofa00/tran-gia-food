@@ -1,0 +1,70 @@
+{
+  "app_name": "Tran Gia Food",
+  "home": {
+    "greeting_morning": "Good morning, {name}! 🌤️",
+    "greeting_afternoon": "Good afternoon, {name}! ☀️",
+    "greeting_evening": "Good evening, {name}! 🌙",
+    "search_placeholder": "Search for food, restaurants...",
+    "section_hot": "🔥 Trending near you",
+    "section_fast": "⚡ Delivered in 15 mins",
+    "section_nearby": "📍 Nearest to you"
+  },
+  "order": {
+    "status_pending": "Waiting for confirmation",
+    "status_confirmed": "Restaurant confirmed",
+    "status_picking_up": "Shipper heading to restaurant",
+    "status_delivering": "Out for delivery 🛵",
+    "status_delivered": "Delivered, awaiting confirmation",
+    "status_completed": "Completed ✅",
+    "status_cancelled": "Cancelled",
+    "eta": "{min} mins away",
+    "cancel_btn": "Cancel Order",
+    "confirm_received": "Confirm Received",
+    "out_of_range": "Out of delivery range"
+  },
+  "payment": {
+    "method_momo": "MoMo Wallet",
+    "method_bank": "Linked Bank Account",
+    "method_cash": "Cash on Delivery",
+    "total": "Total",
+    "ship_fee": "Delivery fee",
+    "discount": "Discount",
+    "voucher_placeholder": "Enter voucher code"
+  },
+  "common": {
+    "btn_order": "Order Now",
+    "btn_cancel": "Cancel",
+    "btn_confirm": "Confirm",
+    "btn_chat": "Chat",
+    "btn_call": "Call",
+    "btn_retry": "Retry",
+    "unit_km": "{n} km",
+    "unit_min": "{n} min",
+    "open": "Open",
+    "closed": "Closed",
+    "loading": "Loading...",
+    "error_generic": "Something went wrong, please try again",
+    "empty_orders": "You have no orders yet",
+    "empty_cart": "Your cart is empty"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Appearance",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
+    "theme_system": "System default",
+    "account": "Account",
+    "logout": "Log out"
+  },
+  "auth": {
+    "login_title": "Log In",
+    "register_title": "Sign Up",
+    "phone_label": "Phone number",
+    "otp_label": "OTP Code",
+    "otp_sent": "OTP sent to {phone}",
+    "continue_google": "Continue with Google",
+    "continue_facebook": "Continue with Facebook",
+    "continue_apple": "Continue with Apple"
+  }
+}

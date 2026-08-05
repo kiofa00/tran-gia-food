@@ -1,0 +1,70 @@
+name: customer_app
+description: Tran Gia Food — Customer App for ordering food
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Shared packages (monorepo local path)
+  shared_models:
+    path: ../../packages/shared_models
+  shared_ui:
+    path: ../../packages/shared_ui
+  api_client:
+    path: ../../packages/api_client
+
+  # Navigation
+  go_router: ^13.2.4
+
+  # State Management
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # Maps
+  google_maps_flutter: ^2.6.1
+
+  # Firebase
+  firebase_core: ^2.30.1
+  firebase_auth: ^4.19.5
+  firebase_messaging: ^14.9.3
+  firebase_storage: ^11.7.5
+
+  # Auth
+  google_sign_in: ^6.2.1
+  flutter_facebook_auth: ^7.0.1
+  sign_in_with_apple: ^6.1.1
+
+  # Realtime
+  socket_io_client: ^2.0.3+1
+
+  # Storage
+  hive_flutter: ^1.1.0
+  shared_preferences: ^2.2.3
+  flutter_secure_storage: ^9.0.0
+
+  # Payments
+  # momo_payment: ^x.x.x  ← thêm khi tích hợp
+
+  # Utils
+  permission_handler: ^11.3.1
+  image_picker: ^1.1.1
+  geolocator: ^11.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  build_runner: ^2.4.8
+  riverpod_generator: ^2.4.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/

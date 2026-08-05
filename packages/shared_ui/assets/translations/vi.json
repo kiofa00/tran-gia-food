@@ -1,0 +1,71 @@
+// Translations: Tiếng Việt
+{
+  "app_name": "Tran Gia Food",
+  "home": {
+    "greeting_morning": "Chào buổi sáng, {name}! 🌤️",
+    "greeting_afternoon": "Buổi chiều vui vẻ, {name}! ☀️",
+    "greeting_evening": "Chào buổi tối, {name}! 🌙",
+    "search_placeholder": "Tìm kiếm đồ ăn, quán ăn...",
+    "section_hot": "🔥 Đang hot gần bạn",
+    "section_fast": "⚡ Giao nhanh 15 phút",
+    "section_nearby": "📍 Gần bạn nhất"
+  },
+  "order": {
+    "status_pending": "Đang chờ xác nhận",
+    "status_confirmed": "Quán đã xác nhận",
+    "status_picking_up": "Shipper đang đến quán",
+    "status_delivering": "Đang giao hàng 🛵",
+    "status_delivered": "Đã giao, chờ xác nhận",
+    "status_completed": "Hoàn thành ✅",
+    "status_cancelled": "Đã hủy",
+    "eta": "Dự kiến {min} phút nữa",
+    "cancel_btn": "Hủy đơn",
+    "confirm_received": "Đã nhận hàng",
+    "out_of_range": "Ngoài vùng giao hàng"
+  },
+  "payment": {
+    "method_momo": "Ví MoMo",
+    "method_bank": "Ngân hàng liên kết",
+    "method_cash": "Tiền mặt khi nhận hàng",
+    "total": "Tổng cộng",
+    "ship_fee": "Phí giao hàng",
+    "discount": "Giảm giá",
+    "voucher_placeholder": "Nhập mã voucher"
+  },
+  "common": {
+    "btn_order": "Đặt hàng ngay",
+    "btn_cancel": "Hủy",
+    "btn_confirm": "Xác nhận",
+    "btn_chat": "Chat",
+    "btn_call": "Gọi điện",
+    "btn_retry": "Thử lại",
+    "unit_km": "{n} km",
+    "unit_min": "{n} phút",
+    "open": "Đang mở",
+    "closed": "Đã đóng cửa",
+    "loading": "Đang tải...",
+    "error_generic": "Đã có lỗi xảy ra, vui lòng thử lại",
+    "empty_orders": "Bạn chưa có đơn hàng nào",
+    "empty_cart": "Giỏ hàng của bạn đang trống"
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "language": "Ngôn ngữ",
+    "theme": "Giao diện",
+    "theme_light": "Sáng",
+    "theme_dark": "Tối",
+    "theme_system": "Theo hệ thống",
+    "account": "Tài khoản",
+    "logout": "Đăng xuất"
+  },
+  "auth": {
+    "login_title": "Đăng nhập",
+    "register_title": "Đăng ký",
+    "phone_label": "Số điện thoại",
+    "otp_label": "Mã OTP",
+    "otp_sent": "Mã OTP đã gửi đến {phone}",
+    "continue_google": "Tiếp tục với Google",
+    "continue_facebook": "Tiếp tục với Facebook",
+    "continue_apple": "Tiếp tục với Apple"
+  }
+}

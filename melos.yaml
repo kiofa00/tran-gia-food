@@ -1,0 +1,46 @@
+name: tran_gia_app
+
+packages:
+  - apps/**
+  - packages/**
+
+command:
+  bootstrap:
+    usePubspecOverrides: true
+
+scripts:
+  analyze:
+    run: melos exec -- flutter analyze
+    description: Analyze all Flutter packages
+
+  test:
+    run: melos exec -- flutter test
+    description: Run tests for all packages
+
+  format:
+    run: melos exec -- dart format .
+    description: Format all Dart code
+
+  build:customer:android:
+    run: flutter build apk --release
+    description: Build customer app APK
+    packageFilters:
+      scope: customer_app
+
+  build:restaurant:android:
+    run: flutter build apk --release
+    description: Build restaurant app APK
+    packageFilters:
+      scope: restaurant_app
+
+  build:shipper:android:
+    run: flutter build apk --release
+    description: Build shipper app APK
+    packageFilters:
+      scope: shipper_app
+
+  gen:
+    run: melos exec -- dart run build_runner build --delete-conflicting-outputs
+    description: Run code generation (freezed, json_serializable)
+    packageFilters:
+      dependsOn: build_runner

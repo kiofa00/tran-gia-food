@@ -1,0 +1,55 @@
+# ===== Flutter / Dart =====
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+*.iml
+*.ipr
+*.iws
+.idea/
+.vscode/settings.json
+
+# Flutter build outputs
+apps/*/build/
+apps/*/android/.gradle/
+apps/*/android/local.properties
+apps/*/android/key.properties
+apps/*/ios/Pods/
+apps/*/ios/.symlinks/
+apps/*/ios/Flutter/.last_build_id
+apps/*/.dart_tool/
+
+# ===== Node.js / Backend =====
+backend/node_modules/
+backend/dist/
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# ===== Next.js Admin =====
+apps/admin_web/node_modules/
+apps/admin_web/.next/
+apps/admin_web/out/
+apps/admin_web/.env
+apps/admin_web/.env.*
+!apps/admin_web/.env.example
+
+# ===== General =====
+*.log
+*.DS_Store
+Thumbs.db
+.env
+.env.local
+.env.production
+
+# ===== Secrets =====
+google-services.json
+GoogleService-Info.plist
+*.p8
+*.p12
+*.jks
+*.keystore
+service-account.json

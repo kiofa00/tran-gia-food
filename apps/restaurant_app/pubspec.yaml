@@ -1,0 +1,62 @@
+name: restaurant_app
+description: Tran Gia Food — Restaurant Management App
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Shared packages
+  shared_models:
+    path: ../../packages/shared_models
+  shared_ui:
+    path: ../../packages/shared_ui
+  api_client:
+    path: ../../packages/api_client
+
+  # Navigation & State
+  go_router: ^13.2.4
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # Firebase
+  firebase_core: ^2.30.1
+  firebase_auth: ^4.19.5
+  firebase_messaging: ^14.9.3
+  firebase_storage: ^11.7.5
+
+  # Realtime (new order notifications)
+  socket_io_client: ^2.0.3+1
+
+  # Audio (new order sound alert)
+  audioplayers: ^6.0.0
+
+  # Charts (revenue dashboard)
+  fl_chart: ^0.68.0
+
+  # Storage
+  hive_flutter: ^1.1.0
+  shared_preferences: ^2.2.3
+
+  # Utils
+  image_picker: ^1.1.1
+  permission_handler: ^11.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  build_runner: ^2.4.8
+  riverpod_generator: ^2.4.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/sounds/
