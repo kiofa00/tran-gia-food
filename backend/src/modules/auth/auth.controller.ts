@@ -1,0 +1,82 @@
+import {
+  Controller, Post, Body, Get, UseGuards, HttpCode, HttpStatus,
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { AuthService } from './auth.service';
+import { SendOtpDto, VerifyOtpDto, GoogleAuthDto, RefreshTokenDto } from './dto/auth.dto';
+import { JwtAuthGuard, Public } from '../../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { User } from '@prisma/client';
+
+@ApiTags('auth')
+@Controller('auth')
+@UseGuards(JwtAuthGuard)
+export class AuthController {
+  constructor(private authService: AuthService) {}
+
+  // ── Phone OTP ────────────────────────────
+
+  @Public()
+  @Post('send-otp')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Gửi OTP đến số điện thoại' })
+  @ApiResponse({ status: 200, description: 'OTP đã gửi thành công' })
+  @ApiResponse({ status: 400, description: 'Quá giới hạn / số không hợp lệ' })
+  sendOtp(@Body() dto: SendOtpDto) {
+    return this.authService.sendOtp(dto);
+  }
+
+  @Public()
+  @Post('verify-otp')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Xác minh OTP → nhận token' })
+  @ApiResponse({ status: 200, description: 'Login thành công', schema: {
+    properties: {
+      accessToken: { type: 'string' },
+      refreshToken: { type: 'string' },
+      isNewUser: { type: 'boolean' },
+      user: { type: 'object' },
+    },
+  }})
+  verifyOtp(@Body() dto: VerifyOtpDto) {
+    return this.authService.verifyOtp(dto);
+  }
+
+  // ── Social Auth ───────────────────────────
+
+  @Public()
+  @Post('google')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Đăng nhập bằng Google (Firebase ID token)' })
+  googleAuth(@Body() dto: GoogleAuthDto) {
+    return this.authService.googleAuth(dto);
+  }
+
+  // ── Token Management ──────────────────────
+
+  @Public()
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Làm mới access token bằng refresh token' })
+  refresh(@Body() dto: RefreshTokenDto) {
+    return this.authService.refreshTokens(dto.refreshToken);
+  }
+
+  @Post('logout')
+  @ApiBearerAuth('access-token')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Đăng xuất (xóa refresh token)' })
+  logout(@CurrentUser() user: User) {
+    return this.authService.logout(user.id);
+  }
+
+  // ── Profile ───────────────────────────────
+
+  @Get('me')
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Lấy thông tin user đang đăng nhập' })
+  getMe(@CurrentUser() user: User) {
+    const { passwordHash, ...rest } = user as any;
+    return rest;
+  }
+}

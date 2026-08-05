@@ -1,0 +1,483 @@
+// Prisma schema for Tran Gia Food Platform
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================
+// ENUMS
+// =============================================
+
+enum UserRole {
+  customer
+  restaurant
+  shipper
+  admin
+}
+
+enum KycStatus {
+  none
+  pending
+  verified
+  rejected
+}
+
+enum OrderStatus {
+  pending
+  confirmed
+  picking_up
+  delivering
+  delivered
+  completed
+  cancelled
+}
+
+enum OrderType {
+  delivery
+  pickup
+}
+
+enum PaymentMethod {
+  momo
+  bank
+  cash
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  failed
+  refunded
+}
+
+enum VehicleType {
+  bicycle
+  motorbike
+  car
+}
+
+enum PenaltyLevel {
+  normal
+  warned
+  deprioritized
+  suspended
+  banned
+}
+
+enum VoucherType {
+  platform
+  restaurant
+  ship
+}
+
+enum DiscountType {
+  percent
+  fixed
+  free_ship
+  buy_x_get_y
+}
+
+enum OrderTypeFilter {
+  delivery
+  pickup
+  both
+}
+
+enum PayoutStatus {
+  pending
+  processing
+  completed
+  failed
+}
+
+enum PenaltyReason {
+  high_cancel_rate
+  low_rating
+  late_delivery
+  misconduct
+}
+
+enum MessageType {
+  text
+  image
+  template
+}
+
+// =============================================
+// MODELS
+// =============================================
+
+model User {
+  id           String    @id @default(cuid())
+  role         UserRole  @default(customer)
+  name         String?
+  phone        String?   @unique
+  email        String?   @unique
+  passwordHash String?
+  address      String?
+  lat          Float?
+  lng          Float?
+  avatarUrl    String?
+  fcmToken     String?
+  isActive     Boolean   @default(true)
+  kycStatus    KycStatus @default(none)
+
+  // Relations
+  restaurant   Restaurant?
+  shipper      Shipper?
+  ordersAsCustomer Order[] @relation("CustomerOrders")
+  voucherUsages VoucherUsage[]
+  notifications Notification[]
+  reviews      Review[]  @relation("CustomerReviews")
+  chatsSent    ChatMessage[] @relation("SentMessages")
+  chatsReceived ChatMessage[] @relation("ReceivedMessages")
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Restaurant {
+  id               String   @id @default(cuid())
+  ownerId          String   @unique
+  owner            User     @relation(fields: [ownerId], references: [id])
+  name             String
+  description      String?
+  address          String
+  lat              Float
+  lng              Float
+  phone            String?
+  coverImageUrl    String?
+  radiusKm         Float    @default(10.0)
+  isOpen           Boolean  @default(false)
+  // Opening hours stored as JSON: {"mon":{"open":"08:00","close":"22:00"}, ...}
+  openingHours     Json?
+  isManualOverride Boolean  @default(false)
+  avgRating        Float    @default(0)
+  totalReviews     Int      @default(0)
+  platformFeeRate  Float    @default(0.20)
+  bankAccount      Json?
+
+  // Relations
+  categories       MenuCategory[]
+  orders           Order[]
+  vouchers         Voucher[]
+  payouts          RestaurantPayout[]
+  reviews          Review[]  @relation("RestaurantReviews")
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("restaurants")
+}
+
+model MenuCategory {
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  name         String
+  sortOrder    Int        @default(0)
+  isActive     Boolean    @default(true)
+
+  items        MenuItem[]
+
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@map("menu_categories")
+}
+
+model MenuItem {
+  id           String       @id @default(cuid())
+  categoryId   String
+  category     MenuCategory @relation(fields: [categoryId], references: [id])
+  name         String
+  description  String?
+  price        Float
+  imageUrl     String?
+  isAvailable  Boolean      @default(true)
+  sortOrder    Int          @default(0)
+
+  orderItems   OrderItem[]
+
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@map("menu_items")
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  customerId      String
+  customer        User          @relation("CustomerOrders", fields: [customerId], references: [id])
+  restaurantId    String
+  restaurant      Restaurant    @relation(fields: [restaurantId], references: [id])
+  shipperId       String?
+  shipper         Shipper?      @relation(fields: [shipperId], references: [id])
+
+  status          OrderStatus   @default(pending)
+  orderType       OrderType     @default(delivery)
+
+  subtotal        Float         // before discount
+  shipFee         Float         @default(0)
+  discountAmount  Float         @default(0)
+  platformFee     Float         @default(0)
+  totalAmount     Float         // what customer pays
+
+  paymentMethod   PaymentMethod @default(cash)
+  paymentStatus   PaymentStatus @default(pending)
+
+  voucherId       String?
+  voucher         Voucher?      @relation(fields: [voucherId], references: [id])
+
+  deliveryAddress String?
+  deliveryLat     Float?
+  deliveryLng     Float?
+  distanceKm      Float?
+  cancelReason    String?
+  note            String?
+
+  estimatedDeliveryAt DateTime?
+  deliveredAt         DateTime?
+  completedAt         DateTime?
+
+  // Relations
+  items           OrderItem[]
+  payment         Payment?
+  commission      Commission?
+  review          Review?
+  chatMessages    ChatMessage[]
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String   @id @default(cuid())
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id])
+  itemId     String
+  item       MenuItem @relation(fields: [itemId], references: [id])
+  itemName   String   // snapshot
+  quantity   Int
+  unitPrice  Float
+  totalPrice Float
+
+  @@map("order_items")
+}
+
+model Shipper {
+  id               String       @id @default(cuid())
+  userId           String       @unique
+  user             User         @relation(fields: [userId], references: [id])
+  vehicleType      VehicleType  @default(motorbike)
+  vehiclePlate     String?
+  lat              Float?
+  lng              Float?
+  isActive         Boolean      @default(false)
+  cancelRate       Float        @default(0)
+  avgRating        Float        @default(5)
+  totalDeliveries  Int          @default(0)
+  walletCash       Float        @default(0)
+  walletAccount    Float        @default(0)
+  ekycStatus       KycStatus    @default(none)
+  penaltyLevel     PenaltyLevel @default(normal)
+  bankAccount      Json?
+
+  orders           Order[]
+  payouts          ShipperPayout[]
+  penalties        ShipperPenalty[]
+  reviews          Review[]     @relation("ShipperReviews")
+
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@map("shippers")
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  orderId         String        @unique
+  order           Order         @relation(fields: [orderId], references: [id])
+  method          PaymentMethod
+  status          PaymentStatus @default(pending)
+  amount          Float
+  transactionId   String?
+  gatewayResponse Json?
+
+  createdAt       DateTime      @default(now())
+
+  @@map("payments")
+}
+
+model Commission {
+  id               String   @id @default(cuid())
+  orderId          String   @unique
+  order            Order    @relation(fields: [orderId], references: [id])
+  foodAmount       Float
+  shipAmount       Float
+  restaurantShare  Float
+  shipperShare     Float
+  platformShare    Float
+  processedAt      DateTime?
+
+  @@map("commissions")
+}
+
+model Voucher {
+  id                      String          @id @default(cuid())
+  code                    String          @unique
+  type                    VoucherType
+  discountType            DiscountType
+  discountValue           Float
+  maxDiscount             Float?
+  minOrderValue           Float           @default(0)
+  validFrom               DateTime
+  validTo                 DateTime
+  totalLimit              Int?
+  usedCount               Int             @default(0)
+  perUserLimit            Int             @default(1)
+  applicableRestaurantIds String[]
+  applicableCategoryIds   String[]
+  applicableOrderType     OrderTypeFilter @default(both)
+  // applicableHours: {"from": "14:00", "to": "17:00"} or null
+  applicableHours         Json?
+
+  restaurantId String?
+  restaurant   Restaurant? @relation(fields: [restaurantId], references: [id])
+  issuedById   String
+
+  usages       VoucherUsage[]
+  orders       Order[]
+
+  createdAt    DateTime @default(now())
+
+  @@map("vouchers")
+}
+
+model VoucherUsage {
+  id              String   @id @default(cuid())
+  voucherId       String
+  voucher         Voucher  @relation(fields: [voucherId], references: [id])
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  orderId         String
+  discountApplied Float
+  usedAt          DateTime @default(now())
+
+  @@map("voucher_usages")
+}
+
+model AppConfig {
+  key         String   @id
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+
+  @@map("app_config")
+}
+
+model ShipperPayout {
+  id                String       @id @default(cuid())
+  shipperId         String
+  shipper           Shipper      @relation(fields: [shipperId], references: [id])
+  amount            Float
+  periodStart       DateTime
+  periodEnd         DateTime
+  status            PayoutStatus @default(pending)
+  bankTransactionId String?
+  processedAt       DateTime?
+
+  createdAt         DateTime     @default(now())
+
+  @@map("shipper_payouts")
+}
+
+model RestaurantPayout {
+  id           String       @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant   @relation(fields: [restaurantId], references: [id])
+  amount       Float
+  periodStart  DateTime
+  periodEnd    DateTime
+  status       PayoutStatus @default(pending)
+  processedAt  DateTime?
+
+  createdAt    DateTime     @default(now())
+
+  @@map("restaurant_payouts")
+}
+
+model ShipperPenalty {
+  id          String        @id @default(cuid())
+  shipperId   String
+  shipper     Shipper       @relation(fields: [shipperId], references: [id])
+  reason      PenaltyReason
+  level       Int
+  description String?
+  expiresAt   DateTime?
+
+  createdAt   DateTime      @default(now())
+
+  @@map("shipper_penalties")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  body      String
+  type      String
+  data      Json?
+  isRead    Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
+model Review {
+  id               String     @id @default(cuid())
+  orderId          String     @unique
+  order            Order      @relation(fields: [orderId], references: [id])
+  customerId       String
+  customer         User       @relation("CustomerReviews", fields: [customerId], references: [id])
+  restaurantId     String
+  restaurant       Restaurant @relation("RestaurantReviews", fields: [restaurantId], references: [id])
+  shipperId        String?
+  shipper          Shipper?   @relation("ShipperReviews", fields: [shipperId], references: [id])
+  restaurantRating Int        @default(5)
+  shipperRating    Int?
+  comment          String?
+
+  createdAt        DateTime   @default(now())
+
+  @@map("reviews")
+}
+
+model ChatMessage {
+  id         String      @id @default(cuid())
+  orderId    String
+  order      Order       @relation(fields: [orderId], references: [id])
+  senderId   String
+  sender     User        @relation("SentMessages", fields: [senderId], references: [id])
+  receiverId String
+  receiver   User        @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  content    String
+  type       MessageType @default(text)
+  isRead     Boolean     @default(false)
+
+  createdAt  DateTime    @default(now())
+
+  @@map("chat_messages")
+}

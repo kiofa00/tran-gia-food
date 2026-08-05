@@ -1,0 +1,206 @@
+import {
+  Injectable,
+  BadRequestException,
+  UnauthorizedException,
+  Logger,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '../../prisma/prisma.service';
+import { RedisService } from '../../redis/redis.service';
+import { SendOtpDto, VerifyOtpDto, GoogleAuthDto } from './dto/auth.dto';
+import { User, UserRole } from '@prisma/client';
+
+@Injectable()
+export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
+  constructor(
+    private prisma: PrismaService,
+    private redis: RedisService,
+    private jwt: JwtService,
+    private config: ConfigService,
+  ) {}
+
+  // ──────────────────────────────────────────
+  // OTP via Phone
+  // ──────────────────────────────────────────
+
+  async sendOtp(dto: SendOtpDto): Promise<{ message: string }> {
+    const phone = this.normalizePhone(dto.phone);
+
+    // Rate limiting: max 5 attempts per 15 min
+    const attempts = await this.redis.incrementOtpAttempts(phone);
+    if (attempts > 5) {
+      throw new BadRequestException(
+        'Quá nhiều lần gửi OTP. Vui lòng thử lại sau 15 phút.',
+      );
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expireMin = this.config.get<number>('OTP_EXPIRE_MINUTES') ?? 5;
+
+    // Store in Redis
+    await this.redis.setOtp(phone, otp, expireMin);
+
+    // Send via SMS (ESMS.vn for Vietnam market)
+    await this.sendSms(phone, `[Tran Gia Food] Mã OTP của bạn là: ${otp}. Hết hạn sau ${expireMin} phút.`);
+
+    this.logger.log(`OTP sent to ${phone}`);
+
+    // In development, log OTP to console
+    if (this.config.get('NODE_ENV') === 'development') {
+      this.logger.debug(`[DEV] OTP for ${phone}: ${otp}`);
+    }
+
+    return { message: `Mã OTP đã được gửi đến ${phone}` };
+  }
+
+  async verifyOtp(dto: VerifyOtpDto): Promise<{ accessToken: string; refreshToken: string; user: Partial<User>; isNewUser: boolean }> {
+    const phone = this.normalizePhone(dto.phone);
+
+    const storedOtp = await this.redis.getOtp(phone);
+    if (!storedOtp || storedOtp !== dto.otp) {
+      throw new UnauthorizedException('Mã OTP không đúng hoặc đã hết hạn');
+    }
+
+    // Clear OTP
+    await this.redis.deleteOtp(phone);
+    await this.redis.resetOtpAttempts(phone);
+
+    // Upsert user
+    const isNewUser = !(await this.prisma.user.findUnique({ where: { phone } }));
+    const user = await this.prisma.user.upsert({
+      where: { phone },
+      create: { phone, role: UserRole.customer },
+      update: { updatedAt: new Date() },
+    });
+
+    const tokens = await this.generateTokens(user);
+    return { ...tokens, user: this.sanitizeUser(user), isNewUser };
+  }
+
+  // ──────────────────────────────────────────
+  // Google OAuth
+  // ──────────────────────────────────────────
+
+  async googleAuth(dto: GoogleAuthDto): Promise<{ accessToken: string; refreshToken: string; user: Partial<User>; isNewUser: boolean }> {
+    // Verify Firebase ID token
+    const payload = await this.verifyFirebaseToken(dto.idToken);
+
+    const email = payload.email;
+    const name = payload.name;
+    const avatarUrl = payload.picture;
+
+    if (!email) throw new BadRequestException('Không lấy được email từ Google');
+
+    const isNewUser = !(await this.prisma.user.findUnique({ where: { email } }));
+    const user = await this.prisma.user.upsert({
+      where: { email },
+      create: { email, name, avatarUrl, role: UserRole.customer },
+      update: { name, avatarUrl },
+    });
+
+    const tokens = await this.generateTokens(user);
+    return { ...tokens, user: this.sanitizeUser(user), isNewUser };
+  }
+
+  // ──────────────────────────────────────────
+  // Token Management
+  // ──────────────────────────────────────────
+
+  async refreshTokens(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+    try {
+      const payload = this.jwt.verify(refreshToken, {
+        secret: this.config.get<string>('JWT_REFRESH_SECRET'),
+      });
+
+      const stored = await this.redis.getRefreshToken(payload.sub);
+      if (!stored || stored !== refreshToken) {
+        throw new UnauthorizedException('Refresh token không hợp lệ');
+      }
+
+      const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
+      if (!user || !user.isActive) throw new UnauthorizedException('Tài khoản không tồn tại');
+
+      return this.generateTokens(user);
+    } catch {
+      throw new UnauthorizedException('Refresh token không hợp lệ hoặc đã hết hạn');
+    }
+  }
+
+  async logout(userId: string): Promise<void> {
+    await this.redis.deleteRefreshToken(userId);
+  }
+
+  // ──────────────────────────────────────────
+  // Private Helpers
+  // ──────────────────────────────────────────
+
+  private async generateTokens(user: User): Promise<{ accessToken: string; refreshToken: string }> {
+    const payload = { sub: user.id, phone: user.phone, role: user.role };
+
+    const accessToken = this.jwt.sign(payload, {
+      secret: this.config.get<string>('JWT_SECRET'),
+      expiresIn: this.config.get<string>('JWT_EXPIRES_IN') ?? '15m',
+    });
+
+    const refreshToken = this.jwt.sign(payload, {
+      secret: this.config.get<string>('JWT_REFRESH_SECRET'),
+      expiresIn: this.config.get<string>('JWT_REFRESH_EXPIRES_IN') ?? '7d',
+    });
+
+    // Store refresh token in Redis (7 days)
+    await this.redis.setRefreshToken(user.id, refreshToken, 7 * 24 * 3600);
+
+    return { accessToken, refreshToken };
+  }
+
+  private normalizePhone(phone: string): string {
+    // Convert 0901234567 → +84901234567
+    if (phone.startsWith('0')) return '+84' + phone.slice(1);
+    return phone;
+  }
+
+  private sanitizeUser(user: User): Partial<User> {
+    const { passwordHash, ...rest } = user as any;
+    return rest;
+  }
+
+  private async sendSms(phone: string, message: string): Promise<void> {
+    // TODO: Integrate ESMS.vn API for Vietnam SMS
+    // ESMS API docs: https://esms.vn/api-sms
+    // 
+    // const apiKey = this.config.get('ESMS_API_KEY');
+    // const apiSecret = this.config.get('ESMS_API_SECRET');
+    // await axios.post('https://rest.esms.vn/MainService.svc/json/SendMultipleMessage_V4_post_json/', {
+    //   ApiKey: apiKey,
+    //   Content: message,
+    //   Phone: phone,
+    //   SecretKey: apiSecret,
+    //   SmsType: 2,
+    //   Brandname: this.config.get('ESMS_BRAND_NAME'),
+    // });
+
+    this.logger.log(`[SMS] → ${phone}: ${message}`);
+  }
+
+  private async verifyFirebaseToken(idToken: string): Promise<any> {
+    // TODO: Use Firebase Admin SDK to verify ID token
+    // import * as admin from 'firebase-admin';
+    // const decoded = await admin.auth().verifyIdToken(idToken);
+    // return decoded;
+
+    // Placeholder: decode without verify for development
+    // NEVER use this in production!
+    try {
+      const parts = idToken.split('.');
+      if (parts.length !== 3) throw new Error('Invalid token format');
+      const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+      return payload;
+    } catch {
+      throw new UnauthorizedException('Google token không hợp lệ');
+    }
+  }
+}
