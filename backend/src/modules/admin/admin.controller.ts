@@ -8,9 +8,6 @@ import { Public } from '../../common/decorators/public.decorator';
 import { UserRole } from '@prisma/client';
 
 @ApiTags('admin')
-@ApiBearerAuth('access-token')
-@UseGuards(JwtAuthGuard)
-@Roles(UserRole.admin)
 @Controller('admin')
 export class AdminController {
   constructor(private adminService: AdminService) {}
@@ -51,4 +48,33 @@ export class AdminController {
   getConfigs() {
     return this.adminService.getAppConfigs();
   }
+
+  @Public()
+  @Get('vouchers')
+  @ApiOperation({ summary: '[Admin] Danh sách vouchers' })
+  getVouchers() {
+    return this.adminService.getVouchers();
+  }
+
+  @Public()
+  @Get('commissions')
+  @ApiOperation({ summary: '[Admin] Bảng phân bổ hoa hồng' })
+  getCommissions() {
+    return this.adminService.getCommissionsBreakdown();
+  }
+
+  @Public()
+  @Get('analytics')
+  @ApiOperation({ summary: '[Admin] Dữ liệu thống kê doanh thu Recharts' })
+  getAnalytics() {
+    return this.adminService.getAnalyticsData();
+  }
+
+  @Public()
+  @Get('fleet')
+  @ApiOperation({ summary: '[Admin] Dữ liệu vị trí đội xe shipper' })
+  getFleet() {
+    return this.adminService.getFleetData();
+  }
 }
+

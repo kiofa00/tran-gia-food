@@ -13,6 +13,9 @@ import {
   MenuOutlined,
   DashboardOutlined,
   CarOutlined,
+  TagOutlined,
+  DollarOutlined,
+  BarChartOutlined,
 } from '@ant-design/icons';
 import { adminDesignTokens } from '../theme/tokens';
 
@@ -52,7 +55,10 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
 
   const navLinks = [
     { key: '/', label: 'Dashboard', icon: <DashboardOutlined /> },
-    { key: '/fleet', label: 'Giám Sát Đội Xe', icon: <CarOutlined /> },
+    { key: '/fleet', label: 'Đội Xe', icon: <CarOutlined /> },
+    { key: '/vouchers', label: 'Mã Giảm Giá', icon: <TagOutlined /> },
+    { key: '/commissions', label: 'Hoa Hồng & Ví', icon: <DollarOutlined /> },
+    { key: '/analytics', label: 'Báo Cáo Financials', icon: <BarChartOutlined /> },
   ];
 
   return (
