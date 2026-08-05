@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "nest build",
+    "dev": "nest start --watch",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
@@ -12,7 +12,7 @@
     "lint:check": "eslint \"src/**/*.ts\"",
     "clean": "node -e \"require('fs').rmSync('dist', {recursive: true, force: true})\"",
     "test": "jest",
-    "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate": "prisma db push",
     "prisma:studio": "prisma studio",
     "prisma:generate": "prisma generate"
   },

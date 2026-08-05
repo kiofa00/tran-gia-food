@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: Triggered when user asks to "review code", "kiểm tra code", "review pr", or "audit quality". Evaluates logic, design tokens compliance, type safety, security, and performance.
+description: Triggered when user asks to "self-review", "/self-review", "self review", "review code", "kiểm tra code", "review pr", or "audit quality". Evaluates logic, design tokens compliance, type safety, security, and performance.
 ---
 
 # Code Review Skill — Tran Gia Food Monorepo

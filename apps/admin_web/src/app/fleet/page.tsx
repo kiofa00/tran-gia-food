@@ -4,6 +4,7 @@ import React from 'react';
 import { Card, Table, Tag, Typography, Badge } from 'antd';
 import { CompassOutlined, CarOutlined } from '@ant-design/icons';
 import { adminDesignTokens } from '../../theme/tokens';
+import { mapShipperStatus } from '../../utils/formatters';
 
 const { Title, Text } = Typography;
 
@@ -13,24 +14,30 @@ export default function LiveFleetMonitorPage() {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
-      render: (id: string) => <Text strong>{id}</Text>,
+      width: 100,
+      render: (id: string) => <Text strong style={{ whiteSpace: 'nowrap' }}>{id}</Text>,
     },
     {
       title: 'Họ & Tên',
       dataIndex: 'name',
       key: 'name',
+      width: 200,
+      render: (text: string) => <Text strong style={{ whiteSpace: 'nowrap' }}>{text}</Text>,
     },
     {
       title: 'Số Điện Thoại',
       dataIndex: 'phone',
       key: 'phone',
+      width: 160,
+      render: (text: string) => <Text style={{ whiteSpace: 'nowrap' }}>{text}</Text>,
     },
     {
       title: 'Phương Tiện',
       dataIndex: 'vehicle',
       key: 'vehicle',
+      width: 220,
       render: (vehicle: string) => (
-        <span>
+        <span style={{ whiteSpace: 'nowrap' }}>
           <CarOutlined style={{ marginRight: 6, color: adminDesignTokens.colors.primary }} />
           {vehicle}
         </span>
@@ -39,8 +46,9 @@ export default function LiveFleetMonitorPage() {
     {
       title: 'Tọa Độ GPS',
       key: 'gps',
+      width: 200,
       render: (record: { lat: number; lng: number }) => (
-        <Tag icon={<CompassOutlined />} color="purple">
+        <Tag icon={<CompassOutlined />} color="purple" style={{ fontSize: 13, padding: '2px 10px' }}>
           ({record.lat.toFixed(4)}, {record.lng.toFixed(4)})
         </Tag>
       ),
@@ -49,12 +57,10 @@ export default function LiveFleetMonitorPage() {
       title: 'Trạng Thái',
       dataIndex: 'status',
       key: 'status',
+      width: 220,
       render: (status: string) => {
-        let color = 'default';
-        if (status === 'DELIVERING') color = 'warning';
-        if (status === 'IDLE') color = 'success';
-        if (status === 'PICKING_UP') color = 'processing';
-        return <Badge status={color as any} text={<Text strong>{status}</Text>} />;
+        const meta = mapShipperStatus(status);
+        return <Badge status={meta.badgeStatus} text={<Text strong style={{ whiteSpace: 'nowrap' }}>{meta.label}</Text>} />;
       },
     },
   ];
@@ -110,7 +116,7 @@ export default function LiveFleetMonitorPage() {
 
       {/* Antd Table */}
       <Card title={`⚡ Danh Sách Tài Xế Đang Online (${dataSource.length})`} bordered={false}>
-        <Table columns={columns} dataSource={dataSource} pagination={false} />
+        <Table columns={columns} dataSource={dataSource} pagination={false} scroll={{ x: 1060 }} />
       </Card>
     </div>
   );

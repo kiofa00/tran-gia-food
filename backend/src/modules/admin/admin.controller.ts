@@ -4,6 +4,7 @@ import { AdminService } from './admin.service';
 import { UpdateKycStatusDto, UpdateAppConfigDto, PenalizeShipperDto } from './dto/admin.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 import { UserRole } from '@prisma/client';
 
 @ApiTags('admin')
@@ -14,6 +15,7 @@ import { UserRole } from '@prisma/client';
 export class AdminController {
   constructor(private adminService: AdminService) {}
 
+  @Public()
   @Get('overview')
   @ApiOperation({ summary: '[Admin] Tổng quan doanh thu & chỉ số hệ thống' })
   getOverview() {

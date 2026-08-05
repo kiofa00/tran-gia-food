@@ -9,9 +9,13 @@
     "pnpm": ">=9.15.9"
   },
   "scripts": {
-    "dev": "pnpm -r --parallel run dev",
+    "dev": "pnpm -r --parallel --if-present run dev",
     "dev:backend": "pnpm --filter=backend run start:dev",
     "dev:admin": "pnpm --filter=admin_web run dev",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "db:migrate": "pnpm --filter=backend run prisma:migrate",
+    "db:studio": "pnpm --filter=backend run prisma:studio",
     "build": "pnpm -r run build",
     "lint": "pnpm -r run lint",
     "lint:check": "pnpm -r run lint:check",

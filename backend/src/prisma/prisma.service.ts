@@ -17,8 +17,12 @@ export class PrismaService
   }
 
   async onModuleInit() {
-    await this.$connect();
-    this.logger.log('✅ Connected to PostgreSQL');
+    try {
+      await this.$connect();
+      this.logger.log('✅ Connected to PostgreSQL');
+    } catch (error) {
+      this.logger.warn('⚠️ Could not connect to PostgreSQL at localhost:5432. Server starting in offline dev mode.');
+    }
   }
 
   async onModuleDestroy() {

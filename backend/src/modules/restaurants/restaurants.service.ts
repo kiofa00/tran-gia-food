@@ -110,29 +110,33 @@ export class RestaurantsService {
 
   @Cron(CronExpression.EVERY_MINUTE)
   async autoOpenClose() {
-    const now = new Date();
-    const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-    const dayKey = dayNames[now.getDay()];
-    const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    try {
+      const now = new Date();
+      const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+      const dayKey = dayNames[now.getDay()];
+      const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
-    const restaurants = await this.prisma.restaurant.findMany({
-      where: { isManualOverride: false, openingHours: { not: null } },
-    });
+      const restaurants = await this.prisma.restaurant.findMany({
+        where: { isManualOverride: false, openingHours: { not: null } },
+      });
 
-    for (const restaurant of restaurants) {
-      const hours = restaurant.openingHours as Record<string, { open: string; close: string }>;
-      const todayHours = hours[dayKey];
-      if (!todayHours) continue;
+      for (const restaurant of restaurants) {
+        const hours = restaurant.openingHours as Record<string, { open: string; close: string }>;
+        const todayHours = hours[dayKey];
+        if (!todayHours) continue;
 
-      const shouldBeOpen = currentTime >= todayHours.open && currentTime < todayHours.close;
+        const shouldBeOpen = currentTime >= todayHours.open && currentTime < todayHours.close;
 
-      if (restaurant.isOpen !== shouldBeOpen) {
-        await this.prisma.restaurant.update({
-          where: { id: restaurant.id },
-          data: { isOpen: shouldBeOpen },
-        });
-        this.logger.debug(`Restaurant ${restaurant.name}: ${shouldBeOpen ? 'opened' : 'closed'} (auto)`);
+        if (restaurant.isOpen !== shouldBeOpen) {
+          await this.prisma.restaurant.update({
+            where: { id: restaurant.id },
+            data: { isOpen: shouldBeOpen },
+          });
+          this.logger.debug(`Restaurant ${restaurant.name}: ${shouldBeOpen ? 'opened' : 'closed'} (auto)`);
+        }
       }
+    } catch {
+      // Ignore DB connection errors during dev cron ticks
     }
   }
 
