@@ -44,6 +44,8 @@ Thumbs.db
 .env
 .env.local
 .env.production
+.turbo/
+node_modules/
 
 # ===== Secrets =====
 google-services.json

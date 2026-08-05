@@ -1,0 +1,27 @@
+{
+  "name": "tran_gia_app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tran Gia Food Delivery Platform - Hybrid Monorepo (Flutter + NestJS + Next.js)",
+  "workspaces": [
+    "apps/*",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:backend": "turbo run dev --filter=backend",
+    "dev:admin": "turbo run dev --filter=admin_web",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean",
+    "melos:bootstrap": "melos bootstrap",
+    "melos:analyze": "melos analyze",
+    "melos:gen": "melos gen"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.9"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
