@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_models/enums/index.dart';
 
 void main() {
-  group('OrderStatus Enum Tests', () => {
+  group('OrderStatus Enum Tests', () {
     test('isActive returns true for active order states', () {
       expect(OrderStatus.pending.isActive, isTrue);
       expect(OrderStatus.confirmed.isActive, isTrue);

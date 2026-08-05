@@ -93,7 +93,7 @@ class HomeScreen extends StatelessWidget {
 
               // Restaurant List Header
               const Row(
-                mainAxisAlignment: MainAlignment.between,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('Quán Ăn Gần Bạn', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
                   Text('Xem tất cả', style: TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w700)),

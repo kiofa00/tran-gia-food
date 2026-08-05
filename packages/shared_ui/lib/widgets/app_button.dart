@@ -43,7 +43,7 @@ class AppButton extends StatelessWidget {
               ),
             )
           : Row(
-              mainAxisAlignment: MainAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (icon != null) ...[
                   Icon(icon, size: 20),

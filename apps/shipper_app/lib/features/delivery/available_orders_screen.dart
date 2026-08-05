@@ -23,7 +23,7 @@ class _AvailableOrdersScreenState extends State<AvailableOrdersScreen> {
               Text(_isOnline ? 'Sẵn sàng' : 'Tắt nhận đơn', style: TextStyle(fontWeight: FontWeight.bold, color: _isOnline ? AppColors.success : AppColors.error)),
               Switch(
                 value: _isOnline,
-                activeColor: AppColors.success,
+                activeTrackColor: AppColors.success,
                 onChanged: (val) => setState(() => _isOnline = val),
               ),
             ],
@@ -50,7 +50,7 @@ class _AvailableOrdersScreenState extends State<AvailableOrdersScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Thu Nhập Hôm Nay', style: TextStyle(color: Colors.white70, fontSize: 12)),
-                      Text('385.000đ', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.extrabold)),
+                      Text('385.000đ', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800)),
                     ],
                   ),
                 ],
@@ -92,10 +92,10 @@ class _AvailableOrdersScreenState extends State<AvailableOrdersScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAlignment.between,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Thu nhập ship: +${shipFee.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}đ', style: const TextStyle(fontWeight: FontWeight.extrabold, color: AppColors.primary, fontSize: 16)),
-              Text('${distanceKm} km', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textSecondaryLight)),
+              Text('Thu nhập ship: +${shipFee.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}đ', style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.primary, fontSize: 16)),
+              Text('$distanceKm km', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textSecondaryLight)),
             ],
           ),
           const SizedBox(height: 12),

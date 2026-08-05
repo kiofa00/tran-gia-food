@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AdminService } from './admin.service';
 import { PrismaService } from '../../prisma/prisma.service';
-import { KycStatus, PenaltyLevel } from '@prisma/client';
+import { KycStatus } from '@prisma/client';
 
 describe('AdminService', () => {
   let service: AdminService;

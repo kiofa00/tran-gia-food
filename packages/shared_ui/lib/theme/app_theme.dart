@@ -30,10 +30,11 @@ class AppColors {
   static const textSecondaryDark = Color(0xFFC4A882);
   static const dividerDark    = Color(0xFF3D2E1E);
 
-  // Semantic
-  static const success = Color(0xFF51CF66);
-  static const error   = Color(0xFFFF4757);
-  static const warning = Color(0xFFFFB800);
+  // Status Colors
+  static const success = Color(0xFF2E7D32);
+  static const warning = Color(0xFFED6C02);
+  static const error   = Color(0xFFD32F2F);
+  static const info    = Color(0xFF0288D1);
 }
 
 /// Border radius constants
@@ -76,9 +77,22 @@ class AppShadows {
   ];
 }
 
+class AppGradients {
+  AppGradients._();
+
+  static const orangeGradient = LinearGradient(
+    colors: [AppColors.primary, AppColors.primaryLight],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+}
+
 /// App Theme (Light + Dark)
 class AppTheme {
   AppTheme._();
+
+  static ThemeData get lightTheme => light;
+  static ThemeData get darkTheme => dark;
 
   static ThemeData get light => ThemeData(
     useMaterial3: true,

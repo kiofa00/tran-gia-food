@@ -164,8 +164,8 @@ export class AuthService {
   }
 
   private sanitizeUser(user: User): Partial<User> {
-    const { passwordHash, ...rest } = user as any;
-    return rest;
+    delete (user as any).passwordHash;
+    return user;
   }
 
   private async sendSms(phone: string, message: string): Promise<void> {

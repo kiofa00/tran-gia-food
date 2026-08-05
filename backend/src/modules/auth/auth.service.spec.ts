@@ -8,8 +8,6 @@ import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let redisService: RedisService;
-  let prismaService: PrismaService;
 
   const mockPrismaService = {
     user: {

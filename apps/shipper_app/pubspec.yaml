@@ -21,6 +21,7 @@ dependencies:
 
   # Navigation & State
   go_router: ^13.2.4
+  iconsax: ^0.0.8
   flutter_riverpod: ^2.5.1
   riverpod_annotation: ^2.3.5
 

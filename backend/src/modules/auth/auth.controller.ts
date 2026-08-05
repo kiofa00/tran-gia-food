@@ -76,7 +76,7 @@ export class AuthController {
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Lấy thông tin user đang đăng nhập' })
   getMe(@CurrentUser() user: User) {
-    const { passwordHash, ...rest } = user as any;
-    return rest;
+    delete (user as any).passwordHash;
+    return user;
   }
 }

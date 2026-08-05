@@ -81,7 +81,7 @@ export class NotificationsService {
     });
   }
 
-  private async sendFcmPush(fcmToken: string, title: string, body: string, data?: any) {
+  private async sendFcmPush(fcmToken: string, title: string, _body: string, _data?: any) {
     this.logger.log(`[FCM Push] → Token ${fcmToken.slice(0, 10)}... | Title: ${title}`);
     // Integration with Firebase Admin SDK:
     // await admin.messaging().send({ token: fcmToken, notification: { title, body }, data });

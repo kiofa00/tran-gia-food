@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shared_ui/shared_ui.dart';
-import 'package:iconsax/iconsax.dart';
 
 class RestaurantOrdersScreen extends StatefulWidget {
   const RestaurantOrdersScreen({super.key});
@@ -23,7 +22,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
               Text(_isOpen ? 'Mở cửa' : 'Đóng cửa', style: TextStyle(fontWeight: FontWeight.bold, color: _isOpen ? AppColors.success : AppColors.error)),
               Switch(
                 value: _isOpen,
-                activeColor: AppColors.success,
+                activeTrackColor: AppColors.success,
                 onChanged: (val) => setState(() => _isOpen = val),
               ),
             ],
@@ -87,9 +86,9 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAlignment.between,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(orderId, style: const TextStyle(fontWeight: FontWeight.extrabold, fontSize: 16)),
+              Text(orderId, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(color: statusColor.withOpacity(0.15), borderRadius: const BorderRadius.all(AppRadius.full)),

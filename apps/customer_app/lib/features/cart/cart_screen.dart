@@ -125,7 +125,7 @@ class _CartScreenState extends State<CartScreen> {
 
   Widget _buildSummaryRow(String label, String value, {bool isBold = false, Color? color}) {
     return Row(
-      mainAxisAlignment: MainAlignment.between,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: TextStyle(fontSize: isBold ? 16 : 14, fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
         Text(value, style: TextStyle(fontSize: isBold ? 18 : 14, fontWeight: isBold ? FontWeight.bold : FontWeight.w600, color: color ?? (isBold ? AppColors.primary : null))),

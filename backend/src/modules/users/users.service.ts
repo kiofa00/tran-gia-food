@@ -10,8 +10,8 @@ export class UsersService {
   async findById(id: string): Promise<Partial<User>> {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new NotFoundException('Không tìm thấy người dùng');
-    const { passwordHash, ...rest } = user as any;
-    return rest;
+    delete (user as any).passwordHash;
+    return user;
   }
 
   async update(id: string, dto: UpdateUserDto): Promise<Partial<User>> {
@@ -19,8 +19,8 @@ export class UsersService {
       where: { id },
       data: dto,
     });
-    const { passwordHash, ...rest } = user as any;
-    return rest;
+    delete (user as any).passwordHash;
+    return user;
   }
 
   async updateFcmToken(id: string, fcmToken: string): Promise<void> {
