@@ -56,6 +56,7 @@
     "prisma": "catalog:",
     "typescript": "catalog:",
     "ts-jest": "catalog:",
-    "jest": "catalog:"
+    "jest": "catalog:",
+    "@types/jest": "catalog:"
   }
 }

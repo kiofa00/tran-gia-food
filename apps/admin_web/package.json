@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "vitest run",
     "clean": "node -e \"require('fs').rmSync('.next', {recursive: true, force: true})\"",
     "type-check": "tsc --noEmit",
     "gen:api-types": "openapi-typescript http://localhost:3000/api-json -o src/types/api.ts"
@@ -36,6 +37,11 @@
     "typescript": "catalog:",
     "eslint": "catalog:",
     "eslint-config-next": "catalog:",
-    "openapi-typescript": "catalog:"
+    "openapi-typescript": "catalog:",
+    "vitest": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@testing-library/jest-dom": "catalog:",
+    "jsdom": "catalog:"
   }
 }
