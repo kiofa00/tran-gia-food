@@ -9,12 +9,12 @@
     "pnpm": ">=9.15.9"
   },
   "scripts": {
-    "dev": "turbo run dev",
-    "dev:backend": "turbo run dev --filter=backend",
-    "dev:admin": "turbo run dev --filter=admin_web",
-    "build": "turbo run build",
-    "lint": "turbo run lint",
-    "clean": "turbo run clean",
+    "dev": "pnpm -r --parallel run dev",
+    "dev:backend": "pnpm --filter=backend run start:dev",
+    "dev:admin": "pnpm --filter=admin_web run dev",
+    "build": "pnpm -r run build",
+    "lint": "pnpm -r run lint",
+    "clean": "pnpm -r run clean",
     "melos:bootstrap": "melos bootstrap",
     "melos:analyze": "melos analyze",
     "melos:gen": "melos gen"
