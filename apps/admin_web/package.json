@@ -11,30 +11,30 @@
     "gen:api-types": "openapi-typescript http://localhost:3000/api-json -o src/types/api.ts"
   },
   "dependencies": {
-    "next": "14.2.5",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "antd": "^5.18.3",
-    "@ant-design/icons": "^5.3.7",
-    "recharts": "^2.12.7",
-    "@vis.gl/react-google-maps": "^1.1.2",
-    "@tanstack/react-query": "^5.50.1",
-    "next-auth": "^4.24.7",
-    "react-hook-form": "^7.52.1",
-    "zod": "^3.23.8",
-    "@hookform/resolvers": "^3.9.0",
-    "zustand": "^4.5.4",
-    "axios": "^1.7.2",
-    "dayjs": "^1.11.11",
-    "socket.io-client": "^4.7.5"
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "antd": "catalog:",
+    "@ant-design/icons": "catalog:",
+    "recharts": "catalog:",
+    "@vis.gl/react-google-maps": "catalog:",
+    "@tanstack/react-query": "catalog:",
+    "next-auth": "catalog:",
+    "react-hook-form": "catalog:",
+    "zod": "catalog:",
+    "@hookform/resolvers": "catalog:",
+    "zustand": "catalog:",
+    "axios": "catalog:",
+    "dayjs": "catalog:",
+    "socket.io-client": "catalog:"
   },
   "devDependencies": {
-    "@types/node": "^20.14.10",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
-    "typescript": "^5.5.3",
-    "eslint": "^8.57.0",
-    "eslint-config-next": "14.2.5",
-    "openapi-typescript": "^7.3.0"
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "catalog:",
+    "eslint": "catalog:",
+    "eslint-config-next": "catalog:",
+    "openapi-typescript": "catalog:"
   }
 }
