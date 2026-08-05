@@ -1,0 +1,9 @@
+{
+  "primary": "{orange-500}",
+  "secondary": "{yellow-400}",
+  "background": "{cream-100}",
+  "surface": "{white}",
+  "status-online": "{green-500}",
+  "status-offline": "{red-500}",
+  "ship-income": "{green-500}"
+}

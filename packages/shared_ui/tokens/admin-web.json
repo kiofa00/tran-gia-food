@@ -1,0 +1,10 @@
+{
+  "primary": "{orange-500}",
+  "sidebar-bg": "{dark-900}",
+  "header-bg": "{white}",
+  "surface": "{white}",
+  "text-primary": "{gray-900}",
+  "status-approved": "{green-500}",
+  "status-pending": "{orange-amber}",
+  "status-rejected": "{red-500}"
+}

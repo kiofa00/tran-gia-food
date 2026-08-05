@@ -1,0 +1,10 @@
+{
+  "primary": "{orange-500}",
+  "secondary": "{yellow-400}",
+  "background": "{cream-100}",
+  "surface": "{white}",
+  "status-open": "{green-500}",
+  "status-closed": "{red-500}",
+  "order-new": "{orange-amber}",
+  "order-preparing": "{blue-500}"
+}

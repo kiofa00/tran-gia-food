@@ -23,7 +23,6 @@ describe('VouchersService', () => {
     }).compile();
 
     service = module.get<VouchersService>(VouchersService);
-    prismaService = module.get<PrismaService>(PrismaService);
   });
 
   describe('validateVoucher', () => {

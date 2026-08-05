@@ -1,0 +1,15 @@
+{
+  "primary": "{orange-500}",
+  "primary-light": "{orange-400}",
+  "primary-dark": "{orange-600}",
+  "secondary": "{yellow-400}",
+  "background": "{cream-100}",
+  "surface": "{white}",
+  "surface-alt": "{cream-200}",
+  "text-primary": "{gray-900}",
+  "text-secondary": "{gray-600}",
+  "status-success": "{green-500}",
+  "status-warning": "{orange-amber}",
+  "status-error": "{red-500}",
+  "status-info": "{blue-500}"
+}

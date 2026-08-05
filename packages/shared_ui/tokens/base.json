@@ -1,0 +1,20 @@
+{
+  "orange-500": "#FF6635",
+  "orange-400": "#FF8C69",
+  "orange-600": "#E04A1E",
+  "yellow-400": "#FFD93D",
+  "cream-100": "#FFF8F2",
+  "cream-200": "#F5EDE3",
+  "gray-900": "#2D1B00",
+  "gray-600": "#7C6E5C",
+  "gray-400": "#B5A898",
+  "gray-200": "#EDE4D8",
+  "dark-900": "#1A1410",
+  "dark-800": "#241D17",
+  "dark-700": "#2E261F",
+  "white": "#FFFFFF",
+  "green-500": "#2E7D32",
+  "orange-amber": "#ED6C02",
+  "red-500": "#D32F2F",
+  "blue-500": "#0288D1"
+}
