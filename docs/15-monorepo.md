@@ -200,52 +200,54 @@ type Order = components['schemas']['OrderDto'];
 
 ### Cài đặt lần đầu
 ```bash
-# 1. Cài melos (nếu chưa có)
+# 1. Cài melos & pnpm (nếu chưa có)
 dart pub global activate melos
+npm i -g pnpm
 
-# 2. Bootstrap tất cả Flutter packages
-cd tran_gia_app
-melos bootstrap
+# 2. Cài đặt toàn bộ dependencies (Workspaces + pnpm catalog)
+pnpm install
 
-# 3. Cài backend dependencies
-cd backend
-npm install
+# 3. Bootstrap tất cả Flutter packages
+pnpm melos:bootstrap
 
-# 4. Cài admin web dependencies
-cd apps/admin_web
-npm install
+# 4. Khởi động PostgreSQL & Redis trong Docker
+docker compose -f backend/docker-compose.yml up -d
+
+# 5. Tạo các bảng trong Database (Prisma)
+pnpm --filter=backend prisma:migrate
 ```
 
 ### Chạy development
 ```bash
-# Chạy backend
-cd backend
-npm run start:dev
+# Chạy tất cả cùng lúc bằng pnpm + Turborepo
+pnpm dev
 
-# Chạy customer app
-cd apps/customer_app
-flutter run
+# Hoặc chạy riêng lẻ từng ứng dụng:
+pnpm dev:backend   # NestJS Server (port 3000)
+pnpm dev:admin     # Next.js Admin (port 3001)
 
-# Chạy admin web
-cd apps/admin_web
-npm run dev
-
-# Chạy tất cả cùng lúc (dùng tmux hoặc split terminal)
+# Chạy Flutter Client Apps (Customer / Shipper / Restaurant):
+cd apps/customer_app && flutter run
+cd apps/shipper_app && flutter run
+cd apps/restaurant_app && flutter run
 ```
 
-### Workflow thêm tính năng mới
+### Quản lý Testing & Quality Assurance
 ```bash
-# 1. Thêm model mới vào shared_models
-# 2. Melos bootstrap lại để sync
-melos bootstrap
+# Chạy Unit & Integration tests cho Web + Backend (26/26 tests PASS)
+pnpm test
 
-# 3. Dùng model trong app
-import 'package:shared_models/models/new_model.dart';
+# Chạy Flutter Unit & Widget tests
+pnpm test:flutter
 
-# 4. Thêm API endpoint vào backend (NestJS)
-# 5. Thêm service vào api_client package
-# 6. Gen lại types cho admin web
-npx openapi-typescript ...
+# Chạy 100% test toàn hệ thống (Web + Backend + Flutter)
+pnpm test:all
+
+# Kiểm tra cú pháp static code analysis
+pnpm lint
+
+# Xóa sạch cache & build outputs
+pnpm clean
 ```
 
 ---
