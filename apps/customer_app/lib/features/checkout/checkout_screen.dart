@@ -21,7 +21,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('🎉 Đặt đơn hàng thành công! Quán đang nhận đơn.')),
       );
-      context.go('/main');
+      context.go('/tracking/12345');
     }
   }
 
@@ -105,7 +105,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryLight.withOpacity(0.15) : AppColors.surfaceAltLight,
+          color: isSelected ? AppColors.primaryLight.withValues(alpha: 0.15) : AppColors.surfaceAltLight,
           borderRadius: const BorderRadius.all(AppRadius.md),
           border: Border.all(color: isSelected ? AppColors.primary : Colors.transparent, width: 1.5),
         ),

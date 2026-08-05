@@ -91,7 +91,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
               Text(orderId, style: const TextStyle(fontWeight: AppFontWeight.extraBold, fontSize: AppFontSize.title)),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(color: statusColor.withOpacity(0.15), borderRadius: const BorderRadius.all(AppRadius.full)),
+                decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.15), borderRadius: const BorderRadius.all(AppRadius.full)),
                 child: Text(status, style: TextStyle(color: statusColor, fontWeight: AppFontWeight.bold, fontSize: AppFontSize.sm)),
               ),
             ],

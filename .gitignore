@@ -45,6 +45,7 @@ Thumbs.db
 .env.local
 .env.production
 .turbo/
+.claude/
 node_modules/
 
 # ===== Secrets =====

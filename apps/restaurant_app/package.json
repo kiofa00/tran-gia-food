@@ -1,0 +1,11 @@
+{
+  "name": "restaurant_app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tran Gia Food - Restaurant App (Flutter)",
+  "scripts": {
+    "build": "flutter build web --release --no-tree-shake-icons",
+    "lint": "flutter analyze lib",
+    "clean": "flutter clean"
+  }
+}

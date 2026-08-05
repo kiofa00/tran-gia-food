@@ -20,6 +20,7 @@ import { PayoutsModule } from './modules/payouts/payouts.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { DeliveryGateway } from './gateways/delivery.gateway';
 
 @Module({
   imports: [
@@ -55,5 +56,6 @@ import { AdminModule } from './modules/admin/admin.module';
     ReviewsModule,
     AdminModule,
   ],
+  providers: [DeliveryGateway],
 })
 export class AppModule {}

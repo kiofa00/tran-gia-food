@@ -61,7 +61,7 @@ class RestaurantCard extends StatelessWidget {
                     ),
                     errorWidget: (context, url, error) => Container(
                       height: 140,
-                      color: AppColors.primaryLight.withOpacity(0.2),
+                      color: AppColors.primaryLight.withValues(alpha: 0.2),
                       child: const Icon(Iconsax.shop, size: 40, color: AppColors.primary),
                     ),
                   ),

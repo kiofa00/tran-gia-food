@@ -4,7 +4,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { RegisterShipperDto, UpdateLocationDto } from './dto/shipper.dto';
-import { User, UserRole, OrderStatus } from '@prisma/client';
+import { User, UserRole, OrderStatus, KycStatus } from '@prisma/client';
 
 @Injectable()
 export class ShippersService {
@@ -108,5 +108,44 @@ export class ShippersService {
       include: { restaurant: true, customer: true },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  async findNearestAvailableShipper(restaurantLat: number, restaurantLng: number, maxRadiusKm = 3.0) {
+    const activeShippers = await this.prisma.shipper.findMany({
+      where: {
+        isActive: true,
+        ekycStatus: KycStatus.verified,
+        lat: { not: null },
+        lng: { not: null },
+      },
+      include: { user: true },
+    });
+
+    if (activeShippers.length === 0) return null;
+
+    // Calculate distance and find nearest shipper
+    let nearestShipper = null;
+    let minDistance = Infinity;
+
+    for (const shipper of activeShippers) {
+      if (shipper.lat == null || shipper.lng == null) continue;
+
+      // Haversine formula distance
+      const R = 6371;
+      const dLat = (shipper.lat - restaurantLat) * (Math.PI / 180);
+      const dLon = (shipper.lng - restaurantLng) * (Math.PI / 180);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(restaurantLat * (Math.PI / 180)) * Math.cos(shipper.lat * (Math.PI / 180)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const distance = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+      if (distance <= maxRadiusKm && distance < minDistance) {
+        minDistance = distance;
+        nearestShipper = shipper;
+      }
+    }
+
+    return nearestShipper;
   }
 }

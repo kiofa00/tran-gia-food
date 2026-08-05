@@ -4,6 +4,7 @@ import '../../features/main/main_shell.dart';
 import '../../features/restaurant/restaurant_detail_screen.dart';
 import '../../features/cart/cart_screen.dart';
 import '../../features/checkout/checkout_screen.dart';
+import '../../features/tracking/order_tracking_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/main',
@@ -30,6 +31,13 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/checkout',
       builder: (context, state) => const CheckoutScreen(),
+    ),
+    GoRoute(
+      path: '/tracking/:orderId',
+      builder: (context, state) {
+        final orderId = state.pathParameters['orderId'] ?? '12345';
+        return OrderTrackingScreen(orderId: orderId);
+      },
     ),
   ],
 );

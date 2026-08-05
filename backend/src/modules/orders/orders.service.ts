@@ -215,7 +215,24 @@ export class OrdersService {
     return order;
   }
 
-  private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  public calculateShippingFee(distanceKm: number): number {
+    if (distanceKm <= 0) return 0;
+    // Base fee 10,000 for first km + 3,000/km for subsequent km
+    return 10000 + Math.ceil(distanceKm) * 3000;
+  }
+
+  public estimateDelivery(lat1: number, lon1: number, lat2: number, lon2: number) {
+    const distanceKm = this.calculateDistance(lat1, lon1, lat2, lon2);
+    const shipFee = this.calculateShippingFee(distanceKm);
+    const estimatedMinutes = Math.round(distanceKm * 5 + 10);
+    return {
+      distanceKm: parseFloat(distanceKm.toFixed(2)),
+      shipFee,
+      estimatedMinutes,
+    };
+  }
+
+  public calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const R = 6371; // Earth radius in km
     const dLat = (lat2 - lat1) * (Math.PI / 180);
     const dLon = (lon2 - lon1) * (Math.PI / 180);

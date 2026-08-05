@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_ui/shared_ui.dart';
 import 'package:iconsax/iconsax.dart';
+import 'order_accept_dialog.dart';
 
 class AvailableOrdersScreen extends StatefulWidget {
   const AvailableOrdersScreen({super.key});
@@ -141,11 +142,31 @@ class _AvailableOrdersScreenState extends State<AvailableOrdersScreen> {
 
           // Accept button
           AppButton(
-            text: 'Nhận Đơn Ngay',
+            text: 'Nhận Đơn Ngay (60s)',
             icon: Iconsax.routing,
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Chấp nhận đơn hàng thành công! Đang di chuyển tới quán.')),
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (dialogContext) => OrderAcceptDialog(
+                  orderId: '#12345',
+                  restaurantName: restaurantName,
+                  pickupAddress: pickupAddress,
+                  deliveryAddress: deliveryAddress,
+                  shipFee: shipFee,
+                  onAccept: () {
+                    Navigator.of(dialogContext).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('🎉 Chấp nhận đơn hàng thành công! Đang định vị GPS di chuyển tới quán.')),
+                    );
+                  },
+                  onReject: () {
+                    Navigator.of(dialogContext).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Đã từ chối đơn hàng.')),
+                    );
+                  },
+                ),
               );
             },
           ),

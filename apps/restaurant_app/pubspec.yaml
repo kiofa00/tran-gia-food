@@ -20,25 +20,25 @@ dependencies:
   api_client:
 
   # Navigation & State
-  go_router: ^13.2.4
+  go_router: ^17.4.0
   iconsax: ^0.0.8
-  flutter_riverpod: ^2.5.1
-  riverpod_annotation: ^2.3.5
+  flutter_riverpod: ^3.3.2
+  riverpod_annotation: ^4.0.3
 
   # Firebase
-  firebase_core: ^2.30.1
-  firebase_auth: ^4.19.5
-  firebase_messaging: ^14.9.3
-  firebase_storage: ^11.7.5
+  firebase_core: ^4.13.0
+  firebase_auth: ^6.5.7
+  firebase_messaging: ^16.5.0
+  firebase_storage: ^13.4.6
 
   # Realtime (new order notifications)
-  socket_io_client: ^2.0.3+1
+  socket_io_client: ^3.1.6
 
   # Audio (new order sound alert)
   audioplayers: ^6.0.0
 
   # Charts (revenue dashboard)
-  fl_chart: ^0.68.0
+  fl_chart: ^1.2.0
 
   # Storage
   hive_flutter: ^1.1.0
@@ -46,14 +46,14 @@ dependencies:
 
   # Utils
   image_picker: ^1.1.1
-  permission_handler: ^11.3.1
+  permission_handler: ^13.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^6.0.0
   build_runner: ^2.4.8
-  riverpod_generator: ^2.4.0
+  riverpod_generator: ^4.0.4
 
 flutter:
   uses-material-design: true

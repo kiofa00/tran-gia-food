@@ -21,4 +21,4 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  melos: ^6.0.0
+  melos: ^8.2.2

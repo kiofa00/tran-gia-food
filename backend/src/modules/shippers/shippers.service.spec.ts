@@ -3,7 +3,7 @@ import { ShippersService } from './shippers.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { BadRequestException } from '@nestjs/common';
-import { VehicleType, OrderStatus } from '@prisma/client';
+import { VehicleType, OrderStatus, KycStatus } from '@prisma/client';
 
 describe('ShippersService', () => {
   let service: ShippersService;
@@ -11,6 +11,7 @@ describe('ShippersService', () => {
   const mockPrismaService = {
     shipper: {
       findUnique: jest.fn(),
+      findMany: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
     },
@@ -80,6 +81,19 @@ describe('ShippersService', () => {
 
       expect(result.shipperId).toBe('shipper-1');
       expect(result.status).toBe(OrderStatus.picking_up);
+    });
+  });
+
+  describe('findNearestAvailableShipper', () => {
+    it('should find nearest online approved shipper within radius', async () => {
+      mockPrismaService.shipper.findMany = jest.fn().mockResolvedValue([
+        { id: 's1', isActive: true, ekycStatus: KycStatus.verified, lat: 10.762622, lng: 106.68222 }, // ~0.8km away
+        { id: 's2', isActive: true, ekycStatus: KycStatus.verified, lat: 10.8231, lng: 106.6297 },   // ~10km away
+      ]);
+
+      const nearest = await service.findNearestAvailableShipper(10.755, 106.68, 3.0);
+      expect(nearest).toBeDefined();
+      expect(nearest?.id).toBe('s1');
     });
   });
 });

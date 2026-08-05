@@ -1,96 +1,156 @@
+'use client';
+
 import React from 'react';
+import { Card, Table, Tag, Button, Row, Col, Statistic, Space, Typography } from 'antd';
+import {
+  DollarOutlined,
+  ShoppingOutlined,
+  UserOutlined,
+  CarOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  ClockCircleOutlined,
+} from '@ant-design/icons';
 import { adminDesignTokens } from '../theme/tokens';
 
+const { Title, Text } = Typography;
+
 export default function AdminDashboardPage() {
+  const columns = [
+    {
+      title: 'Họ & Tên',
+      dataIndex: 'name',
+      key: 'name',
+      render: (text: string) => <Text strong>{text}</Text>,
+    },
+    {
+      title: 'Số Điện Thoại',
+      dataIndex: 'phone',
+      key: 'phone',
+    },
+    {
+      title: 'Loại Xe',
+      dataIndex: 'vehicle',
+      key: 'vehicle',
+    },
+    {
+      title: 'Biển Số Xe',
+      dataIndex: 'plate',
+      key: 'plate',
+      render: (plate: string) => <Tag color="blue">{plate}</Tag>,
+    },
+    {
+      title: 'Trạng Thái eKYC',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: string) => (
+        <Tag icon={<ClockCircleOutlined />} color="warning">
+          {status}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Hành Động',
+      key: 'action',
+      render: () => (
+        <Space size="middle">
+          <Button type="primary" icon={<CheckCircleOutlined />} style={{ backgroundColor: adminDesignTokens.colors.statusApproved }}>
+            Duyệt eKYC
+          </Button>
+          <Button danger icon={<CloseCircleOutlined />}>
+            Từ Chối
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
+  const dataSource = [
+    {
+      key: '1',
+      name: 'Nguyễn Văn Cường',
+      phone: '0912 345 678',
+      vehicle: 'Xe Máy (Honda Wave)',
+      plate: '59P1-999.88',
+      status: 'PENDING',
+    },
+    {
+      key: '2',
+      name: 'Lê Hoàng Nam',
+      phone: '0987 654 321',
+      vehicle: 'Xe Máy (Yamaha Exciter)',
+      plate: '59X2-123.45',
+      status: 'PENDING',
+    },
+  ];
+
   return (
-    <div style={{ padding: adminDesignTokens.padding.lg, fontFamily: 'system-ui, sans-serif', backgroundColor: adminDesignTokens.colors.background, minHeight: '100vh' }}>
-      <header style={{ marginBottom: adminDesignTokens.padding.lg }}>
-        <h1 style={{ fontSize: adminDesignTokens.fontSize.h1, color: adminDesignTokens.colors.primary, margin: '0 0 8px 0' }}>🍜 Tran Gia Food — Dashboard Quản Trị</h1>
-        <p style={{ color: adminDesignTokens.colors.textSecondary, margin: 0 }}>Tổng quan tình hình kinh doanh & hoạt động hệ thống toàn quốc</p>
-      </header>
-
-      {/* Overview Stat Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '36px' }}>
-        <div style={cardStyle}>
-          <span style={labelStyle}>Tổng Doanh Thu Platform</span>
-          <span style={valueStyle}>125.450.000 đ</span>
-          <span style={{ color: adminDesignTokens.colors.statusApproved, fontSize: adminDesignTokens.fontSize.sm, fontWeight: adminDesignTokens.fontWeight.bold }}>▲ +18.5% so với tháng trước</span>
-        </div>
-        <div style={cardStyle}>
-          <span style={labelStyle}>Tổng GMV Đặt Hàng</span>
-          <span style={valueStyle}>627.250.000 đ</span>
-          <span style={{ color: adminDesignTokens.colors.statusApproved, fontSize: adminDesignTokens.fontSize.sm, fontWeight: adminDesignTokens.fontWeight.bold }}>▲ +24.2% GMV đồ ăn</span>
-        </div>
-        <div style={cardStyle}>
-          <span style={labelStyle}>Tổng Số Đơn Hàng</span>
-          <span style={valueStyle}>4.820 đơn</span>
-          <span style={{ color: adminDesignTokens.colors.primary, fontSize: adminDesignTokens.fontSize.sm, fontWeight: adminDesignTokens.fontWeight.bold }}>● 98.2% giao thành công</span>
-        </div>
-        <div style={cardStyle}>
-          <span style={labelStyle}>Shipper Đang Hoạt Động</span>
-          <span style={valueStyle}>154 tài xế</span>
-          <span style={{ color: adminDesignTokens.colors.statusPending, fontSize: adminDesignTokens.fontSize.sm, fontWeight: adminDesignTokens.fontWeight.bold }}>⏳ 12 hồ sơ chờ duyệt eKYC</span>
-        </div>
+    <div style={{ padding: adminDesignTokens.padding.lg }}>
+      <div style={{ marginBottom: 24 }}>
+        <Title level={2} style={{ color: adminDesignTokens.colors.primary, margin: 0 }}>
+          🍜 Tran Gia Food — Dashboard Quản Trị
+        </Title>
+        <Text type="secondary">Tổng quan tình hình kinh doanh & hoạt động hệ thống toàn quốc</Text>
       </div>
 
-      {/* Shipper eKYC Pending Table */}
-      <div style={{ backgroundColor: adminDesignTokens.colors.surface, borderRadius: adminDesignTokens.borderRadius.lg, padding: adminDesignTokens.padding.md, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-        <h2 style={{ fontSize: adminDesignTokens.fontSize.lg, marginTop: 0, marginBottom: '20px' }}>📋 Danh Sách Shipper Chờ Duyệt eKYC</h2>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ borderBottom: `2px solid ${adminDesignTokens.colors.border}`, color: adminDesignTokens.colors.textMuted }}>
-              <th style={thStyle}>Họ & Tên</th>
-              <th style={thStyle}>Số Điện Thoại</th>
-              <th style={thStyle}>Loại Xe</th>
-              <th style={thStyle}>Biển Số Xe</th>
-              <th style={thStyle}>Trạng Thái eKYC</th>
-              <th style={thStyle}>Hành Động</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style={{ borderBottom: `1px solid ${adminDesignTokens.colors.border}` }}>
-              <td style={tdStyle}>Nguyễn Văn Cường</td>
-              <td style={tdStyle}>0912 345 678</td>
-              <td style={tdStyle}>Xe Máy (Honda Wave)</td>
-              <td style={tdStyle}>59P1-999.88</td>
-              <td style={tdStyle}><span style={badgePending}>PENDING</span></td>
-              <td style={tdStyle}>
-                <button style={btnApprove}>Duyệt eKYC</button>
-                <button style={btnReject}>Từ Chối</button>
-              </td>
-            </tr>
-            <tr style={{ borderBottom: `1px solid ${adminDesignTokens.colors.border}` }}>
-              <td style={tdStyle}>Lê Hoàng Nam</td>
-              <td style={tdStyle}>0987 654 321</td>
-              <td style={tdStyle}>Xe Máy (Yamaha Exciter)</td>
-              <td style={tdStyle}>59X2-123.45</td>
-              <td style={tdStyle}><span style={badgePending}>PENDING</span></td>
-              <td style={tdStyle}>
-                <button style={btnApprove}>Duyệt eKYC</button>
-                <button style={btnReject}>Từ Chối</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      {/* Antd Stat Cards */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 32 }}>
+        <Col xs={24} sm={12} lg={6}>
+          <Card bordered={false}>
+            <Statistic
+              title="Tổng Doanh Thu Platform"
+              value={125450000}
+              precision={0}
+              suffix="đ"
+              prefix={<DollarOutlined style={{ color: adminDesignTokens.colors.primary }} />}
+              valueStyle={{ color: adminDesignTokens.colors.textPrimary, fontWeight: 800 }}
+            />
+            <Text type="success" style={{ fontWeight: 600 }}>▲ +18.5% so với tháng trước</Text>
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <Card bordered={false}>
+            <Statistic
+              title="Tổng GMV Đặt Hàng"
+              value={627250000}
+              precision={0}
+              suffix="đ"
+              prefix={<ShoppingOutlined style={{ color: adminDesignTokens.colors.primary }} />}
+              valueStyle={{ color: adminDesignTokens.colors.textPrimary, fontWeight: 800 }}
+            />
+            <Text type="success" style={{ fontWeight: 600 }}>▲ +24.2% GMV đồ ăn</Text>
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <Card bordered={false}>
+            <Statistic
+              title="Tổng Số Đơn Hàng"
+              value={4820}
+              suffix="đơn"
+              prefix={<UserOutlined style={{ color: adminDesignTokens.colors.primary }} />}
+              valueStyle={{ color: adminDesignTokens.colors.textPrimary, fontWeight: 800 }}
+            />
+            <Text style={{ color: adminDesignTokens.colors.primary, fontWeight: 600 }}>● 98.2% giao thành công</Text>
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <Card bordered={false}>
+            <Statistic
+              title="Shipper Đang Hoạt Động"
+              value={154}
+              suffix="tài xế"
+              prefix={<CarOutlined style={{ color: adminDesignTokens.colors.primary }} />}
+              valueStyle={{ color: adminDesignTokens.colors.textPrimary, fontWeight: 800 }}
+            />
+            <Text type="warning" style={{ fontWeight: 600 }}>⏳ 12 hồ sơ chờ duyệt eKYC</Text>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Antd Shipper Table */}
+      <Card title="📋 Danh Sách Shipper Chờ Duyệt eKYC" bordered={false}>
+        <Table columns={columns} dataSource={dataSource} pagination={false} />
+      </Card>
     </div>
   );
 }
-
-const cardStyle: React.CSSProperties = {
-  backgroundColor: adminDesignTokens.colors.surface,
-  borderRadius: adminDesignTokens.borderRadius.lg,
-  padding: adminDesignTokens.padding.md,
-  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '8px',
-};
-
-const labelStyle: React.CSSProperties = { fontSize: adminDesignTokens.fontSize.body, color: adminDesignTokens.colors.textSecondary, fontWeight: adminDesignTokens.fontWeight.semiBold };
-const valueStyle: React.CSSProperties = { fontSize: adminDesignTokens.fontSize.xl, fontWeight: adminDesignTokens.fontWeight.extraBold, color: adminDesignTokens.colors.textPrimary };
-const thStyle: React.CSSProperties = { padding: '14px 12px', fontSize: adminDesignTokens.fontSize.body };
-const tdStyle: React.CSSProperties = { padding: '14px 12px', fontSize: adminDesignTokens.fontSize.body };
-const badgePending: React.CSSProperties = { backgroundColor: adminDesignTokens.colors.statusPendingBg, color: adminDesignTokens.colors.statusPending, padding: '4px 8px', borderRadius: adminDesignTokens.borderRadius.sm, fontSize: adminDesignTokens.fontSize.xs, fontWeight: adminDesignTokens.fontWeight.bold };
-const btnApprove: React.CSSProperties = { backgroundColor: adminDesignTokens.colors.statusApproved, color: adminDesignTokens.colors.surface, border: 'none', padding: '6px 12px', borderRadius: adminDesignTokens.borderRadius.md, cursor: 'pointer', marginRight: '8px', fontWeight: adminDesignTokens.fontWeight.bold };
-const btnReject: React.CSSProperties = { backgroundColor: adminDesignTokens.colors.statusRejected, color: adminDesignTokens.colors.surface, border: 'none', padding: '6px 12px', borderRadius: adminDesignTokens.borderRadius.md, cursor: 'pointer', fontWeight: adminDesignTokens.fontWeight.bold };
