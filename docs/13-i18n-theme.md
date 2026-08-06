@@ -3,12 +3,14 @@
 ## Đa Ngôn Ngữ (i18n)
 
 ### Ngôn ngữ hỗ trợ
-| Code | Ngôn ngữ | Mặc định |
-|---|---|---|
-| `vi` | Tiếng Việt | ✅ |
-| `en` | English | Chuyển trong Settings |
+
+| Code | Ngôn ngữ   | Mặc định              |
+| ---- | ---------- | --------------------- |
+| `vi` | Tiếng Việt | ✅                    |
+| `en` | English    | Chuyển trong Settings |
 
 ### Package
+
 ```yaml
 # pubspec.yaml (shared_ui hoặc mỗi app)
 dependencies:
@@ -21,6 +23,7 @@ flutter:
 ```
 
 ### Cấu trúc file
+
 ```
 assets/translations/
   vi.json
@@ -28,6 +31,7 @@ assets/translations/
 ```
 
 ### vi.json (mẫu đầy đủ)
+
 ```json
 {
   "app_name": "Tran Gia Food",
@@ -86,6 +90,7 @@ assets/translations/
 ```
 
 ### en.json (mẫu)
+
 ```json
 {
   "app_name": "Tran Gia Food",
@@ -114,6 +119,7 @@ assets/translations/
 ```
 
 ### Cách dùng trong code
+
 ```dart
 // main.dart
 void main() async {
@@ -148,6 +154,7 @@ context.setLocale(Locale('en')); // lưu tự động vào SharedPreferences
 ## 🌙 Theme Switching
 
 ### 3 Chế Độ
+
 ```
 ○ Theo hệ thống (mặc định) ← Tự động theo cài đặt Android/iOS
 ● Sáng (Light)
@@ -155,6 +162,7 @@ context.setLocale(Locale('en')); // lưu tự động vào SharedPreferences
 ```
 
 ### Setup AppTheme
+
 ```dart
 // packages/shared_ui/lib/theme/app_theme.dart
 class AppTheme {
@@ -190,6 +198,7 @@ class AppTheme {
 ```
 
 ### Riverpod Provider
+
 ```dart
 // packages/shared_ui/lib/providers/theme_provider.dart
 final themeProvider =
@@ -223,6 +232,7 @@ class ThemeNotifier extends StateNotifier<ThemeMode> {
 ```
 
 ### Dùng trong main.dart
+
 ```dart
 // apps/customer_app/lib/main.dart
 Consumer(builder: (context, ref, _) {
@@ -239,5 +249,6 @@ Consumer(builder: (context, ref, _) {
 ---
 
 ## 🔗 Xem Thêm
+
 - [UI/UX Design System](./12-ui-ux.md)
 - [Tech stack](./11-tech-stack.md)

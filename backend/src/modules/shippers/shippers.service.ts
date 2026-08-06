@@ -1,15 +1,12 @@
-import {
-  Injectable, NotFoundException, BadRequestException, Logger,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { KycStatus, OrderStatus, User, UserRole } from '@prisma/client';
+
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { RegisterShipperDto, UpdateLocationDto } from './dto/shipper.dto';
-import { User, UserRole, OrderStatus, KycStatus } from '@prisma/client';
 
 @Injectable()
 export class ShippersService {
-  private readonly logger = new Logger(ShippersService.name);
-
   constructor(
     private prisma: PrismaService,
     private redis: RedisService,
@@ -110,7 +107,11 @@ export class ShippersService {
     });
   }
 
-  async findNearestAvailableShipper(restaurantLat: number, restaurantLng: number, maxRadiusKm = 3.0) {
+  async findNearestAvailableShipper(
+    restaurantLat: number,
+    restaurantLng: number,
+    maxRadiusKm = 3.0,
+  ) {
     const activeShippers = await this.prisma.shipper.findMany({
       where: {
         isActive: true,
@@ -136,8 +137,10 @@ export class ShippersService {
       const dLon = (shipper.lng - restaurantLng) * (Math.PI / 180);
       const a =
         Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(restaurantLat * (Math.PI / 180)) * Math.cos(shipper.lat * (Math.PI / 180)) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        Math.cos(restaurantLat * (Math.PI / 180)) *
+          Math.cos(shipper.lat * (Math.PI / 180)) *
+          Math.sin(dLon / 2) *
+          Math.sin(dLon / 2);
       const distance = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
       if (distance <= maxRadiusKm && distance < minDistance) {

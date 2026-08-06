@@ -1,9 +1,20 @@
-import { describe, it, expect } from 'vitest';
-import { formatCurrency, formatDistance, truncateText, mapKycStatus, mapShipperStatus, mapOrderStatus, mapVehicleType, formatDate } from './formatters';
+import { describe, expect, it } from 'vitest';
+
+import {
+  formatCurrency,
+  formatDate,
+  formatDistance,
+  mapKycStatus,
+  mapOrderStatus,
+  mapShipperStatus,
+  mapVehicleType,
+  truncateText,
+} from './formatters';
 
 describe('formatters utility', () => {
   it('should format currency correctly', () => {
     const formatted = formatCurrency(50000);
+
     expect(formatted).toContain('50');
     expect(formatted).toContain('₫');
   });

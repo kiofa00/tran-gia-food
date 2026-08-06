@@ -1,16 +1,17 @@
-import {
-  Controller, Post, Patch, Delete, Body, Param, UseGuards,
-} from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { MenuService } from './menu.service';
-import {
-  CreateCategoryDto, UpdateCategoryDto,
-  CreateMenuItemDto, UpdateMenuItemDto,
-} from './dto/menu.dto';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Body, Controller, Delete, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { User, UserRole } from '@prisma/client';
+
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import {
+  CreateCategoryDto,
+  CreateMenuItemDto,
+  UpdateCategoryDto,
+  UpdateMenuItemDto,
+} from './dto/menu.dto';
+import { MenuService } from './menu.service';
 
 @ApiTags('menu')
 @ApiBearerAuth('access-token')

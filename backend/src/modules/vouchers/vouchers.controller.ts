@@ -1,10 +1,11 @@
-import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { VouchersService } from './vouchers.service';
-import { CreateVoucherDto, ValidateVoucherDto } from './dto/voucher.dto';
-import { JwtAuthGuard, Public } from '../../common/guards/jwt-auth.guard';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
+
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { JwtAuthGuard, Public } from '../../common/guards/jwt-auth.guard';
+import { CreateVoucherDto, ValidateVoucherDto } from './dto/voucher.dto';
+import { VouchersService } from './vouchers.service';
 
 @ApiTags('vouchers')
 @Controller('vouchers')

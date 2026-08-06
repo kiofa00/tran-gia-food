@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { OrderStatus, User } from '@prisma/client';
+
 import { PrismaService } from '../../prisma/prisma.service';
 import { SendChatMessageDto } from './dto/chat.dto';
-import { User, OrderStatus } from '@prisma/client';
 
 @Injectable()
 export class ChatService {
@@ -27,7 +28,7 @@ export class ChatService {
     });
   }
 
-  async getOrderMessages(user: User, orderId: string) {
+  async getOrderMessages(_user: User, orderId: string) {
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });
     if (!order) throw new NotFoundException('Đơn hàng không tồn tại');
 

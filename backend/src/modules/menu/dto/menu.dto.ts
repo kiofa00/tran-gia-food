@@ -1,10 +1,10 @@
-import { IsString, IsOptional, IsNumber, IsBoolean, IsUrl, Min } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsBoolean, IsNumber, IsOptional, IsString, IsUrl, Min } from 'class-validator';
 
 export class CreateCategoryDto {
   @ApiProperty({ example: 'Đồ uống' })
   @IsString()
-  name: string;
+  name!: string;
 
   @ApiPropertyOptional({ example: 0 })
   @IsOptional()
@@ -21,7 +21,7 @@ export class UpdateCategoryDto {
 export class CreateMenuItemDto {
   @ApiProperty({ example: 'Phở bò tái' })
   @IsString()
-  name: string;
+  name!: string;
 
   @ApiPropertyOptional({ example: 'Phở bò Hà Nội truyền thống' })
   @IsOptional()
@@ -31,7 +31,7 @@ export class CreateMenuItemDto {
   @ApiProperty({ example: 65000 })
   @IsNumber()
   @Min(0)
-  price: number;
+  price!: number;
 
   @ApiPropertyOptional({ example: 'https://example.com/pho.jpg' })
   @IsOptional()

@@ -1,6 +1,5 @@
 import js from '@eslint/js';
 import eslintConfigPrettier from 'eslint-config-prettier';
-import turboPlugin from 'eslint-plugin-turbo';
 import tseslint from 'typescript-eslint';
 
 /**
@@ -12,16 +11,10 @@ export const config = [
   eslintConfigPrettier,
   ...tseslint.configs.recommended,
   {
-    plugins: {
-      turbo: turboPlugin,
-    },
-    rules: {
-      'turbo/no-undeclared-env-vars': 'warn',
-    },
-  },
-  {
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
+      // Disabled: conflicts with optional chaining patterns (a?.b?.c) used throughout the codebase
+      '@typescript-eslint/no-unused-expressions': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {

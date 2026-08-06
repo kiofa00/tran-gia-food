@@ -57,6 +57,7 @@
     "@types/passport-jwt": "catalog:",
     "eslint": "catalog:",
     "@trangia/eslint-config": "workspace:*",
+    "@trangia/tsconfig": "workspace:*",
     "prisma": "catalog:",
     "typescript": "catalog:",
     "ts-jest": "catalog:",

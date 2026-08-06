@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Layout, Typography, Space, Divider } from 'antd';
+
+import { Divider, Layout, Space, Typography } from 'antd';
 
 const { Footer: AntFooter } = Layout;
 const { Text, Link } = Typography;

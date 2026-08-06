@@ -52,13 +52,13 @@ Khách được kết nối tới Shipper qua proxy
 
 ## 👥 Ma Trận Giao Tiếp
 
-| Từ | Tới | Chat | Gọi | Thời điểm |
-|---|---|---|---|---|
-| Customer | Shipper | ✅ | ✅ (masked) | Sau khi shipper nhận đơn |
-| Customer | Quán | ✅ | ✅ (masked) | Sau khi đặt xong |
-| Shipper | Customer | ✅ | ✅ (masked) | Khi đang giao |
-| Shipper | Quán | ✅ | ✅ (masked) | Khi đến lấy hàng |
-| Quán | Customer | ✅ | ✅ (masked) | Sau khi nhận đơn |
+| Từ       | Tới      | Chat | Gọi         | Thời điểm                |
+| -------- | -------- | ---- | ----------- | ------------------------ |
+| Customer | Shipper  | ✅   | ✅ (masked) | Sau khi shipper nhận đơn |
+| Customer | Quán     | ✅   | ✅ (masked) | Sau khi đặt xong         |
+| Shipper  | Customer | ✅   | ✅ (masked) | Khi đang giao            |
+| Shipper  | Quán     | ✅   | ✅ (masked) | Khi đến lấy hàng         |
+| Quán     | Customer | ✅   | ✅ (masked) | Sau khi nhận đơn         |
 
 ---
 
@@ -83,13 +83,14 @@ Báo cáo:
 
 ## 🛠️ Tech Stack
 
-| Layer | Lựa chọn chính | Lựa chọn thay thế |
-|---|---|---|
-| **In-app Chat** | **Stringee Chat SDK** | Stream Chat SDK |
-| **Masked Call / VOIP** | **Stringee Voice** | Twilio Proxy + Voice |
-| **Lưu trữ chat** | Firebase Realtime DB | PostgreSQL |
+| Layer                  | Lựa chọn chính        | Lựa chọn thay thế    |
+| ---------------------- | --------------------- | -------------------- |
+| **In-app Chat**        | **Stringee Chat SDK** | Stream Chat SDK      |
+| **Masked Call / VOIP** | **Stringee Voice**    | Twilio Proxy + Voice |
+| **Lưu trữ chat**       | Firebase Realtime DB  | PostgreSQL           |
 
 > 💡 **Tại sao Stringee?**
+>
 > - Giải pháp Việt Nam → latency thấp hơn
 > - Giá rẻ hơn Twilio đáng kể
 > - Flutter SDK sẵn có
@@ -98,6 +99,7 @@ Báo cáo:
 ---
 
 ## 🔗 Xem Thêm
+
 - [Order flow](./02-order-flow.md)
 - [Notifications](./09-notifications.md)
 - [Tech stack](./11-tech-stack.md)

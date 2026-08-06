@@ -1,12 +1,11 @@
-import {
-  Controller, Post, Body, Get, UseGuards, HttpCode, HttpStatus,
-} from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { AuthService } from './auth.service';
-import { SendOtpDto, VerifyOtpDto, GoogleAuthDto, RefreshTokenDto } from './dto/auth.dto';
-import { JwtAuthGuard, Public } from '../../common/guards/jwt-auth.guard';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
+
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { JwtAuthGuard, Public } from '../../common/guards/jwt-auth.guard';
+import { AuthService } from './auth.service';
+import { GoogleAuthDto, RefreshTokenDto, SendOtpDto, VerifyOtpDto } from './dto/auth.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -30,14 +29,18 @@ export class AuthController {
   @Post('verify-otp')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Xác minh OTP → nhận token' })
-  @ApiResponse({ status: 200, description: 'Login thành công', schema: {
-    properties: {
-      accessToken: { type: 'string' },
-      refreshToken: { type: 'string' },
-      isNewUser: { type: 'boolean' },
-      user: { type: 'object' },
+  @ApiResponse({
+    status: 200,
+    description: 'Login thành công',
+    schema: {
+      properties: {
+        accessToken: { type: 'string' },
+        refreshToken: { type: 'string' },
+        isNewUser: { type: 'boolean' },
+        user: { type: 'object' },
+      },
     },
-  }})
+  })
   verifyOtp(@Body() dto: VerifyOtpDto) {
     return this.authService.verifyOtp(dto);
   }
@@ -76,7 +79,8 @@ export class AuthController {
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Lấy thông tin user đang đăng nhập' })
   getMe(@CurrentUser() user: User) {
-    delete (user as any).passwordHash;
-    return user;
+    const userObj = { ...user } as Record<string, unknown>;
+    delete userObj.passwordHash;
+    return userObj;
   }
 }

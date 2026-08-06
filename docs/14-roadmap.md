@@ -19,6 +19,7 @@ Tổng ước tính          → 7-8 tháng
 **Mục tiêu:** App chạy được end-to-end cho Pickup flow
 
 ### Backend
+
 - [ ] Cài đặt NestJS monorepo, PostgreSQL, Prisma
 - [ ] Module Auth: OTP (SĐT), Google login, JWT
 - [ ] Module Users: CRUD, roles
@@ -28,6 +29,7 @@ Tổng ước tính          → 7-8 tháng
 - [ ] Swagger docs
 
 ### Customer App
+
 - [ ] Setup Flutter + Riverpod + go_router + Design System
 - [ ] Màn đăng ký / đăng nhập (SĐT OTP, Google)
 - [ ] Màn Home: danh sách quán, category pills, search
@@ -38,12 +40,14 @@ Tổng ước tính          → 7-8 tháng
 - [ ] i18n (vi/en) + Theme (Light/Dark)
 
 ### Restaurant App
+
 - [ ] Đăng nhập quán
 - [ ] Màn quản lý đơn (nhận đơn, âm thanh notification)
 - [ ] Màn menu management
 - [ ] Dashboard doanh thu cơ bản
 
 ### Admin Web
+
 - [ ] Đăng nhập Admin
 - [ ] Quản lý quán ăn (duyệt, xem danh sách)
 - [ ] Cấu hình platform_fee_rate
@@ -55,6 +59,7 @@ Tổng ước tính          → 7-8 tháng
 **Mục tiêu:** Delivery flow hoạt động với real shipper
 
 ### Backend
+
 - [ ] Module Shippers: CRUD, location tracking (Redis), eKYC
 - [ ] Module Delivery: Auto-assign algorithm
 - [ ] Google Maps integration (Distance Matrix)
@@ -64,11 +69,13 @@ Tổng ước tính          → 7-8 tháng
 - [ ] Hệ thống phạt Shipper (penalty levels)
 
 ### Customer App
+
 - [ ] Màn chọn Delivery (nhập địa chỉ, xem phí ship)
 - [ ] Tracking màn real-time (Google Maps + WebSocket)
 - [ ] Hủy đơn (PENDING only)
 
 ### Shipper App
+
 - [ ] Đăng ký + eKYC upload
 - [ ] Màn nhận đơn (60s timer)
 - [ ] Navigation turn-by-turn (Directions API)
@@ -82,6 +89,7 @@ Tổng ước tính          → 7-8 tháng
 **Mục tiêu:** Thanh toán online + chia tiền tự động
 
 ### Backend
+
 - [ ] MoMo SDK integration + webhook
 - [ ] VNPay integration + webhook
 - [ ] Refund flow
@@ -90,16 +98,19 @@ Tổng ước tính          → 7-8 tháng
 - [ ] Email sao kê (SendGrid template)
 
 ### Customer App
+
 - [ ] Màn thanh toán MoMo / VNPay
 - [ ] KYC flow: CCCD + Face ID để liên kết ngân hàng
 - [ ] Ví app + lịch sử giao dịch
 
 ### Shipper App
+
 - [ ] Cash Wallet + Account Wallet đầy đủ
 - [ ] Lịch sử sao kê hàng tuần
 - [ ] Yêu cầu rút tiền
 
 ### Restaurant App
+
 - [ ] Dashboard doanh thu chi tiết
 - [ ] Payout history
 
@@ -110,25 +121,30 @@ Tổng ước tính          → 7-8 tháng
 **Mục tiêu:** Hệ thống marketing + communication đầy đủ
 
 ### Backend
+
 - [ ] Module Vouchers: CRUD, validation logic
 - [ ] Module Notifications: FCM + SendGrid + in-app
 - [ ] Chat integration (Stringee)
 - [ ] Masked call integration (Stringee)
 
 ### Customer App
+
 - [ ] Nhập voucher ở giỏ hàng
 - [ ] In-app notification center (lịch sử thông báo)
 - [ ] Chat với Shipper / Quán
 - [ ] Gọi điện (masked)
 
 ### Shipper App
+
 - [ ] Chat với Customer / Quán
 
 ### Restaurant App
+
 - [ ] Tạo voucher riêng cho quán
 - [ ] Chat với khách
 
 ### Admin Web
+
 - [ ] Quản lý voucher đầy đủ
 - [ ] Notification analytics
 
@@ -150,5 +166,6 @@ Tổng ước tính          → 7-8 tháng
 ---
 
 ## 🔗 Xem Thêm
+
 - [Tổng quan hệ thống](./01-overview.md)
 - [Tech stack](./11-tech-stack.md)

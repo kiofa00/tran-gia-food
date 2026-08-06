@@ -9,9 +9,17 @@ packages:
   - packages/api_client
 
 scripts:
+  lint:
+    run: flutter analyze lib
+    description: Lint (analyze) all Flutter packages
+    exec:
+      concurrency: 1
+
   analyze:
     run: flutter analyze
     description: Analyze all Flutter packages
+    exec:
+      concurrency: 1
 
   test:
     run: flutter test

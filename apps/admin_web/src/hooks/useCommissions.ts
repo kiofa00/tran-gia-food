@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
-import { commissionsService } from '../services/commissions.service';
+﻿import { useQuery } from '@tanstack/react-query';
 
-import { QueryParams } from '../services/apiClient';
+import { QueryParams } from '@/services/apiClient';
+import { commissionsService } from '@/services/commissions.service';
 
 export const COMMISSION_QUERY_KEYS = {
   all: ['commissions', 'list'],

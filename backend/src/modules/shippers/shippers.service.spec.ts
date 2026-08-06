@@ -1,9 +1,10 @@
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ShippersService } from './shippers.service';
+import { KycStatus, OrderStatus, User, VehicleType } from '@prisma/client';
+
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
-import { BadRequestException } from '@nestjs/common';
-import { VehicleType, OrderStatus, KycStatus } from '@prisma/client';
+import { ShippersService } from './shippers.service';
 
 describe('ShippersService', () => {
   let service: ShippersService;
@@ -48,7 +49,7 @@ describe('ShippersService', () => {
         vehicleType: VehicleType.motorbike,
       });
 
-      const user = { id: 'user-1' } as any;
+      const user = { id: 'user-1' } as unknown as User;
       const result = await service.register(user, {
         vehicleType: VehicleType.motorbike,
         vehiclePlate: '59P1-12345',
@@ -62,7 +63,9 @@ describe('ShippersService', () => {
       mockPrismaService.shipper.findUnique.mockResolvedValue({ id: 'existing-shipper' });
 
       await expect(
-        service.register({ id: 'user-1' } as any, { vehicleType: VehicleType.motorbike }),
+        service.register({ id: 'user-1' } as unknown as User, {
+          vehicleType: VehicleType.motorbike,
+        }),
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -77,7 +80,7 @@ describe('ShippersService', () => {
         status: OrderStatus.picking_up,
       });
 
-      const result = await service.acceptOrder({ id: 'user-1' } as any, 'order-1');
+      const result = await service.acceptOrder({ id: 'user-1' } as unknown as User, 'order-1');
 
       expect(result.shipperId).toBe('shipper-1');
       expect(result.status).toBe(OrderStatus.picking_up);
@@ -87,8 +90,14 @@ describe('ShippersService', () => {
   describe('findNearestAvailableShipper', () => {
     it('should find nearest online approved shipper within radius', async () => {
       mockPrismaService.shipper.findMany = jest.fn().mockResolvedValue([
-        { id: 's1', isActive: true, ekycStatus: KycStatus.verified, lat: 10.762622, lng: 106.68222 }, // ~0.8km away
-        { id: 's2', isActive: true, ekycStatus: KycStatus.verified, lat: 10.8231, lng: 106.6297 },   // ~10km away
+        {
+          id: 's1',
+          isActive: true,
+          ekycStatus: KycStatus.verified,
+          lat: 10.762622,
+          lng: 106.68222,
+        }, // ~0.8km away
+        { id: 's2', isActive: true, ekycStatus: KycStatus.verified, lat: 10.8231, lng: 106.6297 }, // ~10km away
       ]);
 
       const nearest = await service.findNearestAvailableShipper(10.755, 106.68, 3.0);

@@ -1,7 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { vouchersService, CreateVoucherPayload } from '../services/vouchers.service';
+﻿import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { QueryParams } from '../services/apiClient';
+import { QueryParams } from '@/services/apiClient';
+import { CreateVoucherPayload, vouchersService } from '@/services/vouchers.service';
 
 export const VOUCHER_QUERY_KEYS = {
   all: ['vouchers', 'list'],

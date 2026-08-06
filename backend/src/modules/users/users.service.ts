@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { User } from '@prisma/client';
+
 import { PrismaService } from '../../prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -10,8 +11,9 @@ export class UsersService {
   async findById(id: string): Promise<Partial<User>> {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new NotFoundException('Không tìm thấy người dùng');
-    delete (user as any).passwordHash;
-    return user;
+    const userObj = { ...user } as Record<string, unknown>;
+    delete userObj.passwordHash;
+    return userObj as Partial<User>;
   }
 
   async update(id: string, dto: UpdateUserDto): Promise<Partial<User>> {
@@ -19,8 +21,9 @@ export class UsersService {
       where: { id },
       data: dto,
     });
-    delete (user as any).passwordHash;
-    return user;
+    const userObj = { ...user } as Record<string, unknown>;
+    delete userObj.passwordHash;
+    return userObj as Partial<User>;
   }
 
   async updateFcmToken(id: string, fcmToken: string): Promise<void> {

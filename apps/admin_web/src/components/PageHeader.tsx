@@ -1,5 +1,6 @@
 import React from 'react';
-import { Row, Col, Typography, Space } from 'antd';
+
+import { Col, Row, Space, Typography } from 'antd';
 
 const { Title, Text } = Typography;
 
@@ -10,22 +11,13 @@ interface PageHeaderProps {
   action?: React.ReactNode;
 }
 
-export const PageHeader: React.FC<PageHeaderProps> = ({
-  icon,
-  title,
-  subtitle,
-  action,
-}) => {
+export const PageHeader: React.FC<PageHeaderProps> = ({ icon, title, subtitle, action }) => {
   return (
     <div className="mb-6">
       <Row justify="space-between" align="middle" gutter={[16, 16]}>
         <Col xs={24} sm={16} md={18}>
           <Space align="center" size="small">
-            {typeof icon === 'string' ? (
-              <span className="text-2xl">{icon}</span>
-            ) : (
-              icon
-            )}
+            {typeof icon === 'string' ? <span className="text-2xl">{icon}</span> : icon}
             <Title level={2} className="m-0 text-orange-500">
               {title}
             </Title>

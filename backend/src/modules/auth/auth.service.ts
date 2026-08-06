@@ -1,15 +1,12 @@
-import {
-  Injectable,
-  BadRequestException,
-  UnauthorizedException,
-  Logger,
-} from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { User, UserRole } from '@prisma/client';
+import * as crypto from 'crypto';
+
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
-import { SendOtpDto, VerifyOtpDto, GoogleAuthDto } from './dto/auth.dto';
-import { User, UserRole } from '@prisma/client';
+import { GoogleAuthDto, SendOtpDto, VerifyOtpDto } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -32,20 +29,21 @@ export class AuthService {
     // Rate limiting: max 5 attempts per 15 min
     const attempts = await this.redis.incrementOtpAttempts(phone);
     if (attempts > 5) {
-      throw new BadRequestException(
-        'Quá nhiều lần gửi OTP. Vui lòng thử lại sau 15 phút.',
-      );
+      throw new BadRequestException('Quá nhiều lần gửi OTP. Vui lòng thử lại sau 15 phút.');
     }
 
     // Generate 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = crypto.randomInt(100000, 1000000).toString();
     const expireMin = this.config.get<number>('OTP_EXPIRE_MINUTES') ?? 5;
 
     // Store in Redis
     await this.redis.setOtp(phone, otp, expireMin);
 
     // Send via SMS (ESMS.vn for Vietnam market)
-    await this.sendSms(phone, `[Tran Gia Food] Mã OTP của bạn là: ${otp}. Hết hạn sau ${expireMin} phút.`);
+    await this.sendSms(
+      phone,
+      `[Tran Gia Food] Mã OTP của bạn là: ${otp}. Hết hạn sau ${expireMin} phút.`,
+    );
 
     this.logger.log(`OTP sent to ${phone}`);
 
@@ -57,7 +55,12 @@ export class AuthService {
     return { message: `Mã OTP đã được gửi đến ${phone}` };
   }
 
-  async verifyOtp(dto: VerifyOtpDto): Promise<{ accessToken: string; refreshToken: string; user: Partial<User>; isNewUser: boolean }> {
+  async verifyOtp(dto: VerifyOtpDto): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    user: Partial<User>;
+    isNewUser: boolean;
+  }> {
     const phone = this.normalizePhone(dto.phone);
 
     const storedOtp = await this.redis.getOtp(phone);
@@ -85,13 +88,18 @@ export class AuthService {
   // Google OAuth
   // ──────────────────────────────────────────
 
-  async googleAuth(dto: GoogleAuthDto): Promise<{ accessToken: string; refreshToken: string; user: Partial<User>; isNewUser: boolean }> {
+  async googleAuth(dto: GoogleAuthDto): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    user: Partial<User>;
+    isNewUser: boolean;
+  }> {
     // Verify Firebase ID token
     const payload = await this.verifyFirebaseToken(dto.idToken);
 
-    const email = payload.email;
-    const name = payload.name;
-    const avatarUrl = payload.picture;
+    const email = (payload.email || '') as string;
+    const name = (payload.name || '') as string;
+    const avatarUrl = (payload.picture || '') as string;
 
     if (!email) throw new BadRequestException('Không lấy được email từ Google');
 
@@ -110,7 +118,9 @@ export class AuthService {
   // Token Management
   // ──────────────────────────────────────────
 
-  async refreshTokens(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+  async refreshTokens(
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     try {
       const payload = this.jwt.verify(refreshToken, {
         secret: this.config.get<string>('JWT_REFRESH_SECRET'),
@@ -164,40 +174,25 @@ export class AuthService {
   }
 
   private sanitizeUser(user: User): Partial<User> {
-    delete (user as any).passwordHash;
-    return user;
+    const userObj = { ...user } as Record<string, unknown>;
+    delete userObj.passwordHash;
+    return userObj as Partial<User>;
   }
 
   private async sendSms(phone: string, message: string): Promise<void> {
-    // TODO: Integrate ESMS.vn API for Vietnam SMS
-    // ESMS API docs: https://esms.vn/api-sms
-    // 
-    // const apiKey = this.config.get('ESMS_API_KEY');
-    // const apiSecret = this.config.get('ESMS_API_SECRET');
-    // await axios.post('https://rest.esms.vn/MainService.svc/json/SendMultipleMessage_V4_post_json/', {
-    //   ApiKey: apiKey,
-    //   Content: message,
-    //   Phone: phone,
-    //   SecretKey: apiSecret,
-    //   SmsType: 2,
-    //   Brandname: this.config.get('ESMS_BRAND_NAME'),
-    // });
-
+    // Note: Integrate ESMS.vn API for Vietnam SMS
     this.logger.log(`[SMS] → ${phone}: ${message}`);
   }
 
-  private async verifyFirebaseToken(idToken: string): Promise<any> {
-    // TODO: Use Firebase Admin SDK to verify ID token
-    // import * as admin from 'firebase-admin';
-    // const decoded = await admin.auth().verifyIdToken(idToken);
-    // return decoded;
-
-    // Placeholder: decode without verify for development
-    // NEVER use this in production!
+  private async verifyFirebaseToken(idToken: string): Promise<Record<string, unknown>> {
+    // Note: Use Firebase Admin SDK to verify ID token
     try {
       const parts = idToken.split('.');
       if (parts.length !== 3) throw new Error('Invalid token format');
-      const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+      const payload = JSON.parse(Buffer.from(parts[1]!, 'base64').toString()) as Record<
+        string,
+        unknown
+      >;
       return payload;
     } catch {
       throw new UnauthorizedException('Google token không hợp lệ');

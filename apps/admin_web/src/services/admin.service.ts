@@ -30,17 +30,26 @@ export interface PendingShipperItem {
 export const adminService = {
   getOverviewStats: async (): Promise<DashboardOverviewStats> => {
     const res = await apiClient.get<DashboardOverviewStats>('/admin/overview');
+
     return res.data;
   },
 
   getPendingShippers: async (): Promise<PendingShipperItem[]> => {
     const res = await apiClient.get<PendingShipperItem[]>('/admin/shippers/pending-kyc');
+
     return res.data;
   },
 
-  verifyShipperKyc: async (id: string, action: 'approve' | 'reject'): Promise<{ success: boolean; id: string; status: string }> => {
+  verifyShipperKyc: async (
+    id: string,
+    action: 'approve' | 'reject',
+  ): Promise<{ success: boolean; id: string; status: string }> => {
     const status = action === 'approve' ? 'VERIFIED' : 'REJECTED';
-    const res = await apiClient.patch<{ success: boolean; id: string; status: string }>(`/admin/shippers/${id}/kyc`, { status });
+    const res = await apiClient.patch<{ success: boolean; id: string; status: string }>(
+      `/admin/shippers/${id}/kyc`,
+      { status },
+    );
+
     return res.data;
   },
 };

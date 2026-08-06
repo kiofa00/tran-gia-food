@@ -1,19 +1,23 @@
 # AGENT OPERATIONAL RULES & BEHAVIORAL CONSTRAINTS
 
-## 1. GIT PUSH POLICY (CRITICAL)
-- **LOCAL-ONLY BY DEFAULT**: All code edits, commits, and refactorings must remain in the local environment.
-- **NO AUTO PUSH**: The agent is strictly forbidden from executing `git push` automatically.
-- **EXPLICIT USER COMMAND REQUIRED**: Execute `git push` ONLY when the user explicitly requests it (e.g. *"push code đi"*, *"push cho tôi"*).
+## 1. GIT COMMIT & PUSH POLICY (STRICT ENFORCEMENT)
 
-## 2. TESTING ENFORCEMENT & STRATEGY
+- **LOCAL-ONLY CODE EDITS**: All code edits, build checks, and refactoring must remain local in the workspace.
+- **NO AUTO COMMIT / NO AUTO PUSH**: The agent is strictly forbidden from executing `git commit` or `git push` automatically without prior permission.
+- **EXPLICIT USER COMMAND REQUIRED**: Execute `git commit` or `git push` ONLY when the user explicitly gives permission or requests it (e.g. _"commit code đi"_, _"push code giúp tôi"_).
+
+## 2. STYLING POLICY (TAILWINDCSS STANDARD)
+
+- **Zero Inline Styles**: Avoid using inline styles (`style={{ ... }}`) unless strictly necessary for dynamic runtime math (e.g. position offsets).
+- **TailwindCSS Utility Classes**: Use TailwindCSS utility classes (`className="..."`) across all React/Next.js components.
+- **Design Tokens**: Match colors with `adminDesignTokens` tokens and Tailwind colors (`orange-500`, `gray-50`, etc.).
+
+## 3. TESTING ENFORCEMENT & STRATEGY
+
 - **UI Components**: React/Next.js pages/JSX components, Flutter Widget screens (e.g. `Header.tsx`, `HomeScreen.dart`, `LoginScreen.dart`) do NOT require unit test files.
 - **Pure Logic & Services**: Custom Hooks (`use*.ts`), Utility functions (`formatters.ts`), NestJS Services (`*.service.ts`), and Database queries MUST be 100% covered by automated tests.
 - **Test Command**: Run `pnpm test` (`vitest` + `jest`) to verify logic.
 
-## 3. DESIGN TOKENS POLICY (ZERO HARDCODE)
-- **Zero Hardcode Colors**: Do NOT hardcode hex colors (`#FF6635`, `#FFD93D`) or font size numbers (`fontSize: 16`) inside UI components or markup.
-- **Flutter Apps**: Use `AppColors.*`, `AppFontSize.*`, `AppFontWeight.*` from `packages/shared_ui`.
-- **Next.js Admin Web**: Use `adminDesignTokens.*` module connected to central JSON tokens.
-
 ## 4. CODE QUALITY & LINTING
+
 - **Linting**: Run `pnpm lint` to verify code quality. `pnpm lint` automatically runs `--fix` across all subpackages. Maintain 0 errors and 0 warnings.

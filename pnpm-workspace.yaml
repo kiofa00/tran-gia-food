@@ -67,7 +67,9 @@ catalogs:
 
     # Dev Tools & Types
     'typescript': '^5.5.3'
-    'turbo': '^2.0.9'
+    'prettier': '^3.3.3'
+    '@trivago/prettier-plugin-sort-imports': '^4.3.0'
+    'eslint-plugin-prettier': '^5.2.6'
     '@types/node': '^20.14.10'
     '@types/react': '^18.3.3'
     '@types/react-dom': '^18.3.0'

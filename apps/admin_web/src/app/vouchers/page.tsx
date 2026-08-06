@@ -1,61 +1,85 @@
 'use client';
 
-import dayjs from 'dayjs';
-import React, { useState } from 'react';
-import { Card, Table, Tag, Button, Modal, Form, Input, InputNumber, Select, DatePicker, Space, Typography, Switch, Tooltip, Empty, App } from 'antd';
-import {
-  TagOutlined,
-  PlusOutlined,
-  ClockCircleOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  PercentageOutlined,
-  DollarOutlined,
-  SearchOutlined,
-  FilterOutlined,
-} from '@ant-design/icons';
-import { adminDesignTokens } from '../../theme/tokens';
-import { formatCurrency, formatDate } from '../../utils/formatters';
-import { PageContainer, PageHeader, SearchFilterBox, DataTable } from '../../components';
+import { useState } from 'react';
 
-const { Title, Text } = Typography;
+import {
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  CloseCircleOutlined,
+  DollarOutlined,
+  PercentageOutlined,
+  PlusOutlined,
+  TagOutlined,
+} from '@ant-design/icons';
+import {
+  App,
+  Button,
+  Card,
+  DatePicker,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Select,
+  Space,
+  Switch,
+  Tag,
+  Typography,
+} from 'antd';
+
+import { DataTable, PageContainer, PageHeader, SearchFilterBox } from '@/components';
+import {
+  useCreateVoucherMutation,
+  useToggleVoucherMutation,
+  useVouchersQuery,
+} from '@/hooks/useVouchers';
+import { CreateVoucherFormValues, VoucherRecord } from '@/types';
+import { formatCurrency, formatDate } from '@/utils/formatters';
+
+const { Text } = Typography;
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
-import { VoucherRecord, CreateVoucherFormValues } from '../../types';
-import { useVouchersQuery, useCreateVoucherMutation, useToggleVoucherMutation } from '../../hooks/useVouchers';
-
 export default function VoucherManagementPage() {
   const { message } = App.useApp();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [statusOverrides, setStatusOverrides] = useState<Record<string, boolean>>({});
-  const [form] = Form.useForm();
-
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [statusOverrides, setStatusOverrides] = useState<Record<string, boolean>>({});
 
-  const { data: rawVouchers, isLoading: loading } = useVouchersQuery({
-    search: search || undefined,
-    status: statusFilter !== 'ALL' ? statusFilter : undefined,
-  });
+  const [form] = Form.useForm();
+  const { data: rawVouchersData, isLoading: loading } = useVouchersQuery();
   const createVoucherMutation = useCreateVoucherMutation();
   const toggleVoucherMutation = useToggleVoucherMutation();
 
-  const rawList = Array.isArray(rawVouchers) ? rawVouchers : (rawVouchers?.data || []);
-  const vouchers: VoucherRecord[] = rawList.map((item: Record<string, unknown>, idx: number) => {
-    const itemKey = String(item.id || item.key || idx + 1);
+  const rawList = Array.isArray(rawVouchersData)
+    ? rawVouchersData
+    : (rawVouchersData as { data?: Record<string, unknown>[] })?.data || [];
+
+  const vouchers: VoucherRecord[] = rawList.map((item: Record<string, unknown>) => {
+    const itemKey = (item.id || item.key) as string;
+    let isActive = true;
+
+    if (statusOverrides[itemKey] !== undefined) {
+      isActive = statusOverrides[itemKey];
+    } else if (item.isActive !== undefined) {
+      isActive = Boolean(item.isActive);
+    }
+
     return {
+      id: String(item.id || item.key || ''),
       key: itemKey,
       code: String(item.code || ''),
       type: String(item.type || 'Platform'),
-      discountType: (item.discountType === 'percent' ? 'percent' : 'fixed'),
+      discountType: (String(item.discountType || 'fixed') === 'percent' ? 'percent' : 'fixed') as
+        'percent' | 'fixed',
       discountValue: Number(item.discountValue) || 0,
       minOrderValue: Number(item.minOrderValue) || 0,
       validFrom: String(item.validFrom || ''),
       validTo: String(item.validTo || ''),
       usedCount: Number(item.usedCount) || 0,
       totalLimit: Number(item.totalLimit) || 0,
-      isActive: statusOverrides[itemKey] !== undefined ? statusOverrides[itemKey] : (item.isActive !== undefined ? Boolean(item.isActive) : true),
+      isActive,
     };
   });
 
@@ -65,6 +89,7 @@ export default function VoucherManagementPage() {
       statusFilter === 'ALL' ||
       (statusFilter === 'ACTIVE' && item.isActive) ||
       (statusFilter === 'INACTIVE' && !item.isActive);
+
     return matchesSearch && matchesStatus;
   });
 
@@ -82,8 +107,13 @@ export default function VoucherManagementPage() {
       discountValue: values.discountValue,
       minOrderValue: values.minOrderValue || 0,
       totalLimit: values.totalLimit || 100,
-      validFrom: values.validDates ? values.validDates[0].format('YYYY-MM-DD') : new Date().toISOString().split('T')[0],
-      validTo: values.validDates ? values.validDates[1].format('YYYY-MM-DD') : new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+      validFrom: values.validDates
+        ? (values.validDates[0]?.format('YYYY-MM-DD') ?? new Date().toISOString().split('T')[0]!)
+        : new Date().toISOString().split('T')[0]!,
+      validTo: values.validDates
+        ? (values.validDates[1]?.format('YYYY-MM-DD') ??
+          new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0]!)
+        : new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0]!,
     };
 
     createVoucherMutation.mutate(payload, {
@@ -106,7 +136,11 @@ export default function VoucherManagementPage() {
       width: 160,
       sorter: (a: VoucherRecord, b: VoucherRecord) => a.code.localeCompare(b.code),
       render: (code: string) => (
-        <Tag color="volcano" icon={<TagOutlined />} className="text-xs font-bold px-2.5 py-0.5 rounded-md">
+        <Tag
+          color="volcano"
+          icon={<TagOutlined />}
+          className="text-xs font-bold px-2.5 py-0.5 rounded-md"
+        >
           {code}
         </Tag>
       ),
@@ -120,7 +154,8 @@ export default function VoucherManagementPage() {
         <Space className="whitespace-nowrap">
           {type === 'percent' ? (
             <Tag color="purple" icon={<PercentageOutlined />}>
-              Giảm {record.discountValue}% {record.maxDiscount ? `(Tối đa ${formatCurrency(record.maxDiscount)})` : ''}
+              Giảm {record.discountValue}%{' '}
+              {record.maxDiscount ? `(Tối đa ${formatCurrency(record.maxDiscount)})` : ''}
             </Tag>
           ) : (
             <Tag color="green" icon={<DollarOutlined />}>
@@ -168,11 +203,19 @@ export default function VoucherManagementPage() {
       sorter: (a: VoucherRecord, b: VoucherRecord) => Number(a.isActive) - Number(b.isActive),
       render: (record: VoucherRecord) => {
         const isExpired = new Date(record.validTo) < new Date('2026-08-05');
+
         if (isExpired) {
-          return <Tag color="default" icon={<CloseCircleOutlined />}>Đã hết hạn</Tag>;
+          return (
+            <Tag color="default" icon={<CloseCircleOutlined />}>
+              Đã hết hạn
+            </Tag>
+          );
         }
+
         return record.isActive ? (
-          <Tag color="success" icon={<CheckCircleOutlined />}>Đang diễn ra</Tag>
+          <Tag color="success" icon={<CheckCircleOutlined />}>
+            Đang diễn ra
+          </Tag>
         ) : (
           <Tag color="warning">Tạm dừng</Tag>
         );
@@ -249,8 +292,22 @@ export default function VoucherManagementPage() {
         cancelText="Hủy"
         okButtonProps={{ className: 'bg-orange-500 font-semibold' }}
       >
-        <Form form={form} layout="vertical" onFinish={handleCreateVoucher} initialValues={{ discountType: 'fixed', type: 'Platform' }}>
-          <Form.Item name="code" label="Mã Voucher (Code)" rules={[{ required: true, message: 'Vui lòng nhập mã voucher' }]}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleCreateVoucher}
+          initialValues={{ discountType: 'fixed', type: 'Platform' }}
+        >
+          <Form.Item
+            name="code"
+            label="Mã Voucher (Code)"
+            rules={[
+              {
+                required: true,
+                message: 'Vui lòng nhập mã voucher',
+              },
+            ]}
+          >
             <Input placeholder="VD: TRANGIA50K" className="uppercase" />
           </Form.Item>
 
@@ -262,7 +319,11 @@ export default function VoucherManagementPage() {
               </Select>
             </Form.Item>
 
-            <Form.Item name="discountValue" label="Giá Trị Giảm" rules={[{ required: true, message: 'Nhập giá trị' }]}>
+            <Form.Item
+              name="discountValue"
+              label="Giá Trị Giảm"
+              rules={[{ required: true, message: 'Nhập giá trị' }]}
+            >
               <InputNumber min={1} className="w-full" placeholder="VD: 50000 hoặc 15" />
             </Form.Item>
           </Space>
@@ -277,7 +338,16 @@ export default function VoucherManagementPage() {
             </Form.Item>
           </Space>
 
-          <Form.Item name="validDates" label="Thời Gian Hiệu Lực" rules={[{ required: true, message: 'Chọn khoảng thời gian' }]}>
+          <Form.Item
+            name="validDates"
+            label="Thời Gian Hiệu Lực"
+            rules={[
+              {
+                required: true,
+                message: 'Chọn khoảng thời gian',
+              },
+            ]}
+          >
             <RangePicker className="w-full" />
           </Form.Item>
         </Form>

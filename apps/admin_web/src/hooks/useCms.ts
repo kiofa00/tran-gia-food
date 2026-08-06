@@ -1,5 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
-import { cmsService } from '../services/cms.service';
+﻿import { useQuery } from '@tanstack/react-query';
+
+import { cmsService } from '@/services/cms.service';
 
 export const CMS_QUERY_KEYS = {
   status: ['cms', 'data'],

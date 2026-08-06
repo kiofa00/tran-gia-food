@@ -4,7 +4,7 @@ services:
     container_name: tran_gia_postgres
     restart: always
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
       POSTGRES_DB: tran_gia_food
       POSTGRES_USER: admin
@@ -17,7 +17,7 @@ services:
     container_name: tran_gia_redis
     restart: always
     ports:
-      - "6379:6379"
+      - '6379:6379'
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data

@@ -2,61 +2,66 @@
 
 ## Kênh Thông Báo
 
-| Kênh | Công nghệ | Dùng khi |
-|---|---|---|
+| Kênh                  | Công nghệ                      | Dùng khi                               |
+| --------------------- | ------------------------------ | -------------------------------------- |
 | **Push Notification** | Firebase Cloud Messaging (FCM) | Thông báo real-time khi app background |
-| **In-app Alert** | WebSocket (Socket.IO) | Thông báo khi đang dùng app |
-| **Email** | SendGrid | Sao kê, xác nhận, marketing |
+| **In-app Alert**      | WebSocket (Socket.IO)          | Thông báo khi đang dùng app            |
+| **Email**             | SendGrid                       | Sao kê, xác nhận, marketing            |
 
 ---
 
 ## 📲 Thông Báo Theo Vai Trò
 
 ### Customer
-| Sự kiện | Push | In-app | Email |
-|---|---|---|---|
-| Đặt hàng thành công | ✅ | ✅ | ✅ |
-| Quán xác nhận đơn | ✅ | ✅ | — |
-| Shipper nhận đơn | ✅ | ✅ | — |
-| Shipper đang đến | ✅ | ✅ | — |
-| Giao hàng thành công | ✅ | ✅ | ✅ |
-| Quán / hệ thống hủy đơn | ✅ | ✅ | ✅ |
-| Voucher mới | ✅ | — | ✅ |
-| Khuyến mãi từ quán yêu thích | ✅ | — | — |
-| Hoàn tiền thành công | ✅ | ✅ | ✅ |
+
+| Sự kiện                      | Push | In-app | Email |
+| ---------------------------- | ---- | ------ | ----- |
+| Đặt hàng thành công          | ✅   | ✅     | ✅    |
+| Quán xác nhận đơn            | ✅   | ✅     | —     |
+| Shipper nhận đơn             | ✅   | ✅     | —     |
+| Shipper đang đến             | ✅   | ✅     | —     |
+| Giao hàng thành công         | ✅   | ✅     | ✅    |
+| Quán / hệ thống hủy đơn      | ✅   | ✅     | ✅    |
+| Voucher mới                  | ✅   | —      | ✅    |
+| Khuyến mãi từ quán yêu thích | ✅   | —      | —     |
+| Hoàn tiền thành công         | ✅   | ✅     | ✅    |
 
 ### Restaurant
-| Sự kiện | Push | In-app | Email |
-|---|---|---|---|
-| Đơn hàng mới | ✅ + 🔔 âm thanh | ✅ | — |
-| Khách hủy đơn | ✅ | ✅ | — |
-| Shipper đến lấy hàng | ✅ | ✅ | — |
-| Sao kê doanh thu hàng tuần | — | — | ✅ |
-| Tài khoản được duyệt | ✅ | — | ✅ |
-| Payout thành công | ✅ | — | ✅ |
+
+| Sự kiện                    | Push             | In-app | Email |
+| -------------------------- | ---------------- | ------ | ----- |
+| Đơn hàng mới               | ✅ + 🔔 âm thanh | ✅     | —     |
+| Khách hủy đơn              | ✅               | ✅     | —     |
+| Shipper đến lấy hàng       | ✅               | ✅     | —     |
+| Sao kê doanh thu hàng tuần | —                | —      | ✅    |
+| Tài khoản được duyệt       | ✅               | —      | ✅    |
+| Payout thành công          | ✅               | —      | ✅    |
 
 ### Shipper
-| Sự kiện | Push | In-app | Email |
-|---|---|---|---|
-| Đơn hàng mới gần đây | ✅ + 🔔 âm thanh | ✅ | — |
-| Đơn bị hủy sau khi nhận | ✅ | ✅ | — |
-| Cảnh báo hệ thống phạt | ✅ | ✅ | ✅ |
-| Sao kê thu nhập hàng tuần | — | — | ✅ |
-| Payout thành công | ✅ | — | ✅ |
-| Tài khoản được duyệt | ✅ | — | ✅ |
+
+| Sự kiện                   | Push             | In-app | Email |
+| ------------------------- | ---------------- | ------ | ----- |
+| Đơn hàng mới gần đây      | ✅ + 🔔 âm thanh | ✅     | —     |
+| Đơn bị hủy sau khi nhận   | ✅               | ✅     | —     |
+| Cảnh báo hệ thống phạt    | ✅               | ✅     | ✅    |
+| Sao kê thu nhập hàng tuần | —                | —      | ✅    |
+| Payout thành công         | ✅               | —      | ✅    |
+| Tài khoản được duyệt      | ✅               | —      | ✅    |
 
 ### Admin
-| Sự kiện | Email |
-|---|---|
-| Shipper mới cần duyệt | ✅ |
-| Quán mới cần duyệt | ✅ |
-| Báo cáo doanh thu hàng tuần | ✅ |
+
+| Sự kiện                     | Email |
+| --------------------------- | ----- |
+| Shipper mới cần duyệt       | ✅    |
+| Quán mới cần duyệt          | ✅    |
+| Báo cáo doanh thu hàng tuần | ✅    |
 
 ---
 
 ## 📧 Email Templates
 
 ### Đặt hàng thành công
+
 ```
 Tiêu đề: 🎉 Đơn hàng #12345 đã được xác nhận!
 Nội dung:
@@ -68,6 +73,7 @@ Nội dung:
 ```
 
 ### Sao kê shipper hàng tuần
+
 ```
 Tiêu đề: 📊 Sao kê thu nhập tuần 28/07 – 03/08
 Nội dung (dạng bảng):
@@ -80,6 +86,7 @@ Nội dung (dạng bảng):
 ```
 
 ### Voucher mới
+
 ```
 Tiêu đề: 🎁 Voucher giảm 20% dành riêng cho bạn!
 Nội dung:
@@ -111,6 +118,7 @@ Lưu vào bảng Notifications (DB)
 ```
 
 ### Cron Jobs liên quan
+
 ```
 Thứ Ba hàng tuần, 8:00 SA:
   → Chạy generate weekly statement
@@ -128,5 +136,6 @@ Hàng ngày 0:00:
 ---
 
 ## 🔗 Xem Thêm
+
 - [Tech stack](./11-tech-stack.md)
 - [Business logic](./03-business-logic.md)

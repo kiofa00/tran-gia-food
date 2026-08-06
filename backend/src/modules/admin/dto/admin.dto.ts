@@ -1,31 +1,31 @@
-import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { KycStatus, PenaltyLevel } from '@prisma/client';
+import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 
 export class UpdateKycStatusDto {
   @ApiProperty({ enum: KycStatus })
   @IsEnum(KycStatus)
-  status: KycStatus;
+  status!: KycStatus;
 }
 
 export class UpdateAppConfigDto {
   @ApiProperty({ example: 'platform_food_fee_rate' })
   @IsString()
   @IsNotEmpty()
-  key: string;
+  key!: string;
 
   @ApiProperty({ example: '0.20' })
   @IsString()
   @IsNotEmpty()
-  value: string;
+  value!: string;
 }
 
 export class PenalizeShipperDto {
   @ApiProperty({ enum: PenaltyLevel })
   @IsEnum(PenaltyLevel)
-  level: PenaltyLevel;
+  level!: PenaltyLevel;
 
   @ApiProperty({ example: 'Hủy quá 10% số đơn trong tháng' })
   @IsString()
-  reason: string;
+  reason!: string;
 }

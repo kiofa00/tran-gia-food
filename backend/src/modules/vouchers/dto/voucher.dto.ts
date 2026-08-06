@@ -1,27 +1,34 @@
-import {
-  IsString, IsEnum, IsNumber, IsOptional, IsDateString, IsInt, Min, IsNotEmpty,
-} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { VoucherType, DiscountType, OrderTypeFilter } from '@prisma/client';
+import { DiscountType, OrderTypeFilter, VoucherType } from '@prisma/client';
+import {
+  IsDateString,
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class CreateVoucherDto {
   @ApiProperty({ example: 'SUMMER20' })
   @IsString()
   @IsNotEmpty()
-  code: string;
+  code!: string;
 
   @ApiProperty({ enum: VoucherType, example: VoucherType.platform })
   @IsEnum(VoucherType)
-  type: VoucherType;
+  type!: VoucherType;
 
   @ApiProperty({ enum: DiscountType, example: DiscountType.percent })
   @IsEnum(DiscountType)
-  discountType: DiscountType;
+  discountType!: DiscountType;
 
   @ApiProperty({ example: 20, description: '20% hoặc 20,000đ' })
   @IsNumber()
   @Min(0)
-  discountValue: number;
+  discountValue!: number;
 
   @ApiPropertyOptional({ example: 50000 })
   @IsOptional()
@@ -35,11 +42,11 @@ export class CreateVoucherDto {
 
   @ApiProperty({ example: '2026-06-01T00:00:00Z' })
   @IsDateString()
-  validFrom: string;
+  validFrom!: string;
 
   @ApiProperty({ example: '2026-12-31T23:59:59Z' })
   @IsDateString()
-  validTo: string;
+  validTo!: string;
 
   @ApiPropertyOptional({ example: 1000 })
   @IsOptional()
@@ -60,9 +67,9 @@ export class CreateVoucherDto {
 export class ValidateVoucherDto {
   @ApiProperty({ example: 'SUMMER20' })
   @IsString()
-  code: string;
+  code!: string;
 
   @ApiProperty({ example: 150000 })
   @IsNumber()
-  subtotal: number;
+  subtotal!: number;
 }

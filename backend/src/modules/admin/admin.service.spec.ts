@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AdminService } from './admin.service';
-import { PrismaService } from '../../prisma/prisma.service';
 import { KycStatus } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
+import { AdminService } from './admin.service';
 
 describe('AdminService', () => {
   let service: AdminService;
@@ -29,10 +30,7 @@ describe('AdminService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        AdminService,
-        { provide: PrismaService, useValue: mockPrismaService },
-      ],
+      providers: [AdminService, { provide: PrismaService, useValue: mockPrismaService }],
     }).compile();
 
     service = module.get<AdminService>(AdminService);
@@ -53,7 +51,10 @@ describe('AdminService', () => {
   describe('updateShipperKyc', () => {
     it('should update eKYC status to VERIFIED', async () => {
       mockPrismaService.shipper.findUnique.mockResolvedValue({ id: 'shipper-1' });
-      mockPrismaService.shipper.update.mockResolvedValue({ id: 'shipper-1', ekycStatus: KycStatus.verified });
+      mockPrismaService.shipper.update.mockResolvedValue({
+        id: 'shipper-1',
+        ekycStatus: KycStatus.verified,
+      });
 
       const result = await service.updateShipperKyc('shipper-1', { status: KycStatus.verified });
 

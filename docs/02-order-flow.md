@@ -34,17 +34,18 @@ Customer đánh giá
 
 ## 🔄 Trạng Thái Đơn Hàng
 
-| Status | Ý nghĩa | Ai trigger |
-|---|---|---|
-| `PENDING` | Đơn mới tạo, chờ quán xác nhận | System (sau thanh toán) |
-| `CONFIRMED` | Quán đã xác nhận, đang chuẩn bị | Restaurant |
-| `PICKING_UP` | Shipper đã nhận đơn, đang đến quán | Shipper |
-| `DELIVERING` | Shipper lấy hàng xong, đang giao | Shipper |
-| `DELIVERED` | Shipper đã giao xong, chờ khách xác nhận | Shipper |
-| `COMPLETED` | Đơn hoàn tất, tiền được giải phóng | Customer / Auto (15 phút) |
-| `CANCELLED` | Đơn đã hủy | Customer / Restaurant / System |
+| Status       | Ý nghĩa                                  | Ai trigger                     |
+| ------------ | ---------------------------------------- | ------------------------------ |
+| `PENDING`    | Đơn mới tạo, chờ quán xác nhận           | System (sau thanh toán)        |
+| `CONFIRMED`  | Quán đã xác nhận, đang chuẩn bị          | Restaurant                     |
+| `PICKING_UP` | Shipper đã nhận đơn, đang đến quán       | Shipper                        |
+| `DELIVERING` | Shipper lấy hàng xong, đang giao         | Shipper                        |
+| `DELIVERED`  | Shipper đã giao xong, chờ khách xác nhận | Shipper                        |
+| `COMPLETED`  | Đơn hoàn tất, tiền được giải phóng       | Customer / Auto (15 phút)      |
+| `CANCELLED`  | Đơn đã hủy                               | Customer / Restaurant / System |
 
 > **DELIVERED vs COMPLETED:**
+>
 > - `DELIVERED` = Shipper đã giao xong, chờ khách xác nhận
 > - `COMPLETED` = Khách xác nhận nhận hàng (hoặc auto sau 15 phút)
 > - Tiền được giải phóng (release) sau khi COMPLETED
@@ -67,6 +68,7 @@ Trạng thái đơn   Khách được hủy?   Hoàn tiền?
 ```
 
 ### Luồng hủy đơn
+
 ```
 Khách nhấn "Hủy đơn" (chỉ hiện nút khi PENDING)
       ↓
@@ -85,6 +87,7 @@ Nhà hàng nhận thông báo hủy
 ```
 
 ### Hủy đơn nhiều lần (anti-abuse)
+
 ```
 Nếu khách hủy > 5 đơn/tháng:
   → Hiển thị cảnh báo
@@ -94,6 +97,7 @@ Nếu khách hủy > 5 đơn/tháng:
 ---
 
 ## 🔗 Xem Thêm
+
 - [Logic chia tiền](./03-business-logic.md)
 - [Quản lý shipper](./04-shipper.md)
 - [Thanh toán & KYC](./05-payment-kyc.md)

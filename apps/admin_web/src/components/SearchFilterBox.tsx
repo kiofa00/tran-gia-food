@@ -1,7 +1,7 @@
 import React from 'react';
-import { Card, Row, Col, Input, Select, Space, Typography } from 'antd';
-import { SearchOutlined, FilterOutlined } from '@ant-design/icons';
-import { adminDesignTokens } from '../theme/tokens';
+
+import { FilterOutlined, SearchOutlined } from '@ant-design/icons';
+import { Card, Col, Input, Row, Select, Space, Typography } from 'antd';
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -33,10 +33,7 @@ export const SearchFilterBox: React.FC<SearchFilterBoxProps> = ({
   extraAction,
 }) => {
   return (
-    <Card
-      variant="borderless"
-      className="bg-gray-50 rounded-lg p-3 mb-4"
-    >
+    <Card variant="borderless" className="bg-gray-50 rounded-lg p-3 mb-4">
       <Row gutter={[12, 12]} align="middle" justify="space-between">
         <Col xs={24} sm={14} md={10}>
           <Input
@@ -51,7 +48,7 @@ export const SearchFilterBox: React.FC<SearchFilterBoxProps> = ({
           <Space wrap align="center" className="w-full justify-end">
             {filterOptions.length > 0 && onFilterChange && (
               <>
-                <FilterOutlined style={{ color: adminDesignTokens.colors.textSecondary }} />
+                <FilterOutlined className="text-slate-400" />
                 <Text type="secondary">{filterLabel}</Text>
                 <Select value={filterValue} onChange={onFilterChange} className="min-w-40">
                   {filterOptions.map((opt) => (

@@ -2,11 +2,11 @@
 
 ## Phân Loại Voucher
 
-| Loại | Phát hành bởi | Ai chịu chi phí |
-|---|---|---|
-| **Platform voucher** | Admin | Platform |
-| **Restaurant voucher** | Quán | Quán (trừ vào phần của quán) |
-| **Ship voucher** (free/giảm ship) | Admin / Quán | Platform hoặc Quán |
+| Loại                              | Phát hành bởi | Ai chịu chi phí              |
+| --------------------------------- | ------------- | ---------------------------- |
+| **Platform voucher**              | Admin         | Platform                     |
+| **Restaurant voucher**            | Quán          | Quán (trừ vào phần của quán) |
+| **Ship voucher** (free/giảm ship) | Admin / Quán  | Platform hoặc Quán           |
 
 ---
 
@@ -111,5 +111,6 @@ VoucherUsages
 ---
 
 ## 🔗 Xem Thêm
+
 - [Business logic](./03-business-logic.md)
 - [Notifications](./09-notifications.md)

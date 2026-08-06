@@ -1,14 +1,18 @@
-import React from 'react';
-import { mapVehicleType, getVehicleIcon } from '../utils/formatters';
+﻿import React from 'react';
+
+import { getVehicleIcon, mapVehicleType } from '@/utils/formatters';
 
 interface VehicleBadgeProps {
   vehicle?: string;
+  type?: string;
 }
 
-export const VehicleBadge: React.FC<VehicleBadgeProps> = ({ vehicle }) => {
-  if (!vehicle) return <span>—</span>;
-  const label = mapVehicleType(vehicle);
-  const icon = getVehicleIcon(vehicle);
+export const VehicleBadge: React.FC<VehicleBadgeProps> = ({ vehicle, type }) => {
+  const vehicleValue = vehicle || type;
+
+  if (!vehicleValue) return <span>—</span>;
+  const label = mapVehicleType(vehicleValue);
+  const icon = getVehicleIcon(vehicleValue);
 
   return (
     <span className="whitespace-nowrap">

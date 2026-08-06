@@ -1,18 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
-import { SendNotificationDto } from './dto/notification.dto';
 import { Order, Prisma } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
+import { SendNotificationDto } from './dto/notification.dto';
 
 @Injectable()
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
 
-  constructor(
-    private prisma: PrismaService,
-    private config: ConfigService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   async send(dto: SendNotificationDto) {
     // 1. Save notification to DB
@@ -57,7 +54,9 @@ export class NotificationsService {
   @OnEvent('order.created')
   async handleOrderCreated(order: Order) {
     // Notify Restaurant
-    const restaurant = await this.prisma.restaurant.findUnique({ where: { id: order.restaurantId } });
+    const restaurant = await this.prisma.restaurant.findUnique({
+      where: { id: order.restaurantId },
+    });
     if (restaurant) {
       await this.send({
         userId: restaurant.ownerId,
@@ -81,7 +80,12 @@ export class NotificationsService {
     });
   }
 
-  private async sendFcmPush(fcmToken: string, title: string, _body: string, _data?: Record<string, unknown>) {
+  private async sendFcmPush(
+    fcmToken: string,
+    title: string,
+    _body: string,
+    _data?: Record<string, unknown>,
+  ) {
     this.logger.log(`[FCM Push] → Token ${fcmToken.slice(0, 10)}... | Title: ${title}`);
     // Integration with Firebase Admin SDK:
     // await admin.messaging().send({ token: fcmToken, notification: { title, body }, data });

@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
+import { PayoutStatus, User } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
 import { RequestWithdrawalDto } from './dto/payout.dto';
-import { User, PayoutStatus } from '@prisma/client';
 
 @Injectable()
 export class PayoutsService {
@@ -74,7 +75,9 @@ export class PayoutsService {
             processedAt: new Date(),
           },
         });
-        this.logger.log(`Auto statement generated for Shipper ${shipper.id}: ${shipper.walletCash}đ`);
+        this.logger.log(
+          `Auto statement generated for Shipper ${shipper.id}: ${shipper.walletCash}đ`,
+        );
       }
     }
   }

@@ -1,21 +1,21 @@
-import { IsString, IsNotEmpty, IsObject, IsOptional } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
 
 export class SendNotificationDto {
   @ApiProperty({ example: 'user-id-123' })
   @IsString()
   @IsNotEmpty()
-  userId: string;
+  userId!: string;
 
   @ApiProperty({ example: 'Đơn hàng mới' })
   @IsString()
   @IsNotEmpty()
-  title: string;
+  title!: string;
 
   @ApiProperty({ example: 'Đơn hàng #12345 đã được xác nhận' })
   @IsString()
   @IsNotEmpty()
-  body: string;
+  body!: string;
 
   @ApiPropertyOptional({ example: 'order_update' })
   @IsOptional()

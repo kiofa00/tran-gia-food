@@ -1,20 +1,24 @@
 import {
-  Injectable, BadRequestException, NotFoundException, ForbiddenException, Logger,
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { CreateOrderDto, CancelOrderDto } from './dto/order.dto';
-import { User, OrderStatus, OrderType, UserRole, PaymentStatus } from '@prisma/client';
+import { OrderStatus, OrderType, PaymentStatus, Prisma, User, UserRole } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
+import { CancelOrderDto, CreateOrderDto } from './dto/order.dto';
 
 @Injectable()
 export class OrdersService {
-  private readonly logger = new Logger(OrdersService.name);
-
   constructor(
     private prisma: PrismaService,
     private eventEmitter: EventEmitter2,
   ) {}
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   async createOrder(customer: User, dto: CreateOrderDto) {
     const restaurant = await this.prisma.restaurant.findUnique({
       where: { id: dto.restaurantId },
@@ -24,14 +28,16 @@ export class OrdersService {
 
     // 1. Calculate items subtotal
     let subtotal = 0;
-    const orderItemData = [];
+    const orderItemData: Prisma.OrderItemCreateManyOrderInput[] = [];
 
     for (const itemInput of dto.items) {
       const menuItem = await this.prisma.menuItem.findUnique({
         where: { id: itemInput.itemId },
       });
       if (!menuItem || !menuItem.isAvailable) {
-        throw new BadRequestException(`Món ${menuItem?.name ?? itemInput.itemId} hiện không khả dụng`);
+        throw new BadRequestException(
+          `Món ${menuItem?.name ?? itemInput.itemId} hiện không khả dụng`,
+        );
       }
       const itemTotal = menuItem.price * itemInput.quantity;
       subtotal += itemTotal;
@@ -56,8 +62,10 @@ export class OrdersService {
 
       // Distance calculation (Haversine formula in km)
       distanceKm = this.calculateDistance(
-        restaurant.lat, restaurant.lng,
-        dto.deliveryLat, dto.deliveryLng,
+        restaurant.lat,
+        restaurant.lng,
+        dto.deliveryLat,
+        dto.deliveryLng,
       );
 
       if (distanceKm > restaurant.radiusKm) {
@@ -97,36 +105,43 @@ export class OrdersService {
     const totalAmount = Math.max(0, subtotal + shipFee - discountAmount);
 
     // 4. Create Order Transaction
-    const order = await this.prisma.order.create({
-      data: {
-        customerId: customer.id,
-        restaurantId: restaurant.id,
-        orderType: dto.orderType,
-        status: OrderStatus.pending,
-        subtotal,
-        shipFee,
-        discountAmount,
-        platformFee,
-        totalAmount,
-        paymentMethod: dto.paymentMethod,
-        paymentStatus: PaymentStatus.pending,
-        voucherId,
-        deliveryAddress: dto.deliveryAddress,
-        deliveryLat: dto.deliveryLat,
-        deliveryLng: dto.deliveryLng,
-        distanceKm,
-        note: dto.note,
-        items: {
-          createMany: {
-            data: orderItemData,
+    let order: Prisma.OrderGetPayload<{ include: { items: true; restaurant: true } }>;
+
+    try {
+      order = await this.prisma.order.create({
+        data: {
+          customerId: customer.id,
+          restaurantId: restaurant.id,
+          orderType: dto.orderType,
+          status: OrderStatus.pending,
+          subtotal,
+          shipFee,
+          discountAmount,
+          platformFee,
+          totalAmount,
+          paymentMethod: dto.paymentMethod,
+          paymentStatus: PaymentStatus.pending,
+          voucherId,
+          deliveryAddress: dto.deliveryAddress,
+          deliveryLat: dto.deliveryLat,
+          deliveryLng: dto.deliveryLng,
+          distanceKm,
+          note: dto.note,
+          items: {
+            createMany: {
+              data: orderItemData,
+            },
           },
         },
-      },
-      include: {
-        items: true,
-        restaurant: true,
-      },
-    });
+        include: {
+          items: true,
+          restaurant: true,
+        },
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown DB error';
+      throw new InternalServerErrorException(`Không thể tạo đơn hàng: ${message}`);
+    }
 
     // 5. Trigger notifications & auto-assign events
     this.eventEmitter.emit('order.created', order);
@@ -139,7 +154,11 @@ export class OrdersService {
     if (!order) throw new NotFoundException('Đơn hàng không tồn tại');
 
     // Only allow customer to cancel if status is PENDING
-    if (order.customerId !== user.id && user.role !== UserRole.admin && user.role !== UserRole.restaurant) {
+    if (
+      order.customerId !== user.id &&
+      user.role !== UserRole.admin &&
+      user.role !== UserRole.restaurant
+    ) {
       throw new ForbiddenException('Bạn không có quyền hủy đơn hàng này');
     }
 
@@ -159,11 +178,11 @@ export class OrdersService {
     return updatedOrder;
   }
 
-  async updateOrderStatus(user: User, orderId: string, status: OrderStatus) {
+  async updateOrderStatus(_user: User, orderId: string, status: OrderStatus) {
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });
     if (!order) throw new NotFoundException('Đơn hàng không tồn tại');
 
-    const updateData: any = { status };
+    const updateData: Prisma.OrderUpdateInput = { status };
     if (status === OrderStatus.delivered) updateData.deliveredAt = new Date();
     if (status === OrderStatus.completed) {
       updateData.completedAt = new Date();
@@ -238,8 +257,10 @@ export class OrdersService {
     const dLon = (lon2 - lon1) * (Math.PI / 180);
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      Math.cos(lat1 * (Math.PI / 180)) *
+        Math.cos(lat2 * (Math.PI / 180)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }

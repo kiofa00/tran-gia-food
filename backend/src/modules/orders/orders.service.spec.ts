@@ -1,9 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { OrdersService } from './orders.service';
-import { PrismaService } from '../../prisma/prisma.service';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { BadRequestException } from '@nestjs/common';
-import { OrderType, PaymentMethod, OrderStatus } from '@prisma/client';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Test, TestingModule } from '@nestjs/testing';
+import { OrderStatus, OrderType, PaymentMethod, User } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
+import { OrdersService } from './orders.service';
 
 describe('OrdersService', () => {
   let service: OrdersService;
@@ -42,7 +43,7 @@ describe('OrdersService', () => {
         lat: 10.7769,
         lng: 106.7009,
         radiusKm: 10,
-        platformFeeRate: 0.20,
+        platformFeeRate: 0.2,
       });
 
       mockPrismaService.menuItem.findUnique.mockResolvedValue({
@@ -60,15 +61,15 @@ describe('OrdersService', () => {
         status: OrderStatus.pending,
       });
 
-      const customer = { id: 'cust-1' } as any;
+      const customer = { id: 'cust-1' } as unknown as User;
 
       const result = await service.createOrder(customer, {
         restaurantId: 'rest-1',
         orderType: OrderType.delivery,
         paymentMethod: PaymentMethod.cash,
         items: [{ itemId: 'item-1', quantity: 2 }],
-        deliveryLat: 10.7800,
-        deliveryLng: 106.7050,
+        deliveryLat: 10.78,
+        deliveryLng: 106.705,
       });
 
       expect(result.id).toBe('order-123');
@@ -82,7 +83,7 @@ describe('OrdersService', () => {
       });
 
       await expect(
-        service.createOrder({ id: 'cust-1' } as any, {
+        service.createOrder({ id: 'cust-1' } as unknown as User, {
           restaurantId: 'rest-1',
           orderType: OrderType.pickup,
           paymentMethod: PaymentMethod.cash,
@@ -106,9 +107,13 @@ describe('OrdersService', () => {
         cancelReason: 'Đổi ý',
       });
 
-      const result = await service.cancelOrder({ id: 'cust-1', role: 'customer' } as any, 'order-123', {
-        reason: 'Đổi ý',
-      });
+      const result = await service.cancelOrder(
+        { id: 'cust-1', role: 'customer' } as unknown as User,
+        'order-123',
+        {
+          reason: 'Đổi ý',
+        },
+      );
 
       expect(result.status).toBe(OrderStatus.cancelled);
       expect(mockEventEmitter.emit).toHaveBeenCalledWith('order.cancelled', expect.any(Object));

@@ -1,20 +1,25 @@
-import '@ant-design/v5-patch-for-react-19';
-import './globals.css';
 import React from 'react';
-import { ConfigProvider } from 'antd';
+
 import { AntdRegistry } from '@ant-design/nextjs-registry';
-import { Header } from '../components/Header';
-import { Footer } from '../components/Footer';
-import { adminDesignTokens } from '../theme/tokens';
-import { QueryProvider } from '../providers/QueryProvider';
+import '@ant-design/v5-patch-for-react-19';
+import { ConfigProvider } from 'antd';
+
+import { Footer } from '@/components/Footer';
+import { Header } from '@/components/Header';
+import { QueryProvider } from '@/providers/QueryProvider';
+import { adminDesignTokens } from '@/theme/tokens';
+
+import './globals.css';
 
 if (typeof window !== 'undefined') {
   const origWarn = console.warn;
+
   console.warn = (...args: unknown[]) => {
     if (typeof args[0] === 'string' && args[0].includes('[antd: compatible]')) return;
     origWarn(...args);
   };
   const origError = console.error;
+
   console.error = (...args: unknown[]) => {
     if (typeof args[0] === 'string' && args[0].includes('[antd: compatible]')) return;
     origError(...args);
@@ -36,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               theme={{
                 token: {
                   colorPrimary: adminDesignTokens.colors.primary,
-                  borderRadius: 8,
+                  borderRadius: adminDesignTokens.borderRadiusAntd,
                 },
               }}
             >
@@ -99,7 +104,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                       padding: 4px 11px !important;
                     }
                     .table-filter-toolbar .filter-search-input input {
-                      font-size: 13px !important;
+                      font-size: ${adminDesignTokens.typography['body'][0]} !important;
                       height: 28px !important;
                     }
                     .table-filter-toolbar .filter-select-group {
@@ -117,7 +122,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                       height: 36px !important;
                       display: flex !important;
                       align-items: center !important;
-                      font-size: 13px !important;
+                      font-size: ${adminDesignTokens.typography['body'][0]} !important;
                     }
                   }
                 `}</style>

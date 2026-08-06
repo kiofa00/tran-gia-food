@@ -1,10 +1,9 @@
-import {
-  Injectable, NotFoundException, ForbiddenException, Logger,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { User } from '@prisma/client';
+
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateRestaurantDto, UpdateRestaurantDto } from './dto/restaurant.dto';
-import { User } from '@prisma/client';
-import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class RestaurantsService {
@@ -25,7 +24,7 @@ export class RestaurantsService {
     const effectiveRadius = Math.min(radiusKm, systemRadius);
 
     // Using Haversine formula in raw SQL for distance filtering
-    const restaurants = await this.prisma.$queryRaw<any[]>`
+    const restaurants = await this.prisma.$queryRaw<Record<string, unknown>[]>`
       SELECT r.*,
         (6371 * acos(
           cos(radians(${lat})) * cos(radians(r.lat)) *
@@ -113,11 +112,14 @@ export class RestaurantsService {
     try {
       const now = new Date();
       const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-      const dayKey = dayNames[now.getDay()];
+      const dayKey = dayNames[now.getDay()]!;
       const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
       const restaurants = await this.prisma.restaurant.findMany({
-        where: { isManualOverride: false, openingHours: { not: null } },
+        where: {
+          isManualOverride: false,
+          openingHours: { not: null as unknown as import('@prisma/client').Prisma.InputJsonValue },
+        },
       });
 
       for (const restaurant of restaurants) {
@@ -132,7 +134,9 @@ export class RestaurantsService {
             where: { id: restaurant.id },
             data: { isOpen: shouldBeOpen },
           });
-          this.logger.debug(`Restaurant ${restaurant.name}: ${shouldBeOpen ? 'opened' : 'closed'} (auto)`);
+          this.logger.debug(
+            `Restaurant ${restaurant.name}: ${shouldBeOpen ? 'opened' : 'closed'} (auto)`,
+          );
         }
       }
     } catch {
@@ -144,7 +148,7 @@ export class RestaurantsService {
   // Peak Hour: Auto shrink radius
   // ──────────────────────────────────────────
 
-  @Cron('0 11,17 * * *')  // Run at 11:00 and 17:00
+  @Cron('0 11,17 * * *') // Run at 11:00 and 17:00
   async shrinkRadiusPeakHour() {
     const config = await this.prisma.appConfig.findUnique({
       where: { key: 'peak_radius_km' },
@@ -153,7 +157,7 @@ export class RestaurantsService {
     // This is read dynamically in findNearby, no DB update needed
   }
 
-  @Cron('0 13,19 * * *')  // Restore at 13:00 and 19:00
+  @Cron('0 13,19 * * *') // Restore at 13:00 and 19:00
   async restoreRadiusAfterPeak() {
     this.logger.log('Peak hour ended — radius restored');
   }

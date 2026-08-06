@@ -16,6 +16,7 @@ Admin duyệt cuối → Shipper trả phí đăng ký → Tài khoản kích ho
 ```
 
 ### Thông tin cần nộp khi đăng ký
+
 - CCCD / CMND (2 mặt)
 - Bằng lái xe (loại A1 / B1 / B2)
 - Ảnh selfie live (liveness check)
@@ -50,6 +51,7 @@ Lặp lại cho đến khi có shipper nhận
 ## ⚖️ Hệ Thống Phạt Shipper
 
 ### Tỉ lệ hủy đơn cao
+
 ```
 > 10% (trong 30 ngày):
   Lần 1: Cảnh báo + email thông báo
@@ -59,6 +61,7 @@ Lặp lại cho đến khi có shipper nhận
 ```
 
 ### Rating trung bình thấp
+
 ```
 < 3.5 sao / 5 (sau ít nhất 20 đánh giá):
   → Cảnh báo + yêu cầu cải thiện trong 30 ngày
@@ -66,6 +69,7 @@ Lặp lại cho đến khi có shipper nhận
 ```
 
 ### Giao hàng trễ thường xuyên
+
 ```
 Trễ > 30 phút so với ETA > 5 lần/tháng:
   → Ghi chú vào hồ sơ
@@ -73,13 +77,14 @@ Trễ > 30 phút so với ETA > 5 lần/tháng:
 ```
 
 ### Bảng penalty level
-| Level | Trạng thái | Hậu quả |
-|---|---|---|
-| 0 | Bình thường | Nhận đơn như thường |
-| 1 | Cảnh báo | Email thông báo |
-| 2 | Giảm ưu tiên | Xếp sau trong queue |
-| 3 | Tạm khóa 7 ngày | Không nhận được đơn |
-| 4 | Khóa vĩnh viễn | Cần Admin unlock |
+
+| Level | Trạng thái      | Hậu quả             |
+| ----- | --------------- | ------------------- |
+| 0     | Bình thường     | Nhận đơn như thường |
+| 1     | Cảnh báo        | Email thông báo     |
+| 2     | Giảm ưu tiên    | Xếp sau trong queue |
+| 3     | Tạm khóa 7 ngày | Không nhận được đơn |
+| 4     | Khóa vĩnh viễn  | Cần Admin unlock    |
 
 ---
 
@@ -101,5 +106,6 @@ Thứ Ba hàng tuần:
 ---
 
 ## 🔗 Xem Thêm
+
 - [Business logic & payout](./03-business-logic.md)
 - [Notifications](./09-notifications.md)

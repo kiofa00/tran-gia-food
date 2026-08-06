@@ -1,41 +1,48 @@
-import {
-  IsString, IsEnum, IsNumber, IsOptional, IsArray, ValidateNested, Min, IsNotEmpty,
-} from 'class-validator';
-import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { OrderType, PaymentMethod } from '@prisma/client';
+import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 
 export class OrderItemInputDto {
   @ApiProperty({ example: 'menu-item-id-123' })
   @IsString()
   @IsNotEmpty()
-  itemId: string;
+  itemId!: string;
 
   @ApiProperty({ example: 2 })
   @IsNumber()
   @Min(1)
-  quantity: number;
+  quantity!: number;
 }
 
 export class CreateOrderDto {
   @ApiProperty({ example: 'restaurant-id-123' })
   @IsString()
   @IsNotEmpty()
-  restaurantId: string;
+  restaurantId!: string;
 
   @ApiProperty({ enum: OrderType, example: OrderType.delivery })
   @IsEnum(OrderType)
-  orderType: OrderType;
+  orderType!: OrderType;
 
   @ApiProperty({ enum: PaymentMethod, example: PaymentMethod.momo })
   @IsEnum(PaymentMethod)
-  paymentMethod: PaymentMethod;
+  paymentMethod!: PaymentMethod;
 
   @ApiProperty({ type: [OrderItemInputDto] })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => OrderItemInputDto)
-  items: OrderItemInputDto[];
+  items!: OrderItemInputDto[];
 
   @ApiPropertyOptional({ example: 'VOUCHER20K' })
   @IsOptional()
@@ -67,5 +74,5 @@ export class CancelOrderDto {
   @ApiProperty({ example: 'Đặt nhầm món' })
   @IsString()
   @IsNotEmpty()
-  reason: string;
+  reason!: string;
 }

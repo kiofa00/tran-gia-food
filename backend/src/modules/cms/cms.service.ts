@@ -1,13 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { RedisService } from '../../redis/redis.service';
 import axios from 'axios';
+
+import { RedisService } from '../../redis/redis.service';
 import {
-  CmsBanner,
-  CmsTranslation,
   CmsAnnouncement,
+  CmsBanner,
   CmsFaq,
   CmsStatusResponse,
+  CmsTranslation,
 } from './types/cms.types';
 
 @Injectable()
@@ -27,21 +28,37 @@ export class CmsService {
     try {
       const cached = await this.redis.get(cacheKey);
       if (cached) return JSON.parse(cached);
-    } catch {}
+    } catch {
+      /* Redis cache miss or connection error */
+    }
 
     try {
       const res = await axios.get(`${this.cmsUrl}/api/banners`, { timeout: 3000 });
       const banners: CmsBanner[] = (res.data?.data || []).map((item: Record<string, unknown>) => ({
         id: (item.id as string | number) || `b_${Date.now()}`,
-        title: (item.attributes ? (item.attributes as Record<string, unknown>).title : item.title) as string || 'Banner',
-        imageUrl: (item.attributes ? (item.attributes as Record<string, unknown>).imageUrl : item.imageUrl) as string || '',
-        linkUrl: (item.attributes ? (item.attributes as Record<string, unknown>).targetUrl : item.linkUrl) as string || '',
-        isActive: (item.attributes ? (item.attributes as Record<string, unknown>).isActive : item.isActive) !== false,
+        title:
+          ((item.attributes
+            ? (item.attributes as Record<string, unknown>).title
+            : item.title) as string) || 'Banner',
+        imageUrl:
+          ((item.attributes
+            ? (item.attributes as Record<string, unknown>).imageUrl
+            : item.imageUrl) as string) || '',
+        linkUrl:
+          ((item.attributes
+            ? (item.attributes as Record<string, unknown>).targetUrl
+            : item.linkUrl) as string) || '',
+        isActive:
+          (item.attributes
+            ? (item.attributes as Record<string, unknown>).isActive
+            : item.isActive) !== false,
       }));
 
       try {
         await this.redis.set(cacheKey, JSON.stringify(banners), 300);
-      } catch {}
+      } catch {
+        /* Redis cache miss or connection error */
+      }
 
       return banners;
     } catch {
@@ -55,22 +72,43 @@ export class CmsService {
     try {
       const cached = await this.redis.get(cacheKey);
       if (cached) return JSON.parse(cached);
-    } catch {}
+    } catch {
+      /* Redis cache miss or connection error */
+    }
 
     try {
       const res = await axios.get(`${this.cmsUrl}/api/translations`, { timeout: 3000 });
-      const translations: CmsTranslation[] = (res.data?.data || []).map((item: Record<string, unknown>) => ({
-        id: (item.id as string | number) || `t_${Date.now()}`,
-        key: (item.attributes ? (item.attributes as Record<string, unknown>).key : item.key) as string || '',
-        vi: (item.attributes ? (item.attributes as Record<string, unknown>).vi : item.vi) as string || '',
-        en: (item.attributes ? (item.attributes as Record<string, unknown>).en : item.en) as string || '',
-        appTarget: (item.attributes ? (item.attributes as Record<string, unknown>).appTarget : item.appTarget) as string || 'ALL',
-        category: (item.attributes ? (item.attributes as Record<string, unknown>).category : item.category) as string || 'GENERAL',
-      }));
+      const translations: CmsTranslation[] = (res.data?.data || []).map(
+        (item: Record<string, unknown>) => ({
+          id: (item.id as string | number) || `t_${Date.now()}`,
+          key:
+            ((item.attributes
+              ? (item.attributes as Record<string, unknown>).key
+              : item.key) as string) || '',
+          vi:
+            ((item.attributes
+              ? (item.attributes as Record<string, unknown>).vi
+              : item.vi) as string) || '',
+          en:
+            ((item.attributes
+              ? (item.attributes as Record<string, unknown>).en
+              : item.en) as string) || '',
+          appTarget:
+            ((item.attributes
+              ? (item.attributes as Record<string, unknown>).appTarget
+              : item.appTarget) as string) || 'ALL',
+          category:
+            ((item.attributes
+              ? (item.attributes as Record<string, unknown>).category
+              : item.category) as string) || 'GENERAL',
+        }),
+      );
 
       try {
         await this.redis.set(cacheKey, JSON.stringify(translations), 300);
-      } catch {}
+      } catch {
+        /* Redis cache miss or connection error */
+      }
 
       return translations;
     } catch {

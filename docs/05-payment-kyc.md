@@ -3,16 +3,19 @@
 ## Phương Thức Thanh Toán
 
 ### MoMo / VNPay (online)
+
 - Tích hợp SDK, redirect sang cổng thanh toán
 - Webhook nhận xác nhận thanh toán → release đơn hàng
 - Refund tự động về ví MoMo/ngân hàng nếu quán hủy
 
 ### Ngân hàng liên kết
+
 - Hỗ trợ: Visa/Mastercard, ATM nội địa, VNPay QR
 - Liên kết qua eKYC (CCCD + Face ID)
 - Thanh toán 1-click sau khi đã liên kết
 
 ### Tiền mặt COD
+
 - Shipper thu tiền mặt từ khách khi giao hàng
 - Platform khấu trừ phí từ Cash Wallet của shipper
 - Chỉ áp dụng cho đơn Delivery
@@ -46,13 +49,13 @@ Layer 3 — Bảo mật giao dịch cao:
 
 ### Tính năng ví trong app
 
-| Tính năng | Mô tả |
-|---|---|
-| **Liên kết ngân hàng** | Visa/Mastercard, ATM nội địa, VNPay QR |
-| **Xác thực Face ID / PIN** | Giao dịch lớn, thêm thẻ mới |
-| **Nạp tiền vào ví app** | Qua ngân hàng, ATM, MoMo |
-| **Lịch sử giao dịch** | Tất cả giao dịch vào/ra |
-| **Hoàn tiền tự động** | Về ví app khi hủy đơn |
+| Tính năng                  | Mô tả                                  |
+| -------------------------- | -------------------------------------- |
+| **Liên kết ngân hàng**     | Visa/Mastercard, ATM nội địa, VNPay QR |
+| **Xác thực Face ID / PIN** | Giao dịch lớn, thêm thẻ mới            |
+| **Nạp tiền vào ví app**    | Qua ngân hàng, ATM, MoMo               |
+| **Lịch sử giao dịch**      | Tất cả giao dịch vào/ra                |
+| **Hoàn tiền tự động**      | Về ví app khi hủy đơn                  |
 
 ---
 
@@ -85,5 +88,6 @@ Thông báo khách: "Hoàn tiền đang xử lý"
 ---
 
 ## 🔗 Xem Thêm
+
 - [Business logic](./03-business-logic.md)
 - [Order flow](./02-order-flow.md)

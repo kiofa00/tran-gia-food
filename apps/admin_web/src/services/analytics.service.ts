@@ -45,6 +45,7 @@ export const analyticsService = {
     const res = await apiClient.get<AnalyticsResponse>('/admin/analytics', {
       params: { range },
     });
+
     return res.data;
   },
 };

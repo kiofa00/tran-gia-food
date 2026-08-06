@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
-import { fleetService } from '../services/fleet.service';
+﻿import { useQuery } from '@tanstack/react-query';
 
-import { QueryParams } from '../services/apiClient';
+import { QueryParams } from '@/services/apiClient';
+import { fleetService } from '@/services/fleet.service';
 
 export const FLEET_QUERY_KEYS = {
   all: ['fleet', 'shippers'],

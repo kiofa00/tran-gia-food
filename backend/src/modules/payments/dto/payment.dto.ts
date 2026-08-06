@@ -1,27 +1,27 @@
-import { IsString, IsNotEmpty, IsObject, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
 
 export class CreatePaymentUrlDto {
   @ApiProperty({ example: 'order-id-123' })
   @IsString()
   @IsNotEmpty()
-  orderId: string;
+  orderId!: string;
 }
 
 export class MoMoWebhookDto {
-  @IsString() partnerCode: string;
-  @IsString() orderId: string;
-  @IsString() requestId: string;
-  @IsString() amount: string;
-  @IsString() resultCode: string; // 0 = success
-  @IsString() message: string;
+  @IsString() partnerCode!: string;
+  @IsString() orderId!: string;
+  @IsString() requestId!: string;
+  @IsString() amount!: string;
+  @IsString() resultCode!: string; // 0 = success
+  @IsString() message!: string;
   @IsOptional() @IsObject() extraData?: Record<string, unknown>;
 }
 
 export class VNPayWebhookDto {
-  @IsString() vnp_TxnRef: string;
-  @IsString() vnp_Amount: string;
-  @IsString() vnp_ResponseCode: string; // '00' = success
-  @IsString() vnp_TransactionNo: string;
-  @IsString() vnp_BankCode: string;
+  @IsString() vnp_TxnRef!: string;
+  @IsString() vnp_Amount!: string;
+  @IsString() vnp_ResponseCode!: string; // '00' = success
+  @IsString() vnp_TransactionNo!: string;
+  @IsString() vnp_BankCode!: string;
 }

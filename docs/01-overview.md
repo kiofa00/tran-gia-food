@@ -8,12 +8,12 @@ Nền tảng giao đồ ăn tương tự GrabFood/ShopeeFood với 4 vai trò ng
 
 ## 👥 Các Bên Tham Gia (Actors)
 
-| Vai trò | Mô tả |
-|---|---|
-| **Customer** | Đặt đồ ăn, chọn pickup hoặc giao hàng, thanh toán, dùng voucher |
-| **Restaurant** | Quản lý menu, đơn hàng, xem doanh thu, tạo voucher |
-| **Shipper** | Nhận đơn giao hàng, tracking, quản lý ví thu nhập |
-| **Admin** | Quản lý toàn hệ thống, cấu hình % chia, duyệt tài khoản, phát hành voucher |
+| Vai trò        | Mô tả                                                                      |
+| -------------- | -------------------------------------------------------------------------- |
+| **Customer**   | Đặt đồ ăn, chọn pickup hoặc giao hàng, thanh toán, dùng voucher            |
+| **Restaurant** | Quản lý menu, đơn hàng, xem doanh thu, tạo voucher                         |
+| **Shipper**    | Nhận đơn giao hàng, tracking, quản lý ví thu nhập                          |
+| **Admin**      | Quản lý toàn hệ thống, cấu hình % chia, duyệt tài khoản, phát hành voucher |
 
 ---
 
@@ -48,6 +48,7 @@ Nền tảng giao đồ ăn tương tự GrabFood/ShopeeFood với 4 vai trò ng
 ## 📱 Tính Năng Theo Từng Vai Trò
 
 ### 🧑 Customer App
+
 - Đăng ký / đăng nhập (SĐT, Google, Apple, Facebook)
 - **Xác minh danh tính**: OTP, Face ID, CCCD (eKYC), liên kết ngân hàng
 - Xem danh sách quán trong **bán kính giới hạn** (động theo giờ cao điểm)
@@ -63,6 +64,7 @@ Nền tảng giao đồ ăn tương tự GrabFood/ShopeeFood với 4 vai trò ng
 - Lịch sử đơn hàng
 
 ### 🍽️ Restaurant App
+
 - Quản lý danh mục & menu (thêm, sửa, xóa món)
 - **Lịch mở/đóng cửa tự động** — đặt giờ mở cửa, hệ thống tự bật/tắt
 - Nhận & xác nhận đơn hàng (với âm thanh thông báo)
@@ -73,6 +75,7 @@ Nền tảng giao đồ ăn tương tự GrabFood/ShopeeFood với 4 vai trò ng
 - Chat với khách hàng (masked)
 
 ### 🚴 Shipper App
+
 - Đăng ký + eKYC (CCCD, bằng lái) qua 3rd party eKYC
 - Nộp phí đăng ký / nhận đồng phục
 - Bật/tắt trạng thái sẵn sàng nhận đơn
@@ -84,6 +87,7 @@ Nền tảng giao đồ ăn tương tự GrabFood/ShopeeFood với 4 vai trò ng
 - Chat / gọi với khách và quán (masked)
 
 ### 🛡️ Admin Dashboard (Web)
+
 - Quản lý tài khoản (duyệt quán, duyệt shipper + xem kết quả eKYC)
 - Cấu hình % hoa hồng (đồ ăn, ship)
 - Cấu hình bán kính giới hạn toàn hệ thống + tự động thu hẹp giờ cao điểm
@@ -95,6 +99,7 @@ Nền tảng giao đồ ăn tương tự GrabFood/ShopeeFood với 4 vai trò ng
 ---
 
 ## 🔗 Xem Thêm
+
 - [Luồng đặt hàng](./02-order-flow.md)
 - [Tech stack](./11-tech-stack.md)
 - [Cấu trúc monorepo](./15-monorepo.md)

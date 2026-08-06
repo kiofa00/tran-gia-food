@@ -3,6 +3,7 @@
 ## Logic Chia % Hoa Hồng
 
 ### Chia tiền đồ ăn
+
 ```
 Giá đồ ăn = 100.000đ
 Platform fee = 20%  (cấu hình bởi Admin)
@@ -12,6 +13,7 @@ Platform fee = 20%  (cấu hình bởi Admin)
 ```
 
 ### Chia tiền phí ship
+
 ```
 Phí ship = 25.000đ
 Shipper share = 85%  (cấu hình bởi Admin)
@@ -22,12 +24,14 @@ Platform share = 15%
 ```
 
 ### Tổng platform revenue từ 1 đơn
+
 ```
 Platform revenue = (food_subtotal × platform_food_rate%)
                  + (ship_fee × platform_ship_rate%)
 ```
 
 ### Voucher ảnh hưởng đến chia tiền
+
 ```
 Nếu voucher giảm 20.000đ:
   Trước voucher: đồ ăn = 100.000đ
@@ -46,10 +50,10 @@ Ai chịu voucher?
 
 ### 2 loại ví cho Shipper
 
-| Ví | Nguồn tiền | Khấu trừ | Rút tiền |
-|---|---|---|---|
-| **Cash Wallet (Ví tiền mặt)** | Cước ship, thưởng, tip | Không | ✅ Rút về ngân hàng bất cứ lúc nào |
-| **Account Wallet (Ví tài khoản)** | Tiền thưởng platform | Phí dịch vụ, phí hoạt động | ❌ Không rút trực tiếp |
+| Ví                                | Nguồn tiền             | Khấu trừ                   | Rút tiền                           |
+| --------------------------------- | ---------------------- | -------------------------- | ---------------------------------- |
+| **Cash Wallet (Ví tiền mặt)**     | Cước ship, thưởng, tip | Không                      | ✅ Rút về ngân hàng bất cứ lúc nào |
+| **Account Wallet (Ví tài khoản)** | Tiền thưởng platform   | Phí dịch vụ, phí hoạt động | ❌ Không rút trực tiếp             |
 
 ### Chu kỳ payout hàng tuần (Grab model)
 
@@ -68,15 +72,17 @@ Shipper rút tiền:
 ```
 
 ### Nội dung bản sao kê hàng tuần
-| Mục | Nguồn |
-|---|---|
-| Tổng tiền cước ship | Đơn Delivery hoàn thành |
-| Tiền thưởng / hỗ trợ | Thưởng từ platform |
-| Phí dịch vụ | Trừ vào Account Wallet |
-| Điều chỉnh / khấu trừ | Admin override |
-| Lịch sử lệnh rút | Cash Wallet → ngân hàng |
+
+| Mục                   | Nguồn                   |
+| --------------------- | ----------------------- |
+| Tổng tiền cước ship   | Đơn Delivery hoàn thành |
+| Tiền thưởng / hỗ trợ  | Thưởng từ platform      |
+| Phí dịch vụ           | Trừ vào Account Wallet  |
+| Điều chỉnh / khấu trừ | Admin override          |
+| Lịch sử lệnh rút      | Cash Wallet → ngân hàng |
 
 ### Xử lý đơn COD (tiền mặt)
+
 ```
 Shipper thu tiền mặt 100.000đ từ khách
       ↓
@@ -87,6 +93,7 @@ Thu nhập ròng của shipper = ship_fee × 85% (vào Cash Wallet)
 ```
 
 ### Payout cho Quán
+
 - Tương tự shipper — nhận tiền đồ ăn trừ phí platform mỗi tuần
 - Dashboard doanh thu theo ngày / tuần / tháng
 - Lệnh rút on-demand về tài khoản ngân hàng đã liên kết
@@ -94,6 +101,7 @@ Thu nhập ròng của shipper = ship_fee × 85% (vào Cash Wallet)
 ---
 
 ## 🔗 Xem Thêm
+
 - [Luồng đặt hàng](./02-order-flow.md)
 - [Thanh toán & KYC](./05-payment-kyc.md)
 - [Voucher system](./08-voucher.md)

@@ -39,6 +39,7 @@ packages/shared_ui/tokens/
 ## III. Sử Dụng Trong Giao Diện UI
 
 ### 1. Trong Flutter Apps (Customer / Shipper / Restaurant)
+
 - Sử dụng trực tiếp các token constants trong `AppColors`, `AppGradients`, `AppRadius`:
   ```dart
   import 'package:shared_ui/shared_ui.dart';
@@ -50,4 +51,5 @@ packages/shared_ui/tokens/
   ```
 
 ### 2. Trong Next.js Admin Web (`apps/admin_web`)
+
 - Tham chiếu các tokens trong `admin-web.json` để đồng bộ màu sắc thương hiệu `#FF6635` toàn hệ thống.

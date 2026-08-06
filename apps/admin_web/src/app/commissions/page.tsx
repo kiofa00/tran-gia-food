@@ -1,26 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Card, Table, Tag, Button, Row, Col, Statistic, Space, Typography, Badge, Empty, App, Skeleton, Input, Select } from 'antd';
+import { useState } from 'react';
+
 import {
   BankOutlined,
-  DollarOutlined,
-  ShoppingOutlined,
-  PercentageOutlined,
   CheckCircleOutlined,
+  DollarOutlined,
+  PercentageOutlined,
+  ShoppingOutlined,
   SyncOutlined,
-  SearchOutlined,
-  FilterOutlined,
 } from '@ant-design/icons';
-import { adminDesignTokens } from '../../theme/tokens';
-import { formatCurrency } from '../../utils/formatters';
-import { PageContainer, PageHeader, SearchFilterBox, DataTable } from '../../components';
+import { App, Button, Card, Col, Row, Skeleton, Statistic, Tag, Typography } from 'antd';
 
-const { Title, Text } = Typography;
-const { Option } = Select;
+import { DataTable, PageContainer, PageHeader, SearchFilterBox } from '@/components';
+import { useCommissionsQuery } from '@/hooks/useCommissions';
+import { adminDesignTokens } from '@/theme/tokens';
+import { CommissionRecord } from '@/types';
+import { formatCurrency } from '@/utils/formatters';
 
-import { CommissionRecord } from '../../types';
-import { useCommissionsQuery } from '../../hooks/useCommissions';
+const { Text } = Typography;
 
 export default function CommissionsPage() {
   const { message } = App.useApp();
@@ -32,19 +30,23 @@ export default function CommissionsPage() {
     status: statusFilter !== 'ALL' ? statusFilter : undefined,
   });
 
-  const rawList = Array.isArray(rawCommissions) ? rawCommissions : (rawCommissions?.data || []);
-  const commissions: CommissionRecord[] = rawList.map((item: Record<string, unknown>, idx: number) => ({
-    key: String(item.id || item.key || idx + 1),
-    orderId: String(item.orderId || `ORD-${item.id || idx + 1}`),
-    restaurantName: String(item.restaurantName || item.restaurant || 'Quán ăn'),
-    foodAmount: Number(item.foodAmount || item.totalFoodGmv) || 0,
-    shipAmount: Number(item.shipAmount || item.shipFee) || 0,
-    restaurantShare: Number(item.restaurantShare) || 0,
-    shipperShare: Number(item.shipperShare) || 0,
-    platformShare: Number(item.platformShare || item.platformCommission) || 0,
-    status: (item.status === 'PAID' || item.status === 'PROCESSED') ? 'PROCESSED' : 'PENDING',
-    createdAt: String(item.createdAt || ''),
-  }));
+  const rawList = Array.isArray(rawCommissions)
+    ? rawCommissions
+    : (rawCommissions as { data?: Record<string, unknown>[] })?.data || [];
+  const commissions: CommissionRecord[] = rawList.map(
+    (item: Record<string, unknown>, idx: number) => ({
+      key: String(item.id || item.key || idx + 1),
+      orderId: String(item.orderId || `ORD-${item.id || idx + 1}`),
+      restaurantName: String(item.restaurantName || item.restaurant || 'Quán ăn'),
+      foodAmount: Number(item.foodAmount || item.totalFoodGmv) || 0,
+      shipAmount: Number(item.shipAmount || item.shipFee) || 0,
+      restaurantShare: Number(item.restaurantShare) || 0,
+      shipperShare: Number(item.shipperShare) || 0,
+      platformShare: Number(item.platformShare || item.platformCommission) || 0,
+      status: item.status === 'PAID' || item.status === 'PROCESSED' ? 'PROCESSED' : 'PENDING',
+      createdAt: String(item.createdAt || ''),
+    }),
+  );
 
   const filteredCommissions = commissions.filter((item) => {
     const matchesSearch =
@@ -52,12 +54,22 @@ export default function CommissionsPage() {
       item.orderId.toLowerCase().includes(search.toLowerCase()) ||
       item.restaurantName.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === 'ALL' || item.status === statusFilter;
+
     return matchesSearch && matchesStatus;
   });
 
-  const totalPlatformCommission = filteredCommissions.reduce((sum, item) => sum + item.platformShare, 0);
-  const totalRestaurantRevenue = filteredCommissions.reduce((sum, item) => sum + item.restaurantShare, 0);
-  const totalShipperDelivery = filteredCommissions.reduce((sum, item) => sum + item.shipperShare, 0);
+  const totalPlatformCommission = filteredCommissions.reduce(
+    (sum, item) => sum + item.platformShare,
+    0,
+  );
+  const totalRestaurantRevenue = filteredCommissions.reduce(
+    (sum, item) => sum + item.restaurantShare,
+    0,
+  );
+  const totalShipperDelivery = filteredCommissions.reduce(
+    (sum, item) => sum + item.shipperShare,
+    0,
+  );
 
   const handleProcessPayout = () => {
     message.success('Đã hoàn tất quyết toán hoa hồng & giải ngân vào Ví đối tác thành công!');
@@ -70,15 +82,24 @@ export default function CommissionsPage() {
       key: 'orderId',
       width: 140,
       sorter: (a: CommissionRecord, b: CommissionRecord) => a.orderId.localeCompare(b.orderId),
-      render: (id: string) => <Text strong style={{ color: adminDesignTokens.colors.primary, whiteSpace: 'nowrap' }}>{id}</Text>,
+      render: (id: string) => (
+        <Text strong className="text-orange-500 whitespace-nowrap">
+          {id}
+        </Text>
+      ),
     },
     {
       title: 'Tên Quán Ăn',
       dataIndex: 'restaurantName',
       key: 'restaurantName',
       width: 200,
-      sorter: (a: CommissionRecord, b: CommissionRecord) => a.restaurantName.localeCompare(b.restaurantName),
-      render: (text: string) => <Text strong style={{ whiteSpace: 'nowrap' }}>{text}</Text>,
+      sorter: (a: CommissionRecord, b: CommissionRecord) =>
+        a.restaurantName.localeCompare(b.restaurantName),
+      render: (text: string) => (
+        <Text strong className="whitespace-nowrap">
+          {text}
+        </Text>
+      ),
     },
     {
       title: 'Tiền Món (GMV)',
@@ -86,7 +107,7 @@ export default function CommissionsPage() {
       key: 'foodAmount',
       width: 150,
       sorter: (a: CommissionRecord, b: CommissionRecord) => a.foodAmount - b.foodAmount,
-      render: (val: number) => <Text style={{ whiteSpace: 'nowrap' }}>{formatCurrency(val)}</Text>,
+      render: (val: number) => <Text className="whitespace-nowrap">{formatCurrency(val)}</Text>,
     },
     {
       title: 'Phí Ship',
@@ -94,7 +115,7 @@ export default function CommissionsPage() {
       key: 'shipAmount',
       width: 130,
       sorter: (a: CommissionRecord, b: CommissionRecord) => a.shipAmount - b.shipAmount,
-      render: (val: number) => <Text style={{ whiteSpace: 'nowrap' }}>{formatCurrency(val)}</Text>,
+      render: (val: number) => <Text className="whitespace-nowrap">{formatCurrency(val)}</Text>,
     },
     {
       title: 'Ví Quán (85%)',
@@ -102,7 +123,11 @@ export default function CommissionsPage() {
       key: 'restaurantShare',
       width: 150,
       sorter: (a: CommissionRecord, b: CommissionRecord) => a.restaurantShare - b.restaurantShare,
-      render: (val: number) => <Text style={{ color: '#52C41A', fontWeight: 600, whiteSpace: 'nowrap' }}>{formatCurrency(val)}</Text>,
+      render: (val: number) => (
+        <Text className="text-green-600 font-semibold whitespace-nowrap">
+          {formatCurrency(val)}
+        </Text>
+      ),
     },
     {
       title: 'Ví Shipper (100% Ship)',
@@ -110,7 +135,9 @@ export default function CommissionsPage() {
       key: 'shipperShare',
       width: 180,
       sorter: (a: CommissionRecord, b: CommissionRecord) => a.shipperShare - b.shipperShare,
-      render: (val: number) => <Text style={{ color: '#1890FF', fontWeight: 600, whiteSpace: 'nowrap' }}>{formatCurrency(val)}</Text>,
+      render: (val: number) => (
+        <Text className="text-blue-500 font-semibold whitespace-nowrap">{formatCurrency(val)}</Text>
+      ),
     },
     {
       title: 'Hoa Hồng Sàn (15%)',
@@ -118,7 +145,9 @@ export default function CommissionsPage() {
       key: 'platformShare',
       width: 170,
       sorter: (a: CommissionRecord, b: CommissionRecord) => a.platformShare - b.platformShare,
-      render: (val: number) => <Text className="text-orange-500 font-bold whitespace-nowrap">{formatCurrency(val)}</Text>,
+      render: (val: number) => (
+        <Text className="text-orange-500 font-bold whitespace-nowrap">{formatCurrency(val)}</Text>
+      ),
     },
     {
       title: 'Trạng Thái',
@@ -127,7 +156,11 @@ export default function CommissionsPage() {
       width: 140,
       sorter: (a: CommissionRecord, b: CommissionRecord) => a.status.localeCompare(b.status),
       render: (status: string) => (
-        <Tag color={status === 'PROCESSED' ? 'success' : 'warning'} icon={status === 'PROCESSED' ? <CheckCircleOutlined /> : <SyncOutlined spin />} className="whitespace-nowrap">
+        <Tag
+          color={status === 'PROCESSED' ? 'success' : 'warning'}
+          icon={status === 'PROCESSED' ? <CheckCircleOutlined /> : <SyncOutlined spin />}
+          className="whitespace-nowrap"
+        >
           {status === 'PROCESSED' ? 'Đã Giải Ngân' : 'Chờ Quyết Toán'}
         </Tag>
       ),
@@ -138,7 +171,11 @@ export default function CommissionsPage() {
       key: 'createdAt',
       width: 160,
       sorter: (a: CommissionRecord, b: CommissionRecord) => a.createdAt.localeCompare(b.createdAt),
-      render: (date: string) => <Text type="secondary" className="whitespace-nowrap">{date}</Text>,
+      render: (date: string) => (
+        <Text type="secondary" className="whitespace-nowrap">
+          {date}
+        </Text>
+      ),
     },
   ];
 
@@ -169,10 +206,19 @@ export default function CommissionsPage() {
               <Skeleton active paragraph={{ rows: 1 }} />
             ) : (
               <Statistic
-                title={<Text type="secondary"><PercentageOutlined className="text-orange-500 mr-2" />Tổng Phí Hoa Hồng Thu Được</Text>}
+                title={
+                  <Text type="secondary">
+                    <PercentageOutlined className="text-orange-500 mr-2" />
+                    Tổng Phí Hoa Hồng Thu Được
+                  </Text>
+                }
                 value={totalPlatformCommission}
                 formatter={(val) => formatCurrency(Number(val))}
-                valueStyle={{ color: '#f97316', fontWeight: 700, fontSize: 24 }}
+                valueStyle={{
+                  color: adminDesignTokens.colors.statOrange,
+                  fontWeight: adminDesignTokens.fontWeightBold,
+                  fontSize: adminDesignTokens.fontSizeXl,
+                }}
               />
             )}
           </Card>
@@ -183,10 +229,19 @@ export default function CommissionsPage() {
               <Skeleton active paragraph={{ rows: 1 }} />
             ) : (
               <Statistic
-                title={<Text type="secondary"><ShoppingOutlined className="text-green-600 mr-2" />Doanh Thu Chuyển Ví Quán</Text>}
+                title={
+                  <Text type="secondary">
+                    <ShoppingOutlined className="text-green-600 mr-2" />
+                    Doanh Thu Chuyển Ví Quán
+                  </Text>
+                }
                 value={totalRestaurantRevenue}
                 formatter={(val) => formatCurrency(Number(val))}
-                valueStyle={{ color: '#16a34a', fontWeight: 700, fontSize: 24 }}
+                valueStyle={{
+                  color: adminDesignTokens.colors.statGreen,
+                  fontWeight: adminDesignTokens.fontWeightBold,
+                  fontSize: adminDesignTokens.fontSizeXl,
+                }}
               />
             )}
           </Card>
@@ -197,10 +252,19 @@ export default function CommissionsPage() {
               <Skeleton active paragraph={{ rows: 1 }} />
             ) : (
               <Statistic
-                title={<Text type="secondary"><DollarOutlined className="text-blue-500 mr-2" />Phí Giao Hàng Thu Hộ Shipper</Text>}
+                title={
+                  <Text type="secondary">
+                    <DollarOutlined className="text-blue-500 mr-2" />
+                    Phí Giao Hàng Thu Hộ Shipper
+                  </Text>
+                }
                 value={totalShipperDelivery}
                 formatter={(val) => formatCurrency(Number(val))}
-                valueStyle={{ color: '#3b82f6', fontWeight: 700, fontSize: 24 }}
+                valueStyle={{
+                  color: adminDesignTokens.colors.statBlue,
+                  fontWeight: adminDesignTokens.fontWeightBold,
+                  fontSize: adminDesignTokens.fontSizeXl,
+                }}
               />
             )}
           </Card>
@@ -223,7 +287,11 @@ export default function CommissionsPage() {
       />
 
       {/* Commission Table */}
-      <Card title="📋 Bảng Chi Tiết Phân Bổ Hoa Hồng Đơn Hàng" variant="borderless" className="rounded-xl shadow-xs">
+      <Card
+        title="📋 Bảng Chi Tiết Phân Bổ Hoa Hồng Đơn Hàng"
+        variant="borderless"
+        className="rounded-xl shadow-xs"
+      >
         <DataTable<CommissionRecord>
           rowKey="key"
           columns={columns}

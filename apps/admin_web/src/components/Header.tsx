@@ -1,24 +1,25 @@
 'use client';
 
 import React, { useState } from 'react';
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Layout, Avatar, Dropdown, Space, Typography, Button, Drawer, Menu, Divider } from 'antd';
+
 import {
-  BellOutlined,
-  UserOutlined,
-  LogoutOutlined,
-  GlobalOutlined,
-  SettingOutlined,
-  MenuOutlined,
-  DashboardOutlined,
-  CarOutlined,
-  TagOutlined,
-  DollarOutlined,
   BarChartOutlined,
+  BellOutlined,
+  CarOutlined,
+  DashboardOutlined,
+  DollarOutlined,
   FileTextOutlined,
+  GlobalOutlined,
+  LogoutOutlined,
+  MenuOutlined,
+  SettingOutlined,
+  TagOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
-import { adminDesignTokens } from '../theme/tokens';
+import { Avatar, Button, Divider, Drawer, Dropdown, Layout, Menu, Space, Typography } from 'antd';
 
 const { Header: AntHeader } = Layout;
 const { Title, Text } = Typography;
@@ -28,7 +29,7 @@ interface HeaderProps {
   userName?: string;
 }
 
-export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
+export const Header: React.FC<HeaderProps> = ({ title: _title, userName }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const pathname = usePathname();
 
@@ -58,8 +59,16 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
     { key: '/', label: 'Dashboard', icon: <DashboardOutlined /> },
     { key: '/fleet', label: 'Đội Xe', icon: <CarOutlined /> },
     { key: '/vouchers', label: 'Mã Giảm Giá', icon: <TagOutlined /> },
-    { key: '/commissions', label: 'Hoa Hồng & Ví', icon: <DollarOutlined /> },
-    { key: '/analytics', label: 'Báo Cáo Financials', icon: <BarChartOutlined /> },
+    {
+      key: '/commissions',
+      label: 'Hoa Hồng & Ví',
+      icon: <DollarOutlined />,
+    },
+    {
+      key: '/analytics',
+      label: 'Báo Cáo Financials',
+      icon: <BarChartOutlined />,
+    },
     { key: '/cms', label: 'Quản Lý CMS', icon: <FileTextOutlined /> },
   ];
 
@@ -85,12 +94,15 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
           <div className="desktop-nav flex gap-2 ml-4">
             {navLinks.map((link) => {
               const isActive = pathname === link.key;
+
               return (
                 <Link key={link.key} href={link.key} prefetch={true} className="no-underline">
                   <Button
                     type={isActive ? 'primary' : 'text'}
                     icon={link.icon}
-                    className={`header-nav-btn ${isActive ? 'active bg-white/25 font-bold' : 'bg-transparent font-medium'} text-white rounded-lg border-none`}
+                    className={`header-nav-btn ${
+                      isActive ? 'active bg-white/25 font-bold' : 'bg-transparent font-medium'
+                    } text-white rounded-lg border-none`}
                   >
                     {link.label}
                   </Button>
@@ -123,10 +135,7 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
             <div className="desktop-nav">
               <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
                 <Space className="header-user-badge cursor-pointer">
-                  <Avatar
-                    className="bg-white text-orange-500 font-bold"
-                    icon={<UserOutlined />}
-                  />
+                  <Avatar className="bg-white text-orange-500 font-bold" icon={<UserOutlined />} />
                   <Text data-testid="user-greeting" className="text-white font-semibold">
                     {userName}
                   </Text>
@@ -152,8 +161,12 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
           <Space>
             <Avatar className="bg-orange-500 text-white" icon={<UserOutlined />} />
             <div>
-              <Text strong className="block">{userName || 'Admin'}</Text>
-              <Text type="secondary" className="text-xs">Quản trị viên hệ thống</Text>
+              <Text strong className="block">
+                {userName || 'Admin'}
+              </Text>
+              <Text type="secondary" className="text-xs">
+                Quản trị viên hệ thống
+              </Text>
             </div>
           </Space>
         }
@@ -169,7 +182,11 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
           items={navLinks.map((link) => ({
             key: link.key,
             icon: link.icon,
-            label: <Link href={link.key} onClick={() => setDrawerOpen(false)}>{link.label}</Link>,
+            label: (
+              <Link href={link.key} onClick={() => setDrawerOpen(false)}>
+                {link.label}
+              </Link>
+            ),
           }))}
         />
 

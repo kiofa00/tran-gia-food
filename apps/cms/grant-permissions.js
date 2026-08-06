@@ -15,25 +15,31 @@ async function main() {
   ];
 
   for (const action of actions) {
-    const existing = await client.query('SELECT id FROM up_permissions WHERE action = $1', [action]);
+    const existing = await client.query('SELECT id FROM up_permissions WHERE action = $1', [
+      action,
+    ]);
     let permId;
 
     if (existing.rows.length > 0) {
       permId = existing.rows[0].id;
     } else {
-      const ins = await client.query('INSERT INTO up_permissions (action) VALUES ($1) RETURNING id', [action]);
+      const ins = await client.query(
+        'INSERT INTO up_permissions (action) VALUES ($1) RETURNING id',
+        [action],
+      );
       permId = ins.rows[0].id;
     }
 
     const linkCheck = await client.query(
       'SELECT * FROM up_permissions_role_links WHERE permission_id = $1 AND role_id = 2',
-      [permId]
+      [permId],
     );
 
     if (linkCheck.rows.length === 0) {
-      await client.query('INSERT INTO up_permissions_role_links (permission_id, role_id) VALUES ($1, 2)', [
-        permId,
-      ]);
+      await client.query(
+        'INSERT INTO up_permissions_role_links (permission_id, role_id) VALUES ($1, 2)',
+        [permId],
+      );
     }
   }
 

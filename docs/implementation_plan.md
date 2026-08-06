@@ -2,12 +2,12 @@
 
 ## 👥 1. Các Bên Tham Gia (Actors)
 
-| Vai trò | Mô tả |
-|---|---|
-| **Customer** | Đặt đồ ăn, chọn pickup hoặc giao hàng, thanh toán, dùng voucher |
-| **Restaurant** | Quản lý menu, đơn hàng, xem doanh thu, tạo voucher |
-| **Shipper** | Nhận đơn giao hàng, tracking, quản lý ví thu nhập |
-| **Admin** | Quản lý toàn hệ thống, cấu hình % chia, duyệt tài khoản, phát hành voucher |
+| Vai trò        | Mô tả                                                                      |
+| -------------- | -------------------------------------------------------------------------- |
+| **Customer**   | Đặt đồ ăn, chọn pickup hoặc giao hàng, thanh toán, dùng voucher            |
+| **Restaurant** | Quản lý menu, đơn hàng, xem doanh thu, tạo voucher                         |
+| **Shipper**    | Nhận đơn giao hàng, tracking, quản lý ví thu nhập                          |
+| **Admin**      | Quản lý toàn hệ thống, cấu hình % chia, duyệt tài khoản, phát hành voucher |
 
 ---
 
@@ -42,6 +42,7 @@
 ## 📱 3. Tính Năng Theo Từng Vai Trò
 
 ### 🧑 Customer App
+
 - Đăng ký / đăng nhập (SĐT, Google, Apple)
 - **Xác minh danh tính**: OTP, Face ID, CCCD (eKYC), liên kết ngân hàng
 - Xem danh sách quán trong **bán kính giới hạn** (động theo giờ cao điểm)
@@ -57,6 +58,7 @@
 - Lịch sử đơn hàng
 
 ### 🍽️ Restaurant App / Dashboard
+
 - Quản lý danh mục & menu (thêm, sửa, xóa món)
 - **Lịch mở/đóng cửa tự động** — đặt giờ mở cửa, hệ thống tự bật/tắt
 - Nhận & xác nhận đơn hàng (với âm thanh thông báo)
@@ -66,6 +68,7 @@
 - Cấu hình bán kính phục vụ riêng (≤ bán kính hệ thống cho phép)
 
 ### 🚴 Shipper App
+
 - Đăng ký + eKYC (CCCD, bằng lái) qua **3rd party eKYC**
 - Nộp phí đăng ký / nhận đồng phục (theo dõi bởi Admin)
 - Bật/tắt trạng thái sẵn sàng nhận đơn
@@ -76,6 +79,7 @@
 - Xem lịch sử đơn, đánh giá, tỉ lệ hủy đơn
 
 ### 🛡️ Admin Dashboard (Web)
+
 - Quản lý tài khoản (duyệt quán, duyệt shipper + xem kết quả eKYC)
 - Cấu hình % hoa hồng (đồ ăn, ship)
 - Cấu hình bán kính giới hạn toàn hệ thống + tự động thu hẹp giờ cao điểm
@@ -89,6 +93,7 @@
 ## 💰 4. Logic Chia % Hoa Hồng
 
 ### 4.1 Chia tiền đồ ăn
+
 ```
 Giá đồ ăn = 100.000đ
 Platform fee = 20%  (cấu hình bởi Admin)
@@ -98,6 +103,7 @@ Platform fee = 20%  (cấu hình bởi Admin)
 ```
 
 ### 4.2 Chia tiền phí ship
+
 ```
 Phí ship = 25.000đ
 Shipper share = 85%
@@ -108,6 +114,7 @@ Platform share = 15%
 ```
 
 ### 4.3 Voucher ảnh hưởng đến chia tiền
+
 ```
 Nếu voucher giảm 20.000đ:
   Trước voucher: đồ ăn = 100.000đ
@@ -151,6 +158,7 @@ Customer đánh giá
 ```
 
 > **DELIVERED vs COMPLETED:**
+>
 > - `DELIVERED` = Shipper đã giao xong, chờ khách xác nhận
 > - `COMPLETED` = Khách xác nhận nhận hàng (hoặc auto sau 15 phút)
 > - Tiền được giải phóng (release) sau khi COMPLETED
@@ -173,6 +181,7 @@ Trạng thái đơn   Khách được hủy?   Hoàn tiền?
 ```
 
 ### Luồng hủy đơn
+
 ```
 Khách nhấn "Hủy đơn" (chỉ hiện nút khi PENDING)
       ↓
@@ -191,6 +200,7 @@ Nhà hàng nhận thông báo hủy
 ```
 
 ### Hủy đơn nhiều lần
+
 ```
 Nếu khách hủy > 5 đơn/tháng:
   → Hiển thị cảnh báo
@@ -224,19 +234,21 @@ Layer 3 — Bảo mật giao dịch:
 ```
 
 ### Tính năng ví trong app (Grab Wallet)
-| Tính năng | Mô tả |
-|---|---|
+
+| Tính năng              | Mô tả                                  |
+| ---------------------- | -------------------------------------- |
 | **Liên kết ngân hàng** | Visa/Mastercard, ATM nội địa, VNPay QR |
-| **Xác thực Face ID** | Thêm thẻ mới, giao dịch lớn |
-| **Nạp tiền vào ví** | Qua ngân hàng, ATM, MoMo |
-| **Lịch sử giao dịch** | Xem tất cả giao dịch vào/ra |
-| **Hoàn tiền** | Tự động về ví khi hủy đơn |
+| **Xác thực Face ID**   | Thêm thẻ mới, giao dịch lớn            |
+| **Nạp tiền vào ví**    | Qua ngân hàng, ATM, MoMo               |
+| **Lịch sử giao dịch**  | Xem tất cả giao dịch vào/ra            |
+| **Hoàn tiền**          | Tự động về ví khi hủy đơn              |
 
 ---
 
-## 💬 5d. Chat & Gọi Điện (Customer ↔ Shipper ↔ Quán) *(MỚI)*
+## 💬 5d. Chat & Gọi Điện (Customer ↔ Shipper ↔ Quán) _(MỚI)_
 
 ### Nguyên tắc bảo mật — Masked Number
+
 ```
 Khách gọi cho Shipper:
   Không dùng số thật của khách hay shipper
@@ -246,6 +258,7 @@ Khách gọi cho Shipper:
 ```
 
 ### In-app Chat
+
 ```
 Khách mở đơn đang giao → nhấn nút Chat
       ↓
@@ -259,6 +272,7 @@ Khách mở đơn đang giao → nhấn nút Chat
 ```
 
 ### In-app Call (Masked)
+
 ```
 Khách nhấn "Gọi Shipper"
       ↓
@@ -274,15 +288,16 @@ Hoặc: Gọi VOIP trong app (Agora / Twilio Voice SDK)
 
 ### Ai có thể chat / gọi ai?
 
-| Từ | Tới | Chat | Gọi |
-|---|---|---|---|
-| Customer | Shipper | ✅ (trong khi đơn đang giao) | ✅ (masked) |
-| Customer | Quán | ✅ (sau khi đặt) | ✅ (masked) |
-| Shipper | Customer | ✅ | ✅ (masked) |
-| Shipper | Quán | ✅ (khi đến lấy hàng) | ✅ (masked) |
-| Quán | Customer | ✅ | ✅ (masked) |
+| Từ       | Tới      | Chat                         | Gọi         |
+| -------- | -------- | ---------------------------- | ----------- |
+| Customer | Shipper  | ✅ (trong khi đơn đang giao) | ✅ (masked) |
+| Customer | Quán     | ✅ (sau khi đặt)             | ✅ (masked) |
+| Shipper  | Customer | ✅                           | ✅ (masked) |
+| Shipper  | Quán     | ✅ (khi đến lấy hàng)        | ✅ (masked) |
+| Quán     | Customer | ✅                           | ✅ (masked) |
 
 ### Giới hạn chat
+
 ```
 - Chỉ mở chat khi đơn đang active (CONFIRMED → DELIVERED)
 - Sau khi COMPLETED: Khóa chat, lưu lịch sử 30 ngày (admin có thể xem)
@@ -290,12 +305,13 @@ Hoặc: Gọi VOIP trong app (Agora / Twilio Voice SDK)
 ```
 
 ### Tech cho Chat & Call
-| Layer | Option 1 | Option 2 |
-|---|---|---|
-| **In-app Chat** | **Stream Chat SDK** (Flutter) | Socket.IO custom |
-| **Masked Call** | **Twilio Proxy** | Stringee (VN local) |
-| **VOIP in-app** | **Agora** | Twilio Voice |
-| **Lưu trữ chat** | **Firebase Realtime DB** | PostgreSQL |
+
+| Layer            | Option 1                      | Option 2            |
+| ---------------- | ----------------------------- | ------------------- |
+| **In-app Chat**  | **Stream Chat SDK** (Flutter) | Socket.IO custom    |
+| **Masked Call**  | **Twilio Proxy**              | Stringee (VN local) |
+| **VOIP in-app**  | **Agora**                     | Twilio Voice        |
+| **Lưu trữ chat** | **Firebase Realtime DB**      | PostgreSQL          |
 
 > 💡 **Gợi ý:** Dùng **Stringee** cho cả chat lẫn voice call — là giải pháp Việt Nam, hỗ trợ tốt, giá rẻ hơn Twilio, có sẵn Flutter SDK.
 
@@ -304,6 +320,7 @@ Hoặc: Gọi VOIP trong app (Agora / Twilio Voice SDK)
 ## 🗺️ 6. Google Maps & Bán Kính Giới Hạn
 
 ### Tính phí ship theo khoảng cách
+
 ```
 Phí ship = base_fee + (distance_km × rate_per_km)
 
@@ -335,14 +352,15 @@ Sau giờ cao điểm:
 - **Khách không thể chỉnh:** ✅ Đúng — chỉ Admin và Quán mới cấu hình được
 
 ### Google Maps tích hợp
-| Feature | API |
-|---|---|
-| Hiển thị bản đồ | Maps SDK for Flutter |
-| Tính khoảng cách thực | Distance Matrix API |
-| Tính phí ship | Distance Matrix API |
-| Tracking shipper real-time | Maps SDK + WebSocket |
-| Bán kính giới hạn | Geometry Library (Circle) |
-| Navigation cho shipper | Directions API |
+
+| Feature                    | API                       |
+| -------------------------- | ------------------------- |
+| Hiển thị bản đồ            | Maps SDK for Flutter      |
+| Tính khoảng cách thực      | Distance Matrix API       |
+| Tính phí ship              | Distance Matrix API       |
+| Tracking shipper real-time | Maps SDK + WebSocket      |
+| Bán kính giới hạn          | Geometry Library (Circle) |
+| Navigation cho shipper     | Directions API            |
 
 ---
 
@@ -366,11 +384,13 @@ Restaurant cũng có thể override thủ công:
 ## 💳 8. Thanh Toán
 
 ### MoMo / VNPay (online)
+
 - Tích hợp SDK, redirect thanh toán
 - Webhook nhận xác nhận → release đơn hàng
 - Refund nếu quán hủy
 
 ### Tiền mặt (COD)
+
 - Shipper thu tiền mặt từ khách
 - Grab model: Grab khấu trừ phần platform fee từ ví tiền mặt của shipper
 - Thu nhập ròng của shipper vào ví tiền mặt
@@ -380,12 +400,14 @@ Restaurant cũng có thể override thủ công:
 ## 💼 9. Hệ Thống Ví & Payout (Mô Hình Grab)
 
 ### 2 loại ví cho Shipper
-| Ví | Nguồn tiền | Khấu trừ | Rút tiền |
-|---|---|---|---|
-| **Ví tiền mặt** | Cước ship, thưởng, tip | Không | ✅ Rút về ngân hàng |
-| **Ví tài khoản** | Tiền thưởng platform | Phí dịch vụ, phí hoạt động | ❌ Không rút trực tiếp |
+
+| Ví               | Nguồn tiền             | Khấu trừ                   | Rút tiền               |
+| ---------------- | ---------------------- | -------------------------- | ---------------------- |
+| **Ví tiền mặt**  | Cước ship, thưởng, tip | Không                      | ✅ Rút về ngân hàng    |
+| **Ví tài khoản** | Tiền thưởng platform   | Phí dịch vụ, phí hoạt động | ❌ Không rút trực tiếp |
 
 ### Chu kỳ payout (theo Grab)
+
 ```
 Thứ Hai → Chủ Nhật: Shipper chạy đơn, thu nhập tích lũy vào ví
 
@@ -399,6 +421,7 @@ Shipper rút tiền:
 ```
 
 ### Bản sao kê hàng tuần bao gồm
+
 - Tổng tiền cước ship nhận được
 - Tiền thưởng / hỗ trợ
 - Phí sử dụng ứng dụng (trừ vào ví tài khoản)
@@ -406,6 +429,7 @@ Shipper rút tiền:
 - Lịch sử lệnh rút (đang xử lý / đã duyệt / từ chối)
 
 ### Payout cho Quán
+
 - Tương tự: nhận tiền đồ ăn trừ phí platform mỗi tuần
 - Dashboard xem doanh thu theo ngày / tuần / tháng
 
@@ -414,6 +438,7 @@ Shipper rút tiền:
 ## 🚴 10. Quản Lý Shipper
 
 ### Đăng ký & eKYC
+
 ```
 Shipper điền thông tin → Upload CCCD, bằng lái xe
       ↓
@@ -428,6 +453,7 @@ Admin duyệt cuối → Shipper trả phí đăng ký → Tài khoản kích ho
 ```
 
 ### Phân công đơn tự động
+
 ```
 Đơn hàng mới tạo
       ↓
@@ -441,6 +467,7 @@ Nếu từ chối / không phản hồi → gửi cho shipper tiếp theo
 ```
 
 ### Hệ thống phạt Shipper
+
 ```
 Tỉ lệ hủy đơn cao (> 10%):
   Cảnh báo lần 1 → Giảm ưu tiên nhận đơn
@@ -457,16 +484,18 @@ Giao hàng trễ thường xuyên:
 
 ---
 
-## 🎟️ 11. Hệ Thống Coupon / Voucher *(MỚI)*
+## 🎟️ 11. Hệ Thống Coupon / Voucher _(MỚI)_
 
 ### Phân loại voucher
-| Loại | Phát hành bởi | Ai chịu chi phí |
-|---|---|---|
-| **Platform voucher** | Admin | Platform |
-| **Restaurant voucher** | Quán | Quán (trừ vào phần của quán) |
-| **Shipper voucher** (free/giảm ship) | Admin / Quán | Platform hoặc Quán |
+
+| Loại                                 | Phát hành bởi | Ai chịu chi phí              |
+| ------------------------------------ | ------------- | ---------------------------- |
+| **Platform voucher**                 | Admin         | Platform                     |
+| **Restaurant voucher**               | Quán          | Quán (trừ vào phần của quán) |
+| **Shipper voucher** (free/giảm ship) | Admin / Quán  | Platform hoặc Quán           |
 
 ### Các kiểu giảm giá
+
 ```
 1. Giảm % tổng đơn       → VD: Giảm 15% (tối đa 30.000đ)
 2. Giảm tiền cố định      → VD: Giảm 20.000đ
@@ -476,6 +505,7 @@ Giao hàng trễ thường xuyên:
 ```
 
 ### Điều kiện áp dụng voucher
+
 ```
 - Đơn tối thiểu: Ví dụ áp dụng khi order ≥ 50.000đ
 - Thời hạn: Từ ngày → đến ngày
@@ -487,6 +517,7 @@ Giao hàng trễ thường xuyên:
 ```
 
 ### Luồng dùng voucher
+
 ```
 Customer nhập mã voucher ở màn giỏ hàng
       ↓
@@ -505,6 +536,7 @@ Invalid → Hiển thị lý do lỗi rõ ràng
 ```
 
 ### Database Voucher
+
 ```
 Vouchers
   id, code, type (platform/restaurant), discount_type,
@@ -519,56 +551,62 @@ VoucherUsages
 
 ---
 
-## 🔔 12. Hệ Thống Notification *(MỚI)*
+## 🔔 12. Hệ Thống Notification _(MỚI)_
 
 ### Kênh thông báo
-| Kênh | Công nghệ | Dùng khi |
-|---|---|---|
+
+| Kênh                  | Công nghệ                      | Dùng khi                      |
+| --------------------- | ------------------------------ | ----------------------------- |
 | **Push Notification** | Firebase Cloud Messaging (FCM) | Thông báo real-time trong app |
-| **Email** | SendGrid / Nodemailer | Sao kê, xác nhận, marketing |
-| **In-app Alert** | WebSocket / local | Thông báo khi đang dùng app |
+| **Email**             | SendGrid / Nodemailer          | Sao kê, xác nhận, marketing   |
+| **In-app Alert**      | WebSocket / local              | Thông báo khi đang dùng app   |
 
 ### Thông báo theo từng vai trò
 
 #### 📲 Customer
-| Sự kiện | Push | Email |
-|---|---|---|
-| Đặt hàng thành công | ✅ | ✅ |
-| Quán xác nhận đơn | ✅ | - |
-| Shipper nhận đơn | ✅ | - |
-| Shipper đang đến | ✅ | - |
-| Giao hàng thành công | ✅ | ✅ |
-| Quán hủy đơn | ✅ | ✅ |
-| Voucher mới | ✅ | ✅ |
-| Khuyến mãi từ quán yêu thích | ✅ | - |
+
+| Sự kiện                      | Push | Email |
+| ---------------------------- | ---- | ----- |
+| Đặt hàng thành công          | ✅   | ✅    |
+| Quán xác nhận đơn            | ✅   | -     |
+| Shipper nhận đơn             | ✅   | -     |
+| Shipper đang đến             | ✅   | -     |
+| Giao hàng thành công         | ✅   | ✅    |
+| Quán hủy đơn                 | ✅   | ✅    |
+| Voucher mới                  | ✅   | ✅    |
+| Khuyến mãi từ quán yêu thích | ✅   | -     |
 
 #### 📲 Restaurant
-| Sự kiện | Push | Email |
-|---|---|---|
-| Đơn hàng mới | ✅ (âm thanh) | - |
-| Shipper đến lấy hàng | ✅ | - |
-| Sao kê doanh thu hàng tuần | - | ✅ |
-| Tài khoản được duyệt | ✅ | ✅ |
-| Payout thành công | ✅ | ✅ |
+
+| Sự kiện                    | Push          | Email |
+| -------------------------- | ------------- | ----- |
+| Đơn hàng mới               | ✅ (âm thanh) | -     |
+| Shipper đến lấy hàng       | ✅            | -     |
+| Sao kê doanh thu hàng tuần | -             | ✅    |
+| Tài khoản được duyệt       | ✅            | ✅    |
+| Payout thành công          | ✅            | ✅    |
 
 #### 📲 Shipper
-| Sự kiện | Push | Email |
-|---|---|---|
-| Đơn hàng mới gần đây | ✅ | - |
-| Đơn bị hủy | ✅ | - |
-| Bị cảnh báo phạt | ✅ | ✅ |
-| Sao kê thu nhập hàng tuần | - | ✅ |
-| Payout thành công | ✅ | ✅ |
-| Tài khoản được duyệt | ✅ | ✅ |
+
+| Sự kiện                   | Push | Email |
+| ------------------------- | ---- | ----- |
+| Đơn hàng mới gần đây      | ✅   | -     |
+| Đơn bị hủy                | ✅   | -     |
+| Bị cảnh báo phạt          | ✅   | ✅    |
+| Sao kê thu nhập hàng tuần | -    | ✅    |
+| Payout thành công         | ✅   | ✅    |
+| Tài khoản được duyệt      | ✅   | ✅    |
 
 #### 📲 Admin
-| Sự kiện | Push | Email |
-|---|---|---|
-| Shipper mới cần duyệt | ✅ | ✅ |
-| Quán mới cần duyệt | ✅ | ✅ |
-| Báo cáo doanh thu hàng tuần | - | ✅ |
+
+| Sự kiện                     | Push | Email |
+| --------------------------- | ---- | ----- |
+| Shipper mới cần duyệt       | ✅   | ✅    |
+| Quán mới cần duyệt          | ✅   | ✅    |
+| Báo cáo doanh thu hàng tuần | -    | ✅    |
 
 ### Template Email mẫu
+
 ```
 [Đặt hàng thành công]
   Tiêu đề: Đơn hàng #12345 đã được xác nhận 🎉
@@ -584,6 +622,7 @@ VoucherUsages
 ```
 
 ### Notification Service Architecture
+
 ```
 Backend emit event → Notification Service
       ↓
@@ -632,43 +671,47 @@ Reviews             → id, order_id, customer_id, restaurant_rating, shipper_ra
 ## 🔧 14. Tech Stack
 
 ### Mobile Apps (3 app riêng biệt — Android + iOS song song)
-| Layer | Tech |
-|---|---|
-| Framework | **Flutter** (code 1 lần → Android + iOS) |
-| State Management | **Riverpod** |
-| Maps | **google_maps_flutter** |
-| Real-time tracking | **Socket.IO** client |
-| HTTP | **Dio** |
-| Push Notification | **Firebase Cloud Messaging** |
-| Local Storage | **Hive** |
-| eKYC | SDK của VNPT eKYC / FPT.AI |
+
+| Layer              | Tech                                     |
+| ------------------ | ---------------------------------------- |
+| Framework          | **Flutter** (code 1 lần → Android + iOS) |
+| State Management   | **Riverpod**                             |
+| Maps               | **google_maps_flutter**                  |
+| Real-time tracking | **Socket.IO** client                     |
+| HTTP               | **Dio**                                  |
+| Push Notification  | **Firebase Cloud Messaging**             |
+| Local Storage      | **Hive**                                 |
+| eKYC               | SDK của VNPT eKYC / FPT.AI               |
 
 ### Backend
-| Layer | Tech |
-|---|---|
-| Runtime | **Node.js** |
-| Framework | **NestJS** |
-| Database | **PostgreSQL** + **Redis** |
-| Real-time | **Socket.IO** |
-| Email | **SendGrid** |
-| Push Notification | **Firebase Admin SDK** |
-| File Storage | **Firebase Storage** |
-| Maps | **Google Maps Platform APIs** |
-| Cron Jobs | **@nestjs/schedule** (giờ mở cửa, payout) |
+
+| Layer             | Tech                                      |
+| ----------------- | ----------------------------------------- |
+| Runtime           | **Node.js**                               |
+| Framework         | **NestJS**                                |
+| Database          | **PostgreSQL** + **Redis**                |
+| Real-time         | **Socket.IO**                             |
+| Email             | **SendGrid**                              |
+| Push Notification | **Firebase Admin SDK**                    |
+| File Storage      | **Firebase Storage**                      |
+| Maps              | **Google Maps Platform APIs**             |
+| Cron Jobs         | **@nestjs/schedule** (giờ mở cửa, payout) |
 
 ### Admin Dashboard
-| Layer | Tech |
-|---|---|
-| Framework | **Next.js** (React) |
-| UI | **Ant Design** |
-| Charts | **Recharts** |
-| Maps | **Google Maps JS API** |
+
+| Layer     | Tech                   |
+| --------- | ---------------------- |
+| Framework | **Next.js** (React)    |
+| UI        | **Ant Design**         |
+| Charts    | **Recharts**           |
+| Maps      | **Google Maps JS API** |
 
 ---
 
 ## 🛣️ 15. Lộ Trình Phát Triển
 
 ### Phase 1 — MVP (2-3 tháng)
+
 - [ ] Auth (Customer, Restaurant, Admin)
 - [ ] Quản lý menu cơ bản
 - [ ] Đặt hàng Pickup
@@ -677,6 +720,7 @@ Reviews             → id, order_id, customer_id, restaurant_rating, shipper_ra
 - [ ] Push notification cơ bản
 
 ### Phase 2 — Delivery + Shipper (2 tháng)
+
 - [ ] Đăng ký Shipper + eKYC tích hợp
 - [ ] Phân công đơn tự động
 - [ ] Google Maps tracking real-time
@@ -685,6 +729,7 @@ Reviews             → id, order_id, customer_id, restaurant_rating, shipper_ra
 - [ ] Hệ thống phạt Shipper
 
 ### Phase 3 — Payment + Commission (1 tháng)
+
 - [ ] Tích hợp MoMo / VNPay
 - [ ] Hệ thống chia % tự động
 - [ ] Ví 2 loại cho Shipper
@@ -692,12 +737,14 @@ Reviews             → id, order_id, customer_id, restaurant_rating, shipper_ra
 - [ ] Email sao kê
 
 ### Phase 4 — Voucher + Notification (1 tháng)
+
 - [ ] Hệ thống coupon/voucher đầy đủ
 - [ ] Email notification theo template
 - [ ] Lịch sử thông báo trong app
 - [ ] Marketing voucher từ Admin
 
 ### Phase 5 — Polish (1 tháng)
+
 - [ ] Đánh giá & review
 - [ ] Analytics dashboard Admin
 - [ ] Tối ưu UX / hiệu năng

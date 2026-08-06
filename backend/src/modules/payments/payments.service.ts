@@ -1,17 +1,14 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { PaymentMethod, PaymentStatus } from '@prisma/client';
+
 import { PrismaService } from '../../prisma/prisma.service';
-import { ConfigService } from '@nestjs/config';
 import { CreatePaymentUrlDto, MoMoWebhookDto, VNPayWebhookDto } from './dto/payment.dto';
-import { PaymentStatus, PaymentMethod } from '@prisma/client';
 
 @Injectable()
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
 
-  constructor(
-    private prisma: PrismaService,
-    private config: ConfigService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   async createPaymentUrl(dto: CreatePaymentUrlDto) {
     const order = await this.prisma.order.findUnique({ where: { id: dto.orderId } });
@@ -90,7 +87,9 @@ export class PaymentsService {
   }
 
   async handleVNPayWebhook(dto: VNPayWebhookDto) {
-    this.logger.log(`Received VNPay Webhook for order ${dto.vnp_TxnRef}: responseCode=${dto.vnp_ResponseCode}`);
+    this.logger.log(
+      `Received VNPay Webhook for order ${dto.vnp_TxnRef}: responseCode=${dto.vnp_ResponseCode}`,
+    );
 
     const status = dto.vnp_ResponseCode === '00' ? PaymentStatus.paid : PaymentStatus.failed;
 

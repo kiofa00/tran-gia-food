@@ -1,5 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { adminService } from '../services/admin.service';
+﻿import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
+import { adminService } from '@/services/admin.service';
 
 export const ADMIN_QUERY_KEYS = {
   overview: ['admin', 'overview'],
@@ -27,8 +28,12 @@ export function useVerifyShipperKycMutation() {
     mutationFn: ({ id, action }: { id: string; action: 'approve' | 'reject' }) =>
       adminService.verifyShipperKyc(id, action),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.pendingShippers });
-      queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.overview });
+      queryClient.invalidateQueries({
+        queryKey: ADMIN_QUERY_KEYS.pendingShippers,
+      });
+      queryClient.invalidateQueries({
+        queryKey: ADMIN_QUERY_KEYS.overview,
+      });
     },
   });
 }

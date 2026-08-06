@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Patch, Body, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
-import { AdminService } from './admin.service';
-import { QueryOptions, CreateVoucherDto } from './types/admin.types';
-import { UpdateKycStatusDto, UpdateAppConfigDto, PenalizeShipperDto } from './dto/admin.dto';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+
 import { Public } from '../../common/decorators/public.decorator';
+import { AdminService } from './admin.service';
+import { PenalizeShipperDto, UpdateAppConfigDto, UpdateKycStatusDto } from './dto/admin.dto';
+import { CreateVoucherDto, QueryOptions } from './types/admin.types';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -49,7 +50,9 @@ export class AdminController {
 
   @Public()
   @Get('vouchers')
-  @ApiOperation({ summary: '[Admin] Danh sách vouchers (Hỗ trợ sort, filter, pagination, max item limit)' })
+  @ApiOperation({
+    summary: '[Admin] Danh sách vouchers (Hỗ trợ sort, filter, pagination, max item limit)',
+  })
   getVouchers(@Query() query: QueryOptions) {
     return this.adminService.getVouchers(query);
   }
@@ -70,7 +73,9 @@ export class AdminController {
 
   @Public()
   @Get('commissions')
-  @ApiOperation({ summary: '[Admin] Bảng phân bổ hoa hồng (Hỗ trợ sort, filter, pagination, max item limit)' })
+  @ApiOperation({
+    summary: '[Admin] Bảng phân bổ hoa hồng (Hỗ trợ sort, filter, pagination, max item limit)',
+  })
   getCommissions(@Query() query: QueryOptions) {
     return this.adminService.getCommissionsBreakdown(query);
   }
@@ -84,7 +89,10 @@ export class AdminController {
 
   @Public()
   @Get('fleet')
-  @ApiOperation({ summary: '[Admin] Dữ liệu vị trí đội xe shipper (Hỗ trợ sort, filter, pagination, max item limit)' })
+  @ApiOperation({
+    summary:
+      '[Admin] Dữ liệu vị trí đội xe shipper (Hỗ trợ sort, filter, pagination, max item limit)',
+  })
   getFleet(@Query() query: QueryOptions) {
     return this.adminService.getFleetData(query);
   }

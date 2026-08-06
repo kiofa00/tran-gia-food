@@ -24,6 +24,7 @@ Hệ thống **Tran Gia Food** được xây dựng nhằm cung cấp một nề
 ## 📱 2. 4 Ứng Dụng Trong Hệ Sinh Thái
 
 ### 🧑 1. Ứng Dụng Khách Hàng (Customer App)
+
 - **Tìm kiếm đồ ăn nhanh chóng**: Tìm món ăn theo từ khóa, danh mục, đánh giá hoặc khoảng cách gần nhất.
 - **Áp dụng Mã giảm giá (Voucher)**: Chọn mã giảm giá toàn sàn hoặc từ chính quán ăn để tiết kiệm chi phí.
 - **Linh hoạt hình thức nhận hàng**: Chọn **Giao tận nơi** hoặc **Tự đến lấy (Pickup)** tại quán.
@@ -31,18 +32,21 @@ Hệ thống **Tran Gia Food** được xây dựng nhằm cung cấp một nề
 - **Liên lạc bảo mật (Ẩn số điện thoại)**: Chat hoặc Gọi điện với tài xế và quán ăn mà không sợ bị lộ số điện thoại cá nhân.
 
 ### 🍽️ 2. Ứng Dụng Nhà Hàng (Restaurant App & Web)
+
 - **Quản lý Thực đơn (Menu)**: Dễ dàng thêm món mới, cập nhật giá, hình ảnh hoặc tạm ẩn món khi hết hàng.
 - **Nhận đơn tự động**: Âm thanh chuông báo tức thì khi có đơn hàng mới.
 - **Lịch mở cửa tự động**: Đặt giờ mở/đóng cửa theo ngày trong tuần, hệ thống tự động bật/tắt đúng giờ.
 - **Báo cáo doanh thu minh bạch**: Xem chi tiết doanh thu thực nhận, số đơn đã bán và % phí dịch vụ.
 
 ### 🚴 3. Ứng Dụng Tài Xế (Shipper App)
+
 - **Nhận đơn thông minh**: Tự động nhận đề xuất đơn hàng gần vị trí đứng trong vòng 60 giây.
 - **Định vị & Dẫn đường chuẩn xác**: Tích hợp bản đồ chỉ đường từ Nhà hàng đến tận nhà Khách hàng.
 - **Quản lý Ví thu nhập**: Phân định rõ ràng Tiền mặt thu hộ và Tiền cước ship thực nhận.
 - **Rút tiền tiện lợi**: Tự động sao kê và hỗ trợ rút tiền về ngân hàng hàng tuần.
 
 ### 🛡️ 4. Trang Quản Trị Hệ Thống (Admin Web Dashboard)
+
 - **Bản đồ giám sát toàn hệ thống**: Theo dõi vị trí các tài xế đang hoạt động và mật độ đơn hàng.
 - **Duyệt đối tác**: Kiểm tra thông tin đăng ký của Nhà hàng và Tài xế mới.
 - **Tạo chương trình Khuyến mãi**: Phát hành các mã giảm giá, chiến dịch Marketing toàn sàn.

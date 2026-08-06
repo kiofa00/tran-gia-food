@@ -1,4 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { Prisma } from '@prisma/client';
+
 import { PrismaService } from './prisma.service';
 
 describe('Database Integration & Schema Tests', () => {
@@ -33,10 +35,14 @@ describe('Database Integration & Schema Tests', () => {
         .mockResolvedValueOnce({ id: 'u1', phone: '+84901234567' })
         .mockRejectedValueOnce(new Error('Unique constraint failed on the fields: (`phone`)'));
 
-      await prisma.user.create({ data: { phone: '+84901234567' } as any });
+      await prisma.user.create({
+        data: { phone: '+84901234567' } as unknown as Prisma.UserCreateInput,
+      });
 
       await expect(
-        prisma.user.create({ data: { phone: '+84901234567' } as any }),
+        prisma.user.create({
+          data: { phone: '+84901234567' } as unknown as Prisma.UserCreateInput,
+        }),
       ).rejects.toThrow('Unique constraint failed');
     });
   });
@@ -48,12 +54,12 @@ describe('Database Integration & Schema Tests', () => {
         { id: 'r2', name: 'Bún Chả', distance_km: 3.2 },
       ]);
 
-      const results = await prisma.$queryRaw`
+      const results = await prisma.$queryRaw<{ distance_km: number }[]>`
         SELECT r.* FROM restaurants r WHERE distance_km <= 10
       `;
 
       expect(results).toHaveLength(2);
-      expect(results[0].distance_km).toBeLessThan(results[1].distance_km);
+      expect(results[0]!.distance_km).toBeLessThan(results[1]!.distance_km);
     });
   });
 });

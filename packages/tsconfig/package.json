@@ -1,0 +1,29 @@
+{
+  "name": "@trangia/tsconfig",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared TypeScript configurations for the Tran Gia Food monorepo",
+  "files": [
+    "base.json",
+    "nextjs.json",
+    "node.json"
+  ],
+  "exports": {
+    "./base": "./base.json",
+    "./nextjs": "./nextjs.json",
+    "./node": "./node.json"
+  },
+  "typesVersions": {
+    "*": {
+      "base": [
+        "./base.json"
+      ],
+      "nextjs": [
+        "./nextjs.json"
+      ],
+      "node": [
+        "./node.json"
+      ]
+    }
+  }
+}

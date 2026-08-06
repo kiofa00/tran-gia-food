@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
+
 import Link from 'next/link';
-import { Result, Button, Card, Space, Typography, Collapse } from 'antd';
-import { ReloadOutlined, HomeOutlined, WarningOutlined, CodeOutlined } from '@ant-design/icons';
+
+import { CodeOutlined, HomeOutlined, ReloadOutlined, WarningOutlined } from '@ant-design/icons';
+import { Button, Card, Collapse, Result, Space, Typography } from 'antd';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -24,7 +26,11 @@ export default function ErrorBoundary({
       <Card className="max-w-2xl w-full text-center rounded-xl shadow-lg border border-gray-200">
         <Result
           status="500"
-          title={<Title level={2} className="text-red-500 m-0">500 — Hệ Thống Gặp Sự Cố Xử Lý</Title>}
+          title={
+            <Title level={2} className="text-red-500 m-0">
+              500 — Hệ Thống Gặp Sự Cố Xử Lý
+            </Title>
+          }
           subTitle={
             <Paragraph type="secondary" className="text-base mt-2">
               Rất tiếc! Đã có lỗi bất ngờ xảy ra trong quá trình xử lý giao diện Admin Web.
@@ -43,11 +49,7 @@ export default function ErrorBoundary({
                   Thử Tải Lại Trang
                 </Button>
                 <Link href="/">
-                  <Button
-                    size="large"
-                    icon={<HomeOutlined />}
-                    className="h-11 px-6 font-semibold"
-                  >
+                  <Button size="large" icon={<HomeOutlined />} className="h-11 px-6 font-semibold">
                     Về Trang Chủ Dashboard
                   </Button>
                 </Link>

@@ -16,6 +16,7 @@ export function formatDistance(distanceKm: number): string {
 /** Truncate long strings with ellipsis */
 export function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
+
   return `${text.slice(0, maxLength)}...`;
 }
 
@@ -23,7 +24,9 @@ export function truncateText(text: string, maxLength: number): string {
 export function formatDate(dateStr: string): string {
   if (!dateStr) return 'N/A';
   const parsed = dayjs(dateStr);
+
   if (!parsed.isValid()) return dateStr;
+
   return parsed.format('DD/MM/YYYY');
 }
 

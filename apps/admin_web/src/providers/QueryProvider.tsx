@@ -1,7 +1,8 @@
 'use client';
 
-import '@ant-design/v5-patch-for-react-19';
 import React, { useState } from 'react';
+
+import '@ant-design/v5-patch-for-react-19';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { App } from 'antd';
 

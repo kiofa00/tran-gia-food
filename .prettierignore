@@ -1,0 +1,33 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+dist
+build
+.next
+out
+coverage
+.turbo
+
+# Flutter
+**/.dart_tool
+**/build
+**/*.g.dart
+**/*.freezed.dart
+**/*.gen.dart
+pubspec.lock
+
+# Lock files (managed by package managers)
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Generated / binary
+*.min.js
+*.min.css
+*.map
+
+# Strapi CMS generated
+apps/cms/.cache
+apps/cms/public/uploads

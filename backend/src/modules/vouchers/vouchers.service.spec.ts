@@ -1,7 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { VouchersService } from './vouchers.service';
-import { PrismaService } from '../../prisma/prisma.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+
+import { PrismaService } from '../../prisma/prisma.service';
+import { VouchersService } from './vouchers.service';
 
 describe('VouchersService', () => {
   let service: VouchersService;
@@ -16,10 +17,7 @@ describe('VouchersService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        VouchersService,
-        { provide: PrismaService, useValue: mockPrismaService },
-      ],
+      providers: [VouchersService, { provide: PrismaService, useValue: mockPrismaService }],
     }).compile();
 
     service = module.get<VouchersService>(VouchersService);
@@ -61,17 +59,17 @@ describe('VouchersService', () => {
         validTo: new Date(now.getTime() + 10000),
       });
 
-      await expect(
-        service.validateVoucher({ code: 'BIGDEAL', subtotal: 150000 }),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.validateVoucher({ code: 'BIGDEAL', subtotal: 150000 })).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw NotFoundException if voucher code does not exist', async () => {
       mockPrismaService.voucher.findUnique.mockResolvedValue(null);
 
-      await expect(
-        service.validateVoucher({ code: 'INVALID', subtotal: 100000 }),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.validateVoucher({ code: 'INVALID', subtotal: 100000 })).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

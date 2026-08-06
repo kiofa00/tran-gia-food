@@ -1,8 +1,11 @@
-import { Injectable, ExecutionContext } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { ExecutionContext, Injectable, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { AuthGuard } from '@nestjs/passport';
 
 export const IS_PUBLIC_KEY = 'isPublic';
+
+/** Returns true if auth is explicitly disabled via DISABLE_AUTH=true env var (opt-in, dev only) */
+const isAuthDisabled = () => process.env['DISABLE_AUTH'] === 'true';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -11,9 +14,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   canActivate(context: ExecutionContext) {
-    // TẠM TẮT JWT GUARD ĐỂ TEST (Bật lại khi sẵn sàng Auth)
-    const disableAuth = process.env.DISABLE_AUTH !== 'false'; // Mặc định tạm tắt để test
-    if (disableAuth) return true;
+    // TẠM TẮT JWT GUARD ĐỂ TEST — đặt DISABLE_AUTH=true trong .env để bỏ qua auth
+    if (isAuthDisabled()) return true;
 
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
@@ -24,8 +26,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   handleRequest<TUser = unknown>(err: Error | null, user: TUser) {
-    if (process.env.DISABLE_AUTH !== 'false') {
-      return user || { id: 'test-user', role: 'admin' };
+    if (isAuthDisabled()) {
+      return user ?? null;
     }
     if (err || !user) {
       return null;
@@ -34,5 +36,4 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 }
 
-import { SetMetadata } from '@nestjs/common';
 export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);

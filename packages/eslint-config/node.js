@@ -1,5 +1,6 @@
-import { config as baseConfig } from './base.js';
 import sonarjs from 'eslint-plugin-sonarjs';
+
+import { config as baseConfig } from './base.js';
 
 /**
  * Strict ESLint configuration for NestJS backend services.

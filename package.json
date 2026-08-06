@@ -16,20 +16,17 @@
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "db:migrate": "pnpm --filter=backend run prisma:migrate",
+    "db:generate": "pnpm --filter=backend run prisma:generate",
     "db:seed": "pnpm --filter=backend run prisma:seed",
     "db:studio": "pnpm --filter=backend run prisma:studio",
-    "build": "pnpm -r run build",
-    "lint": "pnpm -r run lint",
-    "lint:check": "pnpm -r run lint:check",
-    "test": "pnpm -r run test",
-    "test:flutter": "melos test",
-    "test:all": "pnpm -r run test && melos test",
+    "fix": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md,yaml,yml}\" --ignore-unknown && pnpm --filter=!customer_app --filter=!shipper_app --filter=!restaurant_app --sequential --if-present run lint",
+    "check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md,yaml,yml}\" --ignore-unknown && pnpm --filter=!customer_app --filter=!shipper_app --filter=!restaurant_app --sequential --if-present run lint && pnpm --filter=customer_app --filter=shipper_app --filter=restaurant_app --sequential run lint",
+    "build": "pnpm --filter=!customer_app --filter=!shipper_app --filter=!restaurant_app --sequential --if-present run build && pnpm --filter=customer_app --filter=shipper_app --filter=restaurant_app --sequential run build",
+    "test": "pnpm -r run test && melos test",
     "clean": "pnpm -r run clean",
-    "melos:bootstrap": "melos bootstrap",
-    "melos:analyze": "melos analyze",
     "melos:gen": "melos gen"
   },
   "devDependencies": {
-    "turbo": "catalog:"
+    "prettier": "catalog:"
   }
 }

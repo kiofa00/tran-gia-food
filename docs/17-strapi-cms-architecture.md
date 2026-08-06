@@ -25,7 +25,9 @@
 ## 2. Danh Mục Quản Lý Nội Dung Toàn Diện (Content Types)
 
 ### A. Từ Điển Đa Ngôn Ngữ & Text Động (`api/translations`)
+
 Quản lý toàn bộ nhãn văn bản (Labels, Button Texts, Placeholders, Error Messages) của 4 ứng dụng:
+
 - `key`: String (vd: `home.search_placeholder`, `order.status_picking_up`)
 - `locale`: Enum (`vi`, `en`)
 - `appTarget`: Enum (`CUSTOMER`, `SHIPPER`, `RESTAURANT`, `ADMIN_WEB`, `ALL`)
@@ -33,6 +35,7 @@ Quản lý toàn bộ nhãn văn bản (Labels, Button Texts, Placeholders, Erro
 - `category`: String (Group danh mục: `ORDER`, `AUTH`, `PAYMENT`, `NAV`)
 
 ### B. Banner Marketing & Truyền Thông (`api/banners`)
+
 - `title`: String (Tên chiến dịch)
 - `imageUrl`: String (URL hình ảnh banner)
 - `targetUrl`: String (Deeplink hoặc mã voucher áp dụng)
@@ -43,6 +46,7 @@ Quản lý toàn bộ nhãn văn bản (Labels, Button Texts, Placeholders, Erro
 - `isActive`: Boolean
 
 ### C. Tin Tức & Thông Báo Hệ Thống (`api/announcements`)
+
 - `title`: String
 - `summary`: String (Tóm tắt hiển thị ở danh sách)
 - `content`: Rich Text / Markdown (Nội dung chi tiết có hình ảnh/định dạng)
@@ -51,6 +55,7 @@ Quản lý toàn bộ nhãn văn bản (Labels, Button Texts, Placeholders, Erro
 - `publishedAt`: DateTime
 
 ### D. Trung Tâm Hỗ Trợ FAQ & Hướng Dẫn Sử Dụng (`api/faq-items`)
+
 - `category`: Enum (`ORDERING`, `PAYMENT`, `DELIVERY`, `ACCOUNT`, `PARTNER`)
 - `targetApp`: Enum (`CUSTOMER`, `SHIPPER`, `RESTAURANT`)
 - `question`: String (Câu hỏi)
@@ -58,6 +63,7 @@ Quản lý toàn bộ nhãn văn bản (Labels, Button Texts, Placeholders, Erro
 - `displayOrder`: Integer
 
 ### E. Điều Khoản & Chính Sách Pháp Lý (`api/legal-policies`)
+
 - `policyType`: Enum (`TERMS_OF_SERVICE`, `PRIVACY_POLICY`, `REFUND_POLICY`, `SHIPPER_RULES`)
 - `version`: String (vd: `v2.1`)
 - `content`: Rich Text (Nội dung pháp lý đầy đủ)

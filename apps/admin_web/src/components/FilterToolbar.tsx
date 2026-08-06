@@ -1,6 +1,7 @@
 import React from 'react';
-import { Card, Row, Col, Input, Select, Space, Typography } from 'antd';
-import { SearchOutlined, FilterOutlined } from '@ant-design/icons';
+
+import { FilterOutlined, SearchOutlined } from '@ant-design/icons';
+import { Card, Col, Input, Row, Select, Space, Typography } from 'antd';
 
 const { Text } = Typography;
 const { Option } = Select;

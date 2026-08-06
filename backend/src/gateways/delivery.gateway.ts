@@ -1,14 +1,14 @@
+import { Logger } from '@nestjs/common';
 import {
-  WebSocketGateway,
-  WebSocketServer,
-  SubscribeMessage,
-  MessageBody,
   ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Logger } from '@nestjs/common';
 
 @WebSocketGateway({
   cors: {
@@ -18,7 +18,7 @@ import { Logger } from '@nestjs/common';
 })
 export class DeliveryGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
   private readonly logger = new Logger(DeliveryGateway.name);
 
@@ -31,10 +31,7 @@ export class DeliveryGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   @SubscribeMessage('join-order-room')
-  handleJoinOrderRoom(
-    @MessageBody() data: { orderId: string },
-    @ConnectedSocket() client: Socket,
-  ) {
+  handleJoinOrderRoom(@MessageBody() data: { orderId: string }, @ConnectedSocket() client: Socket) {
     client.join(`order-${data.orderId}`);
     this.logger.log(`Client ${client.id} joined room order-${data.orderId}`);
     return { event: 'joined-room', orderId: data.orderId };

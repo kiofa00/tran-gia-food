@@ -18,6 +18,7 @@ Phí tối đa (cap): 50.000đ (Admin cấu hình)
 ```
 
 ### Cách tính khoảng cách
+
 - Dùng **Google Distance Matrix API** — tính khoảng cách đường thực tế (không phải đường chim bay)
 - Tính từ: địa chỉ quán → địa chỉ giao hàng của khách
 
@@ -46,11 +47,13 @@ Sau giờ cao điểm:
 ```
 
 ### Ai có thể cấu hình?
+
 - **Admin**: Đặt `system_radius` và `peak_hour_radius`
 - **Restaurant**: Đặt `restaurant_radius` ≤ `system_radius`
 - **Customer**: ❌ Không được chỉnh — chỉ thấy kết quả
 
 ### Thông báo ngoài vùng
+
 ```
 Khi khách chọn địa chỉ ngoài vùng:
   → Ẩn quán đó khỏi danh sách kết quả
@@ -73,6 +76,7 @@ Cập nhật marker shipper trên Google Maps (animate smooth)
 ```
 
 ### Độ chính xác & tối ưu pin
+
 ```
 Khi shipper PICKING_UP / DELIVERING:
   → GPS update mỗi 3 giây (high accuracy)
@@ -85,21 +89,23 @@ Khi shipper idle (chờ đơn):
 
 ## 🗺️ Google Maps APIs Sử Dụng
 
-| Feature | API | Ghi chú |
-|---|---|---|
-| Hiển thị bản đồ | Maps SDK for Flutter | Customer + Shipper app |
-| Tính khoảng cách thực | Distance Matrix API | Tính phí ship |
-| Bán kính giới hạn | Geometry Library (Circle) | Hiển thị vùng phủ |
-| Navigation shipper | Directions API | Turn-by-turn |
-| Tracking real-time | Maps SDK + WebSocket | Live marker |
-| Geocoding địa chỉ | Geocoding API | Nhập địa chỉ → tọa độ |
+| Feature               | API                       | Ghi chú                |
+| --------------------- | ------------------------- | ---------------------- |
+| Hiển thị bản đồ       | Maps SDK for Flutter      | Customer + Shipper app |
+| Tính khoảng cách thực | Distance Matrix API       | Tính phí ship          |
+| Bán kính giới hạn     | Geometry Library (Circle) | Hiển thị vùng phủ      |
+| Navigation shipper    | Directions API            | Turn-by-turn           |
+| Tracking real-time    | Maps SDK + WebSocket      | Live marker            |
+| Geocoding địa chỉ     | Geocoding API             | Nhập địa chỉ → tọa độ  |
 
 ### Chi phí API cần lưu ý
+
 - Distance Matrix: $5/1000 requests → cache kết quả khi cùng tọa độ
 - Maps SDK: Miễn phí đến 28k map loads/tháng
 
 ---
 
 ## 🔗 Xem Thêm
+
 - [Tech stack](./11-tech-stack.md)
 - [Order flow](./02-order-flow.md)

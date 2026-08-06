@@ -1,15 +1,15 @@
 import {
-  PrismaClient,
-  UserRole,
+  DiscountType,
   KycStatus,
-  VehicleType,
   OrderStatus,
   OrderType,
+  OrderTypeFilter,
   PaymentMethod,
   PaymentStatus,
+  PrismaClient,
+  UserRole,
+  VehicleType,
   VoucherType,
-  DiscountType,
-  OrderTypeFilter,
 } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -55,8 +55,8 @@ async function main() {
       name: 'Lê Thu Thảo',
       role: UserRole.customer,
       address: '15 Lê Thánh Tôn, Bến Nghé, Quận 1, TP.HCM',
-      lat: 10.7780,
-      lng: 106.7020,
+      lat: 10.778,
+      lng: 106.702,
     },
   });
 
@@ -67,8 +67,8 @@ async function main() {
       name: 'Trần Minh Hoàng',
       role: UserRole.customer,
       address: '88 Nguyễn Thượng Hiền, Phường 5, Quận 3, TP.HCM',
-      lat: 10.7720,
-      lng: 106.6850,
+      lat: 10.772,
+      lng: 106.685,
     },
   });
 
@@ -140,8 +140,8 @@ async function main() {
       userId: shipperUser2.id,
       vehicleType: VehicleType.motorbike,
       vehiclePlate: '59X2-123.45',
-      lat: 10.7550,
-      lng: 106.6800,
+      lat: 10.755,
+      lng: 106.68,
       isActive: true,
       ekycStatus: KycStatus.pending,
       totalDeliveries: 85,
@@ -163,8 +163,8 @@ async function main() {
       userId: shipperUser3.id,
       vehicleType: VehicleType.motorbike,
       vehiclePlate: '59Z1-888.99',
-      lat: 10.7700,
-      lng: 106.6900,
+      lat: 10.77,
+      lng: 106.69,
       isActive: true,
       ekycStatus: KycStatus.verified,
       totalDeliveries: 310,
@@ -184,7 +184,8 @@ async function main() {
       lat: 10.7626,
       lng: 106.6822,
       phone: '+84911111111',
-      coverImageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop',
+      coverImageUrl:
+        'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop',
       isOpen: true,
       avgRating: 4.9,
       totalReviews: 350,
@@ -195,8 +196,18 @@ async function main() {
             sortOrder: 1,
             items: {
               create: [
-                { name: 'Cơm Tấm Sườn Cốt Lết Mật Ong', price: 65000, description: 'Sườn nướng thơm lừng kèm chả trứng nướng', imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400' },
-                { name: 'Cơm Tấm Sườn Bì Chả Trứng Ốp La', price: 79000, description: 'Đầy đủ topping chuẩn vị sà bì chưởng', imageUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400' },
+                {
+                  name: 'Cơm Tấm Sườn Cốt Lết Mật Ong',
+                  price: 65000,
+                  description: 'Sườn nướng thơm lừng kèm chả trứng nướng',
+                  imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400',
+                },
+                {
+                  name: 'Cơm Tấm Sườn Bì Chả Trứng Ốp La',
+                  price: 79000,
+                  description: 'Đầy đủ topping chuẩn vị sà bì chưởng',
+                  imageUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400',
+                },
               ],
             },
           },
@@ -206,7 +217,11 @@ async function main() {
             items: {
               create: [
                 { name: 'Trà Đá Khổ Qua Rừng', price: 10000, description: 'Mát lạnh thanh nhiệt' },
-                { name: 'Canh Khổ Qua Thịt Băm', price: 20000, description: 'Tô canh nóng hổi đậm đà' },
+                {
+                  name: 'Canh Khổ Qua Thịt Băm',
+                  price: 20000,
+                  description: 'Tô canh nóng hổi đậm đà',
+                },
               ],
             },
           },
@@ -225,7 +240,8 @@ async function main() {
       lat: 21.0182,
       lng: 105.8562,
       phone: '+84922222222',
-      coverImageUrl: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&auto=format&fit=crop',
+      coverImageUrl:
+        'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&auto=format&fit=crop',
       isOpen: true,
       avgRating: 4.8,
       totalReviews: 290,
@@ -236,8 +252,17 @@ async function main() {
             sortOrder: 1,
             items: {
               create: [
-                { name: 'Phở Bò Tái Lăn Đặc Biệt', price: 85000, description: 'Bò xào xèo lửa xanh hành hoa tươi thơm phức', imageUrl: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400' },
-                { name: 'Phở Nạm Gầu Bò', price: 75000, description: 'Nước dùng ninh xương 12 tiếng' },
+                {
+                  name: 'Phở Bò Tái Lăn Đặc Biệt',
+                  price: 85000,
+                  description: 'Bò xào xèo lửa xanh hành hoa tươi thơm phức',
+                  imageUrl: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400',
+                },
+                {
+                  name: 'Phở Nạm Gầu Bò',
+                  price: 75000,
+                  description: 'Nước dùng ninh xương 12 tiếng',
+                },
               ],
             },
           },
@@ -253,10 +278,11 @@ async function main() {
       name: 'Bánh Mì Huỳnh Hoa - Quận 1',
       description: 'Bánh mì ô môi siêu paté thịt nguội nổi tiếng bậc nhất Sài Gòn',
       address: '26 Lê Thị Riêng, Phường Bến Thành, Quận 1, TP.HCM',
-      lat: 10.7710,
-      lng: 106.6920,
+      lat: 10.771,
+      lng: 106.692,
       phone: '+84933333333',
-      coverImageUrl: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=800&auto=format&fit=crop',
+      coverImageUrl:
+        'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=800&auto=format&fit=crop',
       isOpen: true,
       avgRating: 4.9,
       totalReviews: 512,
@@ -267,7 +293,12 @@ async function main() {
             sortOrder: 1,
             items: {
               create: [
-                { name: 'Bánh Mì Đặc Biệt Đầy Đủ', price: 68000, description: 'Ổ bánh mì nén đầy paté bơ tươi và 5 loại thịt nguội', imageUrl: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=400' },
+                {
+                  name: 'Bánh Mì Đặc Biệt Đầy Đủ',
+                  price: 68000,
+                  description: 'Ổ bánh mì nén đầy paté bơ tươi và 5 loại thịt nguội',
+                  imageUrl: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=400',
+                },
               ],
             },
           },
@@ -332,14 +363,26 @@ async function main() {
       paymentStatus: PaymentStatus.paid,
       voucherId: voucher2.id,
       deliveryAddress: '15 Lê Thánh Tôn, Bến Nghé, Quận 1, TP.HCM',
-      deliveryLat: 10.7780,
-      deliveryLng: 106.7020,
+      deliveryLat: 10.778,
+      deliveryLng: 106.702,
       distanceKm: 2.5,
       completedAt: new Date('2026-08-05T14:20:00Z'),
       items: {
         create: [
-          { itemId: item1.id, itemName: item1.name, quantity: 1, unitPrice: 65000, totalPrice: 65000 },
-          { itemId: item2.id, itemName: item2.name, quantity: 1, unitPrice: 79000, totalPrice: 79000 },
+          {
+            itemId: item1.id,
+            itemName: item1.name,
+            quantity: 1,
+            unitPrice: 65000,
+            totalPrice: 65000,
+          },
+          {
+            itemId: item2.id,
+            itemName: item2.name,
+            quantity: 1,
+            unitPrice: 79000,
+            totalPrice: 79000,
+          },
         ],
       },
     },
@@ -385,7 +428,13 @@ async function main() {
       completedAt: new Date('2026-08-05T15:10:00Z'),
       items: {
         create: [
-          { itemId: rest2.categories[0].items[0].id, itemName: rest2.categories[0].items[0].name, quantity: 2, unitPrice: 85000, totalPrice: 170000 },
+          {
+            itemId: rest2.categories[0].items[0].id,
+            itemName: rest2.categories[0].items[0].name,
+            quantity: 2,
+            unitPrice: 85000,
+            totalPrice: 170000,
+          },
         ],
       },
     },

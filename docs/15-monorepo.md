@@ -2,12 +2,12 @@
 
 ## Tại Sao Monorepo?
 
-| | Monorepo | 4 Repo riêng |
-|---|---|---|
-| Chia sẻ code chung | ✅ Import trực tiếp | ❌ Phải publish package |
-| Thay đổi API → cập nhật client | ✅ 1 commit, thấy ngay | ❌ Phải sync 4 repo |
-| Quản lý | ✅ 1 git history | ❌ 4 CI/CD riêng |
-| Phù hợp team nhỏ | ✅ | ❌ |
+|                                | Monorepo               | 4 Repo riêng            |
+| ------------------------------ | ---------------------- | ----------------------- |
+| Chia sẻ code chung             | ✅ Import trực tiếp    | ❌ Phải publish package |
+| Thay đổi API → cập nhật client | ✅ 1 commit, thấy ngay | ❌ Phải sync 4 repo     |
+| Quản lý                        | ✅ 1 git history       | ❌ 4 CI/CD riêng        |
+| Phù hợp team nhỏ               | ✅                     | ❌                      |
 
 ---
 
@@ -199,6 +199,7 @@ type Order = components['schemas']['OrderDto'];
 ## 🚀 Quick Start
 
 ### Cài đặt lần đầu
+
 ```bash
 # 1. Cài melos & pnpm (nếu chưa có)
 dart pub global activate melos
@@ -208,23 +209,28 @@ npm i -g pnpm
 pnpm install
 
 # 3. Bootstrap tất cả Flutter packages
-pnpm melos:bootstrap
+pnpm melos:gen
 
 # 4. Khởi động PostgreSQL & Redis trong Docker
 docker compose -f backend/docker-compose.yml up -d
 
 # 5. Tạo các bảng trong Database (Prisma)
-pnpm --filter=backend prisma:migrate
+pnpm db:migrate && pnpm db:generate
+
+# 6. (Tuỳ chọn) Seed dữ liệu mẫu
+pnpm db:seed
 ```
 
 ### Chạy development
+
 ```bash
-# Chạy tất cả cùng lúc bằng pnpm + Turborepo
+# Chạy tất cả cùng lúc (NestJS + Next.js)
 pnpm dev
 
 # Hoặc chạy riêng lẻ từng ứng dụng:
 pnpm dev:backend   # NestJS Server (port 3000)
 pnpm dev:admin     # Next.js Admin (port 3001)
+pnpm dev:cms       # Strapi CMS (port 1337)
 
 # Chạy Flutter Client Apps (Customer / Shipper / Restaurant):
 cd apps/customer_app && flutter run
@@ -233,18 +239,23 @@ cd apps/restaurant_app && flutter run
 ```
 
 ### Quản lý Testing & Quality Assurance
+
 ```bash
-# Chạy Unit & Integration tests cho Web + Backend (26/26 tests PASS)
+# --- Local (trước khi commit) ---
+# Format code + ESLint fix tự động (JS/TS)
+pnpm fix
+
+# --- CI / pre-push ---
+# Kiểm tra format + lint toàn bộ (JS/TS + Flutter), không sửa file
+pnpm check
+
+# --- Tests ---
+# Chạy toàn bộ tests (JS/TS + Flutter)
 pnpm test
 
-# Chạy Flutter Unit & Widget tests
-pnpm test:flutter
-
-# Chạy 100% test toàn hệ thống (Web + Backend + Flutter)
-pnpm test:all
-
-# Kiểm tra cú pháp static code analysis
-pnpm lint
+# --- Build ---
+# Build production (JS/TS + Flutter)
+pnpm build
 
 # Xóa sạch cache & build outputs
 pnpm clean
@@ -255,14 +266,15 @@ pnpm clean
 ## 📦 Packages pubspec.yaml Mẫu
 
 ### shared_models/pubspec.yaml
+
 ```yaml
 name: shared_models
 description: Shared Dart models for Tran Gia Food apps
 version: 0.0.1
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
-  flutter: ">=3.16.0"
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.16.0'
 
 dependencies:
   flutter:
@@ -277,6 +289,7 @@ dev_dependencies:
 ```
 
 ### shared_ui/pubspec.yaml
+
 ```yaml
 name: shared_ui
 description: Shared UI components and design system
@@ -301,5 +314,6 @@ dependencies:
 ---
 
 ## 🔗 Xem Thêm
+
 - [Tech stack](./11-tech-stack.md)
 - [Roadmap](./14-roadmap.md)

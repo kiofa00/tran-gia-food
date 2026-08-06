@@ -1,9 +1,8 @@
-import {
-  Injectable, NotFoundException, BadRequestException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { User, UserRole } from '@prisma/client';
+
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateVoucherDto, ValidateVoucherDto } from './dto/voucher.dto';
-import { User, UserRole } from '@prisma/client';
 
 @Injectable()
 export class VouchersService {
@@ -56,7 +55,9 @@ export class VouchersService {
     }
 
     if (dto.subtotal < voucher.minOrderValue) {
-      throw new BadRequestException(`Đơn hàng phải từ ${voucher.minOrderValue.toLocaleString('vi-VN')}đ để áp dụng`);
+      throw new BadRequestException(
+        `Đơn hàng phải từ ${voucher.minOrderValue.toLocaleString('vi-VN')}đ để áp dụng`,
+      );
     }
 
     let discountAmount = 0;

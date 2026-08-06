@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { PrismaService } from '../../prisma/prisma.service';
 import { Order } from '@prisma/client';
+
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class CommissionsService {
@@ -18,8 +19,8 @@ export class CommissionsService {
     if (existing) return;
 
     // Rates (read from system AppConfig or calculated from order subtotal)
-    const platformFoodRate = order.subtotal > 0 ? (order.platformFee / order.subtotal) : 0.20;
-    
+    const platformFoodRate = order.subtotal > 0 ? order.platformFee / order.subtotal : 0.2;
+
     const shipFeeConfig = await this.prisma.appConfig?.findUnique({
       where: { key: 'platform_ship_fee_rate' },
     });
@@ -31,7 +32,7 @@ export class CommissionsService {
 
     const restaurantShare = foodAmount * (1 - platformFoodRate);
     const shipperShare = shipAmount * shipperShareRate;
-    const platformShare = (foodAmount * platformFoodRate) + (shipAmount * platformShipRate);
+    const platformShare = foodAmount * platformFoodRate + shipAmount * platformShipRate;
 
     // Record Commission Record
     await this.prisma.commission.create({

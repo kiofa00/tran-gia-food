@@ -1,7 +1,8 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
-import { CmsService } from './cms.service';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+
 import { Public } from '../../common/decorators/public.decorator';
+import { CmsService } from './cms.service';
 
 @ApiTags('cms')
 @Controller('cms')

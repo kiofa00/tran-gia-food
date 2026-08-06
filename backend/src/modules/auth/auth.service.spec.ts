@@ -1,10 +1,11 @@
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from './auth.service';
+
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { AuthService } from './auth.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -98,9 +99,9 @@ describe('AuthService', () => {
     it('should throw UnauthorizedException if OTP is invalid or expired', async () => {
       mockRedisService.getOtp.mockResolvedValue(null);
 
-      await expect(
-        service.verifyOtp({ phone: '0901234567', otp: '999999' }),
-      ).rejects.toThrow(UnauthorizedException);
+      await expect(service.verifyOtp({ phone: '0901234567', otp: '999999' })).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });

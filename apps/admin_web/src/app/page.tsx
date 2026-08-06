@@ -1,36 +1,54 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Card, Row, Col, Statistic, Typography, Table, Tag, Button, Space, Skeleton, Empty, App, Input, Select } from 'antd';
+import { useState } from 'react';
+
 import {
+  CarOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  CloseCircleOutlined,
   DollarOutlined,
+  ReloadOutlined,
   ShoppingOutlined,
   UserOutlined,
-  CarOutlined,
-  ReloadOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  ClockCircleOutlined,
-  SearchOutlined,
-  FilterOutlined,
 } from '@ant-design/icons';
-import { adminDesignTokens } from '../theme/tokens';
-import { mapKycStatus, mapVehicleType } from '../utils/formatters';
-import { VehicleBadge, PlateBadge, PageContainer, PageHeader, SearchFilterBox, DataTable } from '../components';
-import { useDashboardStatsQuery, usePendingShippersQuery, useVerifyShipperKycMutation } from '../hooks/useAdmin';
-import { DashboardOverviewStats } from '../services/admin.service';
-import { PendingShipperRecord } from '../types';
+import { App, Button, Card, Col, Row, Skeleton, Space, Statistic, Tag, Typography } from 'antd';
 
-const { Title, Text } = Typography;
-const { Option } = Select;
+import {
+  DataTable,
+  PageContainer,
+  PageHeader,
+  PlateBadge,
+  SearchFilterBox,
+  VehicleBadge,
+} from '@/components';
+import {
+  useDashboardStatsQuery,
+  usePendingShippersQuery,
+  useVerifyShipperKycMutation,
+} from '@/hooks/useAdmin';
+import { DashboardOverviewStats } from '@/services/admin.service';
+import { adminDesignTokens } from '@/theme/tokens';
+import { PendingShipperRecord } from '@/types';
+import { mapKycStatus, mapVehicleType } from '@/utils/formatters';
+
+const { Text } = Typography;
 
 export default function AdminDashboardPage() {
   const { message } = App.useApp();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
-  const { data: statsData, isLoading: statsLoading, refetch: refetchStats } = useDashboardStatsQuery();
-  const { data: rawShippersData, isLoading: shippersLoading, refetch: refetchShippers } = usePendingShippersQuery();
+  const {
+    data: statsData,
+    isLoading: statsLoading,
+    refetch: refetchStats,
+  } = useDashboardStatsQuery();
+  const {
+    data: rawShippersData,
+    isLoading: shippersLoading,
+    refetch: refetchShippers,
+  } = usePendingShippersQuery();
   const verifyKycMutation = useVerifyShipperKycMutation();
 
   const loading = statsLoading || shippersLoading;
@@ -45,20 +63,29 @@ export default function AdminDashboardPage() {
     totalShipGmv: 0,
   };
 
-  const pendingShippers: PendingShipperRecord[] = (rawShippersData || []).map((item, idx: number) => {
-    const rawStatus = (item.ekycStatus || item.kycStatus || item.status || 'PENDING').toUpperCase();
-    const normalizedStatus = (rawStatus === 'VERIFIED' || rawStatus === 'APPROVED') ? 'APPROVED' : rawStatus;
-    return {
-      key: item.id || String(idx + 1),
-      id: item.id || `S${idx + 1}`,
-      name: item.user?.name || item.name || '',
-      phone: item.user?.phone || item.phone || '',
-      vehicle: mapVehicleType(item.vehicle || item.vehicleType),
-      plate: item.plate || item.licensePlate || '',
-      status: normalizedStatus,
-      rawStatus,
-    };
-  });
+  const pendingShippers: PendingShipperRecord[] = (rawShippersData || []).map(
+    (item, idx: number) => {
+      const rawStatus = (
+        item.ekycStatus ||
+        item.kycStatus ||
+        item.status ||
+        'PENDING'
+      ).toUpperCase();
+      const normalizedStatus =
+        rawStatus === 'VERIFIED' || rawStatus === 'APPROVED' ? 'APPROVED' : rawStatus;
+
+      return {
+        key: item.id || String(idx + 1),
+        id: item.id || `S${idx + 1}`,
+        name: item.user?.name || item.name || '',
+        phone: item.user?.phone || item.phone || '',
+        vehicle: mapVehicleType(String(item.vehicle || item.vehicleType || '')),
+        plate: item.plate || item.licensePlate || '',
+        status: normalizedStatus,
+        rawStatus,
+      };
+    },
+  );
 
   const filteredPendingShippers = pendingShippers.filter((item: PendingShipperRecord) => {
     const matchesSearch =
@@ -69,6 +96,7 @@ export default function AdminDashboardPage() {
       statusFilter === 'ALL' ||
       item.status === statusFilter ||
       (statusFilter === 'APPROVED' && (item.status === 'APPROVED' || item.status === 'VERIFIED'));
+
     return matchesSearch && matchesStatus;
   });
 
@@ -113,7 +141,11 @@ export default function AdminDashboardPage() {
       key: 'id',
       width: 120,
       sorter: (a: PendingShipperRecord, b: PendingShipperRecord) => a.id.localeCompare(b.id),
-      render: (id: string) => <Text strong style={{ color: adminDesignTokens.colors.primary, whiteSpace: 'nowrap' }}>{id}</Text>,
+      render: (id: string) => (
+        <Text strong className="text-orange-500 whitespace-nowrap">
+          {id}
+        </Text>
+      ),
     },
     {
       title: 'Họ & Tên',
@@ -121,21 +153,26 @@ export default function AdminDashboardPage() {
       key: 'name',
       width: 180,
       sorter: (a: PendingShipperRecord, b: PendingShipperRecord) => a.name.localeCompare(b.name),
-      render: (name: string) => <Text strong style={{ whiteSpace: 'nowrap' }}>{name}</Text>,
+      render: (name: string) => (
+        <Text strong className="whitespace-nowrap">
+          {name}
+        </Text>
+      ),
     },
     {
       title: 'Số Điện Thoại',
       dataIndex: 'phone',
       key: 'phone',
       width: 150,
-      render: (text: string) => <Text style={{ whiteSpace: 'nowrap' }}>{text}</Text>,
+      render: (text: string) => <Text className="whitespace-nowrap">{text}</Text>,
     },
     {
       title: 'Loại Xe',
       dataIndex: 'vehicle',
       key: 'vehicle',
       width: 180,
-      sorter: (a: PendingShipperRecord, b: PendingShipperRecord) => a.vehicle.localeCompare(b.vehicle),
+      sorter: (a: PendingShipperRecord, b: PendingShipperRecord) =>
+        a.vehicle.localeCompare(b.vehicle),
       render: (text: string) => <VehicleBadge vehicle={text} />,
     },
     {
@@ -150,11 +187,17 @@ export default function AdminDashboardPage() {
       dataIndex: 'status',
       key: 'status',
       width: 170,
-      sorter: (a: PendingShipperRecord, b: PendingShipperRecord) => a.status.localeCompare(b.status),
+      sorter: (a: PendingShipperRecord, b: PendingShipperRecord) =>
+        a.status.localeCompare(b.status),
       render: (status: string) => {
         const meta = mapKycStatus(status);
+
         return (
-          <Tag icon={<ClockCircleOutlined />} color={meta.tagColor} style={{ fontSize: 13, padding: '2px 10px', whiteSpace: 'nowrap' }}>
+          <Tag
+            icon={<ClockCircleOutlined />}
+            color={meta.tagColor}
+            className="text-xs px-2.5 py-0.5 whitespace-nowrap"
+          >
             {meta.label}
           </Tag>
         );
@@ -165,16 +208,20 @@ export default function AdminDashboardPage() {
       key: 'action',
       width: 260,
       render: (record: PendingShipperRecord) => (
-        <Space size="small" style={{ whiteSpace: 'nowrap' }}>
+        <Space size="small" className="whitespace-nowrap">
           <Button
             type="primary"
             icon={<CheckCircleOutlined />}
-            style={{ backgroundColor: adminDesignTokens.colors.statusApproved }}
+            className="bg-green-600 hover:bg-green-500 border-none"
             onClick={() => handleApproveKyc(record.id, record.name)}
           >
             Duyệt eKYC
           </Button>
-          <Button danger icon={<CloseCircleOutlined />} onClick={() => handleRejectKyc(record.id, record.name)}>
+          <Button
+            danger
+            icon={<CloseCircleOutlined />}
+            onClick={() => handleRejectKyc(record.id, record.name)}
+          >
             Từ Chối
           </Button>
         </Space>
@@ -189,7 +236,14 @@ export default function AdminDashboardPage() {
         title="Tran Gia Food — Dashboard Quản Trị"
         subtitle="Tích hợp API Realtime theo dõi doanh thu, GMV & tài xế toàn quốc"
         action={
-          <Button type="primary" ghost icon={<ReloadOutlined />} onClick={handleRefresh} loading={loading} className="font-semibold">
+          <Button
+            type="primary"
+            ghost
+            icon={<ReloadOutlined />}
+            onClick={handleRefresh}
+            loading={loading}
+            className="font-semibold"
+          >
             Làm mới số liệu
           </Button>
         }
@@ -202,10 +256,19 @@ export default function AdminDashboardPage() {
               <Skeleton active paragraph={{ rows: 1 }} />
             ) : (
               <Statistic
-                title={<Text type="secondary"><DollarOutlined className="text-orange-500 mr-2" />Doanh Thu Hoa Hồng (Sàn)</Text>}
+                title={
+                  <Text type="secondary">
+                    <DollarOutlined className="text-orange-500 mr-2" />
+                    Doanh Thu Hoa Hồng (Sàn)
+                  </Text>
+                }
                 value={stats.totalPlatformRevenue}
                 suffix="đ"
-                valueStyle={{ color: '#f97316', fontWeight: 700, fontSize: 24 }}
+                valueStyle={{
+                  color: adminDesignTokens.colors.statOrange,
+                  fontWeight: adminDesignTokens.fontWeightBold,
+                  fontSize: adminDesignTokens.fontSizeXl,
+                }}
               />
             )}
           </Card>
@@ -217,10 +280,19 @@ export default function AdminDashboardPage() {
               <Skeleton active paragraph={{ rows: 1 }} />
             ) : (
               <Statistic
-                title={<Text type="secondary"><ShoppingOutlined className="text-green-600 mr-2" />Tổng GMV Đặt Đồ Ăn</Text>}
+                title={
+                  <Text type="secondary">
+                    <ShoppingOutlined className="text-green-600 mr-2" />
+                    Tổng GMV Đặt Đồ Ăn
+                  </Text>
+                }
                 value={stats.totalFoodGmv}
                 suffix="đ"
-                valueStyle={{ color: '#16a34a', fontWeight: 700, fontSize: 24 }}
+                valueStyle={{
+                  color: adminDesignTokens.colors.statGreen,
+                  fontWeight: adminDesignTokens.fontWeightBold,
+                  fontSize: adminDesignTokens.fontSizeXl,
+                }}
               />
             )}
           </Card>
@@ -232,10 +304,19 @@ export default function AdminDashboardPage() {
               <Skeleton active paragraph={{ rows: 1 }} />
             ) : (
               <Statistic
-                title={<Text type="secondary"><CarOutlined className="text-blue-500 mr-2" />Tổng Cước Phí Shipping</Text>}
+                title={
+                  <Text type="secondary">
+                    <CarOutlined className="text-blue-500 mr-2" />
+                    Tổng Cước Phí Shipping
+                  </Text>
+                }
                 value={stats.totalShipGmv}
                 suffix="đ"
-                valueStyle={{ color: '#3b82f6', fontWeight: 700, fontSize: 24 }}
+                valueStyle={{
+                  color: adminDesignTokens.colors.statBlue,
+                  fontWeight: adminDesignTokens.fontWeightBold,
+                  fontSize: adminDesignTokens.fontSizeXl,
+                }}
               />
             )}
           </Card>
@@ -247,10 +328,19 @@ export default function AdminDashboardPage() {
               <Skeleton active paragraph={{ rows: 1 }} />
             ) : (
               <Statistic
-                title={<Text type="secondary"><UserOutlined className="text-purple-600 mr-2" />Đội Ngũ Tài Xế Online</Text>}
+                title={
+                  <Text type="secondary">
+                    <UserOutlined className="text-purple-600 mr-2" />
+                    Đội Ngũ Tài Xế Online
+                  </Text>
+                }
                 value={stats.totalShippers}
                 suffix="Tài xế"
-                valueStyle={{ color: '#9333ea', fontWeight: 700, fontSize: 24 }}
+                valueStyle={{
+                  color: adminDesignTokens.colors.statPurple,
+                  fontWeight: adminDesignTokens.fontWeightBold,
+                  fontSize: adminDesignTokens.fontSizeXl,
+                }}
               />
             )}
           </Card>
@@ -272,7 +362,11 @@ export default function AdminDashboardPage() {
         ]}
       />
 
-      <Card title="📋 Danh Sách Shipper Chờ Duyệt eKYC" variant="borderless" className="rounded-xl shadow-xs">
+      <Card
+        title="📋 Danh Sách Shipper Chờ Duyệt eKYC"
+        variant="borderless"
+        className="rounded-xl shadow-xs"
+      >
         <DataTable<PendingShipperRecord>
           rowKey="key"
           columns={columns}

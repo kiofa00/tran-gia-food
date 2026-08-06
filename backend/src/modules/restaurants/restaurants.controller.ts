@@ -1,14 +1,22 @@
 import {
-  Controller, Get, Post, Patch, Body, Param, Query,
-  UseGuards, ParseFloatPipe,
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseFloatPipe,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { RestaurantsService } from './restaurants.service';
-import { CreateRestaurantDto, UpdateRestaurantDto, ToggleOpenDto } from './dto/restaurant.dto';
-import { JwtAuthGuard, Public } from '../../common/guards/jwt-auth.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { User, UserRole } from '@prisma/client';
+
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { JwtAuthGuard, Public } from '../../common/guards/jwt-auth.guard';
+import { CreateRestaurantDto, ToggleOpenDto, UpdateRestaurantDto } from './dto/restaurant.dto';
+import { RestaurantsService } from './restaurants.service';
 
 @ApiTags('restaurants')
 @UseGuards(JwtAuthGuard)
@@ -61,11 +69,7 @@ export class RestaurantsController {
   @Roles(UserRole.restaurant)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: '[Restaurant] Cập nhật thông tin quán' })
-  update(
-    @CurrentUser() user: User,
-    @Param('id') id: string,
-    @Body() dto: UpdateRestaurantDto,
-  ) {
+  update(@CurrentUser() user: User, @Param('id') id: string, @Body() dto: UpdateRestaurantDto) {
     return this.restaurantsService.update(user, id, dto);
   }
 
@@ -73,11 +77,7 @@ export class RestaurantsController {
   @Roles(UserRole.restaurant)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: '[Restaurant] Mở/đóng cửa thủ công' })
-  toggleOpen(
-    @CurrentUser() user: User,
-    @Param('id') id: string,
-    @Body() dto: ToggleOpenDto,
-  ) {
+  toggleOpen(@CurrentUser() user: User, @Param('id') id: string, @Body() dto: ToggleOpenDto) {
     return this.restaurantsService.toggleOpen(user, id, dto.isOpen);
   }
 }

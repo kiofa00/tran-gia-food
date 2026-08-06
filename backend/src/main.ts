@@ -1,6 +1,7 @@
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe, Logger } from '@nestjs/common';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -38,9 +39,9 @@ async function bootstrap() {
   // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,       // strip unknown fields
+      whitelist: true, // strip unknown fields
       forbidNonWhitelisted: false,
-      transform: true,       // auto-transform types
+      transform: true, // auto-transform types
       transformOptions: { enableImplicitConversion: true },
     }),
   );
@@ -51,10 +52,7 @@ async function bootstrap() {
       .setTitle('Tran Gia Food API')
       .setDescription('Food delivery platform REST API')
       .setVersion('1.0')
-      .addBearerAuth(
-        { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
-        'access-token',
-      )
+      .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
       .addTag('auth', 'Authentication endpoints')
       .addTag('users', 'User profile management')
       .addTag('restaurants', 'Restaurant management')

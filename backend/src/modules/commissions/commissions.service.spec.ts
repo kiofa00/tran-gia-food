@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CommissionsService } from './commissions.service';
+
 import { PrismaService } from '../../prisma/prisma.service';
+import { CommissionsService } from './commissions.service';
 
 describe('CommissionsService', () => {
   let service: CommissionsService;
@@ -17,10 +18,7 @@ describe('CommissionsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        CommissionsService,
-        { provide: PrismaService, useValue: mockPrismaService },
-      ],
+      providers: [CommissionsService, { provide: PrismaService, useValue: mockPrismaService }],
     }).compile();
 
     service = module.get<CommissionsService>(CommissionsService);
@@ -37,7 +35,7 @@ describe('CommissionsService', () => {
         shipFee: 20000,
         platformFee: 20000,
         shipperId: 'shipper-1',
-      } as any;
+      } as unknown as Parameters<CommissionsService['handleOrderCompleted']>[0];
 
       await service.handleOrderCompleted(order);
 
@@ -46,8 +44,8 @@ describe('CommissionsService', () => {
           foodAmount: 100000,
           shipAmount: 20000,
           restaurantShare: 80000, // 80% of food
-          shipperShare: 17000,    // 85% of ship
-          platformShare: 23000,   // 20k food + 3k ship
+          shipperShare: 17000, // 85% of ship
+          platformShare: 23000, // 20k food + 3k ship
         }),
       });
 

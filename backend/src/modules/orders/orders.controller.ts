@@ -1,13 +1,12 @@
-import {
-  Controller, Post, Get, Patch, Body, Param, Query, UseGuards,
-} from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { OrdersService } from './orders.service';
-import { CreateOrderDto, CancelOrderDto } from './dto/order.dto';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { OrderStatus, User, UserRole } from '@prisma/client';
+
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { User, OrderStatus, UserRole } from '@prisma/client';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { CancelOrderDto, CreateOrderDto } from './dto/order.dto';
+import { OrdersService } from './orders.service';
 
 @ApiTags('orders')
 @ApiBearerAuth('access-token')
@@ -47,11 +46,7 @@ export class OrdersController {
 
   @Post(':id/cancel')
   @ApiOperation({ summary: 'Hủy đơn hàng (khi còn PENDING)' })
-  cancelOrder(
-    @CurrentUser() user: User,
-    @Param('id') id: string,
-    @Body() dto: CancelOrderDto,
-  ) {
+  cancelOrder(@CurrentUser() user: User, @Param('id') id: string, @Body() dto: CancelOrderDto) {
     return this.ordersService.cancelOrder(user, id, dto);
   }
 
