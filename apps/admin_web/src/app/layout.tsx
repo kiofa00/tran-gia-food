@@ -29,7 +29,7 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi">
-      <body style={{ margin: 0, padding: 0, fontFamily: 'system-ui, sans-serif' }}>
+      <body className="m-0 p-0 font-sans">
         <QueryProvider>
           <AntdRegistry>
             <ConfigProvider
@@ -40,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 },
               }}
             >
-              <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: adminDesignTokens.colors.background }}>
+              <div className="flex flex-col min-h-screen bg-gray-50">
                 <style>{`
                   .ant-table-wrapper .ant-spin-nested-loading {
                     min-height: 260px;
@@ -122,7 +122,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   }
                 `}</style>
                 <Header title="Tran Gia Food — Admin Portal" userName="Admin Tran Gia" />
-                <main style={{ flex: 1 }}>{children}</main>
+                <main className="flex-1">{children}</main>
                 <Footer />
               </div>
             </ConfigProvider>
