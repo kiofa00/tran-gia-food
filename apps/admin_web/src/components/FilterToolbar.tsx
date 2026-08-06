@@ -1,7 +1,6 @@
 import React from 'react';
 import { Card, Row, Col, Input, Select, Space, Typography } from 'antd';
 import { SearchOutlined, FilterOutlined } from '@ant-design/icons';
-import { adminDesignTokens } from '../theme/tokens';
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -31,12 +30,12 @@ export const FilterToolbar: React.FC<FilterToolbarProps> = ({
   filterOptions,
 }) => {
   return (
-    <Card variant="borderless" style={{ backgroundColor: '#fafafa', borderRadius: 8, padding: 12 }}>
+    <Card variant="borderless" className="bg-gray-50 rounded-lg p-3">
       <Row gutter={[12, 12]} align="middle">
         <Col xs={24} sm={14} md={10}>
           <Input
             placeholder={searchPlaceholder}
-            prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
+            prefix={<SearchOutlined className="text-gray-400" />}
             value={searchValue}
             onChange={(e) => onSearchChange(e.target.value)}
             allowClear
@@ -44,9 +43,9 @@ export const FilterToolbar: React.FC<FilterToolbarProps> = ({
         </Col>
         <Col xs={24} sm={10} md={8}>
           <Space wrap align="center">
-            <FilterOutlined style={{ color: adminDesignTokens.colors.textSecondary }} />
+            <FilterOutlined className="text-gray-500" />
             <Text type="secondary">{filterLabel}</Text>
-            <Select value={filterValue} onChange={onFilterChange} style={{ minWidth: 160 }}>
+            <Select value={filterValue} onChange={onFilterChange} className="min-w-40">
               {filterOptions.map((opt) => (
                 <Option key={opt.value} value={opt.value}>
                   {opt.label}

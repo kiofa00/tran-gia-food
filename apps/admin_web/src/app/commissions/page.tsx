@@ -14,6 +14,7 @@ import {
 } from '@ant-design/icons';
 import { adminDesignTokens } from '../../theme/tokens';
 import { formatCurrency } from '../../utils/formatters';
+import { PageContainer, PageHeader, SearchFilterBox, DataTable } from '../../components';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -117,7 +118,7 @@ export default function CommissionsPage() {
       key: 'platformShare',
       width: 170,
       sorter: (a: CommissionRecord, b: CommissionRecord) => a.platformShare - b.platformShare,
-      render: (val: number) => <Text style={{ color: adminDesignTokens.colors.primary, fontWeight: 700, whiteSpace: 'nowrap' }}>{formatCurrency(val)}</Text>,
+      render: (val: number) => <Text className="text-orange-500 font-bold whitespace-nowrap">{formatCurrency(val)}</Text>,
     },
     {
       title: 'Trạng Thái',
@@ -126,7 +127,7 @@ export default function CommissionsPage() {
       width: 140,
       sorter: (a: CommissionRecord, b: CommissionRecord) => a.status.localeCompare(b.status),
       render: (status: string) => (
-        <Tag color={status === 'PROCESSED' ? 'success' : 'warning'} icon={status === 'PROCESSED' ? <CheckCircleOutlined /> : <SyncOutlined spin />} style={{ whiteSpace: 'nowrap' }}>
+        <Tag color={status === 'PROCESSED' ? 'success' : 'warning'} icon={status === 'PROCESSED' ? <CheckCircleOutlined /> : <SyncOutlined spin />} className="whitespace-nowrap">
           {status === 'PROCESSED' ? 'Đã Giải Ngân' : 'Chờ Quyết Toán'}
         </Tag>
       ),
@@ -137,119 +138,101 @@ export default function CommissionsPage() {
       key: 'createdAt',
       width: 160,
       sorter: (a: CommissionRecord, b: CommissionRecord) => a.createdAt.localeCompare(b.createdAt),
-      render: (date: string) => <Text type="secondary" style={{ whiteSpace: 'nowrap' }}>{date}</Text>,
+      render: (date: string) => <Text type="secondary" className="whitespace-nowrap">{date}</Text>,
     },
   ];
 
   return (
-    <div style={{ padding: adminDesignTokens.padding.lg }}>
-      {/* Header Title & Bulk Action */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16, marginBottom: 24 }}>
-        <div>
-          <Title level={2} style={{ color: adminDesignTokens.colors.primary, margin: 0 }}>
-            💰 Hoa Hồng Sàn & Giải Ngân Ví Đối Tác
-          </Title>
-          <Text type="secondary">Phân bổ doanh thu tự động giữa Quán ăn (85%), Shipper (100% phí ship) & Sàn Tran Gia (15%)</Text>
-        </div>
-        <Button
-          type="primary"
-          icon={<BankOutlined />}
-          size="large"
-          onClick={handleProcessPayout}
-          style={{ backgroundColor: '#52C41A', fontWeight: 600 }}
-        >
-          Duyệt Quyết Toán Ví
-        </Button>
-      </div>
+    <PageContainer>
+      <PageHeader
+        icon="💰"
+        title="Hoa Hồng Sàn & Giải Ngân Ví Đối Tác"
+        subtitle="Phân bổ doanh thu tự động giữa Quán ăn (85%), Shipper (100% phí ship) & Sàn Tran Gia (15%)"
+        action={
+          <Button
+            type="primary"
+            icon={<BankOutlined />}
+            size="large"
+            onClick={handleProcessPayout}
+            className="bg-green-600 font-semibold border-none"
+          >
+            Duyệt Quyết Toán Ví
+          </Button>
+        }
+      />
 
       {/* Top Stat Cards */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+      <Row gutter={[16, 16]} className="mb-6">
         <Col xs={24} sm={12} lg={8}>
-          <Card variant="borderless" style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+          <Card variant="borderless" className="rounded-xl shadow-xs">
             {loading ? (
               <Skeleton active paragraph={{ rows: 1 }} />
             ) : (
               <Statistic
-                title={<Text type="secondary"><PercentageOutlined style={{ color: adminDesignTokens.colors.primary, marginRight: 8 }} />Tổng Phí Hoa Hồng Thu Được</Text>}
+                title={<Text type="secondary"><PercentageOutlined className="text-orange-500 mr-2" />Tổng Phí Hoa Hồng Thu Được</Text>}
                 value={totalPlatformCommission}
                 formatter={(val) => formatCurrency(Number(val))}
-                valueStyle={{ color: adminDesignTokens.colors.primary, fontWeight: 700, fontSize: 24 }}
+                valueStyle={{ color: '#f97316', fontWeight: 700, fontSize: 24 }}
               />
             )}
           </Card>
         </Col>
-
         <Col xs={24} sm={12} lg={8}>
-          <Card variant="borderless" style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+          <Card variant="borderless" className="rounded-xl shadow-xs">
             {loading ? (
               <Skeleton active paragraph={{ rows: 1 }} />
             ) : (
               <Statistic
-                title={<Text type="secondary"><ShoppingOutlined style={{ color: '#52C41A', marginRight: 8 }} />Doanh Thu Chuyển Ví Quán</Text>}
+                title={<Text type="secondary"><ShoppingOutlined className="text-green-600 mr-2" />Doanh Thu Chuyển Ví Quán</Text>}
                 value={totalRestaurantRevenue}
                 formatter={(val) => formatCurrency(Number(val))}
-                valueStyle={{ color: '#52C41A', fontWeight: 700, fontSize: 24 }}
+                valueStyle={{ color: '#16a34a', fontWeight: 700, fontSize: 24 }}
               />
             )}
           </Card>
         </Col>
-
         <Col xs={24} sm={12} lg={8}>
-          <Card variant="borderless" style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+          <Card variant="borderless" className="rounded-xl shadow-xs">
             {loading ? (
               <Skeleton active paragraph={{ rows: 1 }} />
             ) : (
               <Statistic
-                title={<Text type="secondary"><DollarOutlined style={{ color: '#1890FF', marginRight: 8 }} />Phí Giao Hàng Thu Hộ Shipper</Text>}
+                title={<Text type="secondary"><DollarOutlined className="text-blue-500 mr-2" />Phí Giao Hàng Thu Hộ Shipper</Text>}
                 value={totalShipperDelivery}
                 formatter={(val) => formatCurrency(Number(val))}
-                valueStyle={{ color: '#1890FF', fontWeight: 700, fontSize: 24 }}
+                valueStyle={{ color: '#3b82f6', fontWeight: 700, fontSize: 24 }}
               />
             )}
           </Card>
         </Col>
       </Row>
 
-      {/* Filter & Search Toolbar */}
-      <Card className="table-filter-card" variant="borderless" style={{ marginBottom: 16, borderRadius: 12 }}>
-        <div className="table-filter-toolbar">
-          <Input
-            placeholder="Tìm theo mã đơn hoặc tên quán..."
-            prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
-            allowClear
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="filter-search-input"
-          />
-          <div className="filter-select-group">
-            <Text type="secondary" style={{ whiteSpace: 'nowrap' }}><FilterOutlined /> Lọc trạng thái:</Text>
-            <Select defaultValue="ALL" value={statusFilter} onChange={(val) => setStatusFilter(val)} style={{ minWidth: 160 }}>
-              <Option value="ALL">Tất cả trạng thái</Option>
-              <Option value="PROCESSED">Đã Giải Ngân</Option>
-              <Option value="PENDING">Chờ Quyết Toán</Option>
-            </Select>
-          </div>
-        </div>
-      </Card>
+      {/* Search & Filter Toolbar */}
+      <SearchFilterBox
+        searchPlaceholder="Tìm theo mã đơn hoặc tên quán..."
+        searchValue={search}
+        onSearchChange={setSearch}
+        filterLabel="Lọc trạng thái:"
+        filterValue={statusFilter}
+        onFilterChange={setStatusFilter}
+        filterOptions={[
+          { value: 'ALL', label: 'Tất cả trạng thái' },
+          { value: 'PROCESSED', label: 'Đã Giải Ngân' },
+          { value: 'PENDING', label: 'Chờ Quyết Toán' },
+        ]}
+      />
 
       {/* Commission Table */}
-      <Card title="📋 Bảng Chi Tiết Phân Bổ Hoa Hồng Đơn Hàng" variant="borderless" style={{ borderRadius: 12 }}>
-        <Table
+      <Card title="📋 Bảng Chi Tiết Phân Bổ Hoa Hồng Đơn Hàng" variant="borderless" className="rounded-xl shadow-xs">
+        <DataTable<CommissionRecord>
           rowKey="key"
           columns={columns}
           dataSource={filteredCommissions}
           loading={loading}
-          pagination={{
-            defaultPageSize: 10,
-            showSizeChanger: true,
-            pageSizeOptions: ['5', '10', '20', '50'],
-            showTotal: (total: number, range: [number, number]) => `${range[0]}-${range[1]} của ${total} mục`,
-          }}
           scroll={{ x: 1200 }}
-          style={{ minHeight: 260 }}
-          locale={{ emptyText: loading ? null : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Chưa có dữ liệu hạch toán hoa hồng" /> }}
+          emptyDescription="Chưa có dữ liệu hạch toán hoa hồng"
         />
       </Card>
-    </div>
+    </PageContainer>
   );
 }

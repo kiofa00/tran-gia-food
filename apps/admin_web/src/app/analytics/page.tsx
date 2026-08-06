@@ -29,6 +29,7 @@ import { adminDesignTokens } from '../../theme/tokens';
 import { formatCurrency } from '../../utils/formatters';
 
 import { useAnalyticsQuery } from '../../hooks/useAnalytics';
+import { PageContainer, PageHeader, DataTable } from '../../components';
 import { RevenueTrendItem, TopRestaurantItem, PaymentMethodItem } from '../../services/analytics.service';
 
 const { Title, Text } = Typography;
@@ -110,28 +111,26 @@ export default function AnalyticsPage() {
   ];
 
   return (
-    <div style={{ padding: adminDesignTokens.padding.lg }}>
-      {/* Header Title & Range Filter */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16, marginBottom: 24 }}>
-        <div>
-          <Title level={2} style={{ color: adminDesignTokens.colors.primary, margin: 0 }}>
-            📊 Báo Cáo Doanh Thu & Tài Chính
-          </Title>
-          <Text type="secondary">Phân tích xu hướng GMV, hoa hồng sàn & tỷ trọng thanh toán toàn hệ thống</Text>
-        </div>
-        <Space align="center">
-          <Text strong>Khoảng thời gian:</Text>
-          <Select
-            value={timeRange}
-            onChange={(val) => setTimeRange(val)}
-            style={{ width: 160 }}
-          >
-            <Option value="7d">7 ngày qua</Option>
-            <Option value="30d">Tháng này (30 ngày)</Option>
-            <Option value="quarter">Quý này</Option>
-          </Select>
-        </Space>
-      </div>
+    <PageContainer>
+      <PageHeader
+        icon="📊"
+        title="Báo Cáo Doanh Thu & Tài Chính"
+        subtitle="Phân tích xu hướng GMV, hoa hồng sàn & tỷ trọng thanh toán toàn hệ thống"
+        action={
+          <Space align="center">
+            <Text strong>Khoảng thời gian:</Text>
+            <Select
+              value={timeRange}
+              onChange={(val) => setTimeRange(val)}
+              className="w-40"
+            >
+              <Option value="7d">7 ngày qua</Option>
+              <Option value="30d">Tháng này (30 ngày)</Option>
+              <Option value="quarter">Quý này</Option>
+            </Select>
+          </Space>
+        }
+      />
 
       {/* Top Statistic Cards */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
@@ -303,25 +302,18 @@ export default function AnalyticsPage() {
 
         {/* Top 4 Restaurants Table */}
         <Col xs={24} lg={14}>
-          <Card title="🏆 Top Quán Ăn Có Doanh Số Cao Nhất Tuần" variant="borderless" style={{ borderRadius: 12 }}>
-            <Table
+          <Card title="🏆 Top Quán Ăn Có Doanh Số Cao Nhất Tuần" variant="borderless" className="rounded-xl shadow-xs">
+            <DataTable<TopRestaurantItem>
               rowKey="key"
               columns={columns}
               dataSource={topRestaurants}
               loading={loading}
-              pagination={{
-                defaultPageSize: 10,
-                showSizeChanger: true,
-                pageSizeOptions: ['5', '10', '20', '50'],
-                showTotal: (total: number, range: [number, number]) => `${range[0]}-${range[1]} của ${total} mục`,
-              }}
               scroll={{ x: 800 }}
-              style={{ minHeight: 260 }}
-              locale={{ emptyText: loading ? null : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Chưa có dữ liệu quán ăn" /> }}
+              emptyDescription="Chưa có dữ liệu quán ăn"
             />
           </Card>
         </Col>
       </Row>
-    </div>
+    </PageContainer>
   );
 }

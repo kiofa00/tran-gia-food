@@ -16,7 +16,7 @@ import {
 } from '@ant-design/icons';
 import { adminDesignTokens } from '../theme/tokens';
 import { mapKycStatus, mapVehicleType } from '../utils/formatters';
-import { VehicleBadge, PlateBadge } from '../components';
+import { VehicleBadge, PlateBadge, PageContainer, PageHeader, SearchFilterBox, DataTable } from '../components';
 import { useDashboardStatsQuery, usePendingShippersQuery, useVerifyShipperKycMutation } from '../hooks/useAdmin';
 import { DashboardOverviewStats } from '../services/admin.service';
 import { PendingShipperRecord } from '../types';
@@ -183,120 +183,105 @@ export default function AdminDashboardPage() {
   ];
 
   return (
-    <div style={{ padding: adminDesignTokens.padding.lg }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16, marginBottom: 24 }}>
-        <div>
-          <Title level={2} style={{ color: adminDesignTokens.colors.primary, margin: 0 }}>
-            🍜 Tran Gia Food — Dashboard Quản Trị
-          </Title>
-          <Text type="secondary">Tích hợp API Realtime theo dõi doanh thu, GMV & tài xế toàn quốc</Text>
-        </div>
-        <Button type="primary" ghost icon={<ReloadOutlined />} onClick={handleRefresh} loading={loading} style={{ fontWeight: 600 }}>
-          Làm mới số liệu
-        </Button>
-      </div>
+    <PageContainer>
+      <PageHeader
+        icon="🍜"
+        title="Tran Gia Food — Dashboard Quản Trị"
+        subtitle="Tích hợp API Realtime theo dõi doanh thu, GMV & tài xế toàn quốc"
+        action={
+          <Button type="primary" ghost icon={<ReloadOutlined />} onClick={handleRefresh} loading={loading} className="font-semibold">
+            Làm mới số liệu
+          </Button>
+        }
+      />
 
-      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+      <Row gutter={[16, 16]} className="mb-6">
         <Col xs={24} sm={12} lg={6}>
-          <Card variant="borderless" style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+          <Card variant="borderless" className="rounded-xl shadow-xs">
             {loading ? (
               <Skeleton active paragraph={{ rows: 1 }} />
             ) : (
               <Statistic
-                title={<Text type="secondary"><DollarOutlined style={{ color: adminDesignTokens.colors.primary, marginRight: 8 }} />Doanh Thu Hoa Hồng (Sàn)</Text>}
+                title={<Text type="secondary"><DollarOutlined className="text-orange-500 mr-2" />Doanh Thu Hoa Hồng (Sàn)</Text>}
                 value={stats.totalPlatformRevenue}
                 suffix="đ"
-                valueStyle={{ color: adminDesignTokens.colors.primary, fontWeight: 700, fontSize: 24 }}
+                valueStyle={{ color: '#f97316', fontWeight: 700, fontSize: 24 }}
               />
             )}
           </Card>
         </Col>
 
         <Col xs={24} sm={12} lg={6}>
-          <Card variant="borderless" style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+          <Card variant="borderless" className="rounded-xl shadow-xs">
             {loading ? (
               <Skeleton active paragraph={{ rows: 1 }} />
             ) : (
               <Statistic
-                title={<Text type="secondary"><ShoppingOutlined style={{ color: '#52C41A', marginRight: 8 }} />Tổng GMV Đặt Đồ Ăn</Text>}
+                title={<Text type="secondary"><ShoppingOutlined className="text-green-600 mr-2" />Tổng GMV Đặt Đồ Ăn</Text>}
                 value={stats.totalFoodGmv}
                 suffix="đ"
-                valueStyle={{ color: '#52C41A', fontWeight: 700, fontSize: 24 }}
+                valueStyle={{ color: '#16a34a', fontWeight: 700, fontSize: 24 }}
               />
             )}
           </Card>
         </Col>
 
         <Col xs={24} sm={12} lg={6}>
-          <Card variant="borderless" style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+          <Card variant="borderless" className="rounded-xl shadow-xs">
             {loading ? (
               <Skeleton active paragraph={{ rows: 1 }} />
             ) : (
               <Statistic
-                title={<Text type="secondary"><CarOutlined style={{ color: '#1890FF', marginRight: 8 }} />Tổng Cước Phí Shipping</Text>}
+                title={<Text type="secondary"><CarOutlined className="text-blue-500 mr-2" />Tổng Cước Phí Shipping</Text>}
                 value={stats.totalShipGmv}
                 suffix="đ"
-                valueStyle={{ color: '#1890FF', fontWeight: 700, fontSize: 24 }}
+                valueStyle={{ color: '#3b82f6', fontWeight: 700, fontSize: 24 }}
               />
             )}
           </Card>
         </Col>
 
         <Col xs={24} sm={12} lg={6}>
-          <Card variant="borderless" style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+          <Card variant="borderless" className="rounded-xl shadow-xs">
             {loading ? (
               <Skeleton active paragraph={{ rows: 1 }} />
             ) : (
               <Statistic
-                title={<Text type="secondary"><UserOutlined style={{ color: '#722ED1', marginRight: 8 }} />Đội Ngũ Tài Xế Online</Text>}
+                title={<Text type="secondary"><UserOutlined className="text-purple-600 mr-2" />Đội Ngũ Tài Xế Online</Text>}
                 value={stats.totalShippers}
                 suffix="Tài xế"
-                valueStyle={{ color: '#722ED1', fontWeight: 700, fontSize: 24 }}
+                valueStyle={{ color: '#9333ea', fontWeight: 700, fontSize: 24 }}
               />
             )}
           </Card>
         </Col>
       </Row>
 
-      <Card className="table-filter-card" variant="borderless" style={{ marginBottom: 16, borderRadius: 12 }}>
-        <div className="table-filter-toolbar">
-          <Input
-            placeholder="Tìm theo tên hoặc SĐT tài xế..."
-            prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
-            allowClear
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="filter-search-input"
-          />
-          <div className="filter-select-group">
-            <Text type="secondary" style={{ whiteSpace: 'nowrap' }}><FilterOutlined /> Lọc trạng thái eKYC:</Text>
-            <Select defaultValue="ALL" value={statusFilter} onChange={(val) => setStatusFilter(val)} style={{ minWidth: 160 }}>
-              <Option value="ALL">Tất cả trạng thái</Option>
-              <Option value="PENDING">Chờ duyệt eKYC</Option>
-              <Option value="APPROVED">Đã duyệt eKYC</Option>
-              <Option value="REJECTED">Từ chối</Option>
-            </Select>
-          </div>
-        </div>
-      </Card>
+      <SearchFilterBox
+        searchPlaceholder="Tìm theo tên hoặc SĐT tài xế..."
+        searchValue={search}
+        onSearchChange={setSearch}
+        filterLabel="Lọc trạng thái eKYC:"
+        filterValue={statusFilter}
+        onFilterChange={setStatusFilter}
+        filterOptions={[
+          { value: 'ALL', label: 'Tất cả trạng thái' },
+          { value: 'PENDING', label: 'Chờ duyệt eKYC' },
+          { value: 'APPROVED', label: 'Đã duyệt eKYC' },
+          { value: 'REJECTED', label: 'Từ chối' },
+        ]}
+      />
 
-      <Card title="📋 Danh Sách Shipper Chờ Duyệt eKYC" variant="borderless">
-        <Table
+      <Card title="📋 Danh Sách Shipper Chờ Duyệt eKYC" variant="borderless" className="rounded-xl shadow-xs">
+        <DataTable<PendingShipperRecord>
           rowKey="key"
           columns={columns}
           dataSource={filteredPendingShippers}
           loading={loading}
-          pagination={{
-            defaultPageSize: 10,
-            showSizeChanger: true,
-            pageSizeOptions: ['5', '10', '20', '50'],
-            showTotal: (total: number, range: [number, number]) => `${range[0]}-${range[1]} của ${total} mục`,
-          }}
           scroll={{ x: 1100 }}
-          style={{ minHeight: 260 }}
-          locale={{ emptyText: loading ? null : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Không có tài xế chờ duyệt eKYC" /> }}
+          emptyDescription="Không có tài xế chờ duyệt eKYC"
         />
       </Card>
-    </div>
+    </PageContainer>
   );
 }

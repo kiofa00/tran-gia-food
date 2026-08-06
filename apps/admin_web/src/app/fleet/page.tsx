@@ -5,7 +5,7 @@ import { Card, Table, Tag, Typography, Badge, Empty, Input, Select, Space } from
 import { CompassOutlined, CarOutlined, CheckCircleOutlined, SyncOutlined, CloseCircleOutlined, SearchOutlined, FilterOutlined } from '@ant-design/icons';
 import { adminDesignTokens } from '../../theme/tokens';
 import { mapShipperStatus, mapVehicleType } from '../../utils/formatters';
-import { VehicleBadge, PlateBadge } from '../../components';
+import { VehicleBadge, PlateBadge, PageContainer, PageHeader, SearchFilterBox, DataTable } from '../../components';
 import { useFleetQuery } from '../../hooks/useFleet';
 
 import { ShipperRecord } from '../../types';
@@ -119,38 +119,24 @@ export default function LiveFleetMonitorPage() {
   ];
 
   return (
-    <div style={{ padding: adminDesignTokens.padding.lg }}>
-      <div style={{ marginBottom: 24 }}>
-        <Title level={2} style={{ color: adminDesignTokens.colors.primary, margin: 0 }}>
-          🗺️ Live Fleet Monitor — Bản Đồ Tài Xế Realtime
-        </Title>
-        <Text type="secondary">Theo dõi vị trí GPS & trạng thái hoạt động của tất cả tài xế trên hệ thống</Text>
-      </div>
+    <PageContainer>
+      <PageHeader
+        icon="🗺️"
+        title="Live Fleet Monitor — Bản Đồ Tài Xế Realtime"
+        subtitle="Theo dõi vị trí GPS & trạng thái hoạt động của tất cả tài xế trên hệ thống"
+      />
 
-      {/* Antd Live Map Card */}
-      <Card variant="borderless" style={{ marginBottom: 24 }}>
-        <div
-          style={{
-            height: '300px',
-            backgroundColor: '#f5f5f5',
-            borderRadius: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            position: 'relative',
-            overflow: 'hidden',
-            border: '1px solid #d9d9d9',
-          }}
-        >
-          <CompassOutlined style={{ fontSize: 54, color: adminDesignTokens.colors.primary, marginBottom: 12 }} />
-          <Title level={4} style={{ margin: 0 }}>Google Maps Live Stream Gateway</Title>
+      {/* Live Map Card */}
+      <Card variant="borderless" className="mb-6 rounded-xl shadow-xs">
+        <div className="h-72 bg-gray-100 rounded-lg flex flex-col items-center justify-center relative overflow-hidden border border-gray-200">
+          <CompassOutlined className="text-5xl text-orange-500 mb-3" />
+          <Title level={4} className="m-0">Google Maps Live Stream Gateway</Title>
           <Text type="secondary">Đang streaming WebSocket tọa độ GPS của {shippers.length} tài xế đang Online</Text>
 
           {/* Shipper Markers */}
-          {shippers.map((s: any, i: number) => (
+          {shippers.map((s: ShipperRecord, i: number) => (
             <div key={s.id} style={{ position: 'absolute', top: `${30 + i * 25}%`, left: `${25 + i * 20}%` }}>
-              <Tag color={s.status === 'DELIVERING' ? 'orange' : s.status === 'IDLE' ? 'green' : 'blue'} style={{ padding: '6px 12px', fontSize: 13, fontWeight: 'bold' }}>
+              <Tag color={s.status === 'DELIVERING' ? 'orange' : s.status === 'IDLE' ? 'green' : 'blue'} className="px-3 py-1.5 text-xs font-bold rounded-md">
                 🛵 {s.name} ({mapShipperStatus(s.status).label})
               </Tag>
             </div>
@@ -159,47 +145,33 @@ export default function LiveFleetMonitorPage() {
       </Card>
 
       {/* Filter & Search Toolbar */}
-      <Card className="table-filter-card" variant="borderless" style={{ marginBottom: 16, borderRadius: 12 }}>
-        <div className="table-filter-toolbar">
-          <Input
-            placeholder="Tìm theo tên hoặc SĐT tài xế..."
-            prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
-            allowClear
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="filter-search-input"
-          />
-          <div className="filter-select-group">
-            <Text type="secondary" style={{ whiteSpace: 'nowrap' }}><FilterOutlined /> Lọc trạng thái:</Text>
-            <Select defaultValue="ALL" value={statusFilter} onChange={(val) => setStatusFilter(val)} style={{ minWidth: 160 }}>
-              <Option value="ALL">Tất cả trạng thái</Option>
-              <Option value="DELIVERING">Đang giao hàng</Option>
-              <Option value="IDLE">Đang sẵn sàng nhận đơn</Option>
-              <Option value="OFFLINE">Offline</Option>
-            </Select>
-          </div>
-        </div>
-      </Card>
+      <SearchFilterBox
+        searchPlaceholder="Tìm theo tên hoặc SĐT tài xế..."
+        searchValue={search}
+        onSearchChange={setSearch}
+        filterLabel="Lọc trạng thái:"
+        filterValue={statusFilter}
+        onFilterChange={setStatusFilter}
+        filterOptions={[
+          { value: 'ALL', label: 'Tất cả trạng thái' },
+          { value: 'DELIVERING', label: 'Đang giao hàng' },
+          { value: 'IDLE', label: 'Đang sẵn sàng nhận đơn' },
+          { value: 'OFFLINE', label: 'Offline' },
+        ]}
+      />
 
-      {/* Antd Table */}
-      <Card title={`⚡ Danh Sách Tài Xế Đang Online (${filteredShippers.length})`} variant="borderless">
-        <Table
+      {/* Table */}
+      <Card title={`⚡ Danh Sách Tài Xế Đang Online (${filteredShippers.length})`} variant="borderless" className="rounded-xl shadow-xs">
+        <DataTable<ShipperRecord>
           rowKey="key"
           columns={columns}
           dataSource={filteredShippers}
           loading={loading}
-          pagination={{
-            defaultPageSize: 10,
-            showSizeChanger: true,
-            pageSizeOptions: ['5', '10', '20', '50'],
-            showTotal: (total: number, range: [number, number]) => `${range[0]}-${range[1]} của ${total} mục`,
-          }}
           scroll={{ x: 1060 }}
-          style={{ minHeight: 260 }}
-          locale={{ emptyText: loading ? null : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Chưa có tài xế trực tuyến" /> }}
+          emptyDescription="Chưa có tài xế trực tuyến"
         />
       </Card>
-    </div>
+    </PageContainer>
   );
 }
 

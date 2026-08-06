@@ -16,7 +16,7 @@ import {
 } from '@ant-design/icons';
 import { adminDesignTokens } from '../../theme/tokens';
 import { formatCurrency, formatDate } from '../../utils/formatters';
-import { PageContainer, PageHeader } from '../../components';
+import { PageContainer, PageHeader, SearchFilterBox, DataTable } from '../../components';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -106,7 +106,7 @@ export default function VoucherManagementPage() {
       width: 160,
       sorter: (a: VoucherRecord, b: VoucherRecord) => a.code.localeCompare(b.code),
       render: (code: string) => (
-        <Tag color="volcano" icon={<TagOutlined />} style={{ fontSize: 13, fontWeight: 700, padding: '3px 10px' }}>
+        <Tag color="volcano" icon={<TagOutlined />} className="text-xs font-bold px-2.5 py-0.5 rounded-md">
           {code}
         </Tag>
       ),
@@ -117,7 +117,7 @@ export default function VoucherManagementPage() {
       key: 'discountType',
       width: 180,
       render: (type: string, record: VoucherRecord) => (
-        <Space style={{ whiteSpace: 'nowrap' }}>
+        <Space className="whitespace-nowrap">
           {type === 'percent' ? (
             <Tag color="purple" icon={<PercentageOutlined />}>
               Giảm {record.discountValue}% {record.maxDiscount ? `(Tối đa ${formatCurrency(record.maxDiscount)})` : ''}
@@ -136,7 +136,7 @@ export default function VoucherManagementPage() {
       key: 'minOrderValue',
       width: 150,
       sorter: (a: VoucherRecord, b: VoucherRecord) => a.minOrderValue - b.minOrderValue,
-      render: (val: number) => <Text style={{ whiteSpace: 'nowrap' }}>{formatCurrency(val)}</Text>,
+      render: (val: number) => <Text className="whitespace-nowrap">{formatCurrency(val)}</Text>,
     },
     {
       title: 'Hạn Sử Dụng',
@@ -144,8 +144,8 @@ export default function VoucherManagementPage() {
       width: 220,
       sorter: (a: VoucherRecord, b: VoucherRecord) => a.validFrom.localeCompare(b.validFrom),
       render: (record: VoucherRecord) => (
-        <Text type="secondary" style={{ fontSize: 13, whiteSpace: 'nowrap' }}>
-          <ClockCircleOutlined style={{ marginRight: 6 }} />
+        <Text type="secondary" className="text-xs whitespace-nowrap">
+          <ClockCircleOutlined className="mr-1.5" />
           {formatDate(record.validFrom)} ➔ {formatDate(record.validTo)}
         </Text>
       ),
@@ -156,7 +156,7 @@ export default function VoucherManagementPage() {
       width: 160,
       sorter: (a: VoucherRecord, b: VoucherRecord) => a.usedCount - b.usedCount,
       render: (record: VoucherRecord) => (
-        <Text style={{ whiteSpace: 'nowrap' }}>
+        <Text className="whitespace-nowrap">
           <Text strong>{record.usedCount}</Text> / {record.totalLimit} lượt
         </Text>
       ),
@@ -205,51 +205,37 @@ export default function VoucherManagementPage() {
             icon={<PlusOutlined />}
             size="large"
             onClick={() => setIsModalOpen(true)}
-            style={{ backgroundColor: adminDesignTokens.colors.primary, fontWeight: 600 }}
+            className="bg-orange-500 font-semibold"
           >
             Tạo Mã Voucher Mới
           </Button>
         }
       />
 
-      {/* Filter & Search Toolbar */}
-      <Card className="table-filter-card" variant="borderless" style={{ marginBottom: 16, borderRadius: 12 }}>
-        <div className="table-filter-toolbar">
-          <Input
-            placeholder="Tìm theo mã voucher (vd: TRANGIA50K)..."
-            prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
-            allowClear
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="filter-search-input"
-          />
-          <div className="filter-select-group">
-            <Text type="secondary" style={{ whiteSpace: 'nowrap' }}><FilterOutlined /> Lọc trạng thái:</Text>
-            <Select defaultValue="ALL" value={statusFilter} onChange={(val) => setStatusFilter(val)} style={{ minWidth: 160 }}>
-              <Option value="ALL">Tất cả trạng thái</Option>
-              <Option value="ACTIVE">Đang diễn ra</Option>
-              <Option value="INACTIVE">Tạm dừng</Option>
-            </Select>
-          </div>
-        </div>
-      </Card>
+      {/* Search & Filter Toolbar */}
+      <SearchFilterBox
+        searchPlaceholder="Tìm theo mã voucher (vd: TRANGIA50K)..."
+        searchValue={search}
+        onSearchChange={setSearch}
+        filterLabel="Lọc trạng thái:"
+        filterValue={statusFilter}
+        onFilterChange={setStatusFilter}
+        filterOptions={[
+          { value: 'ALL', label: 'Tất cả trạng thái' },
+          { value: 'ACTIVE', label: 'Đang diễn ra' },
+          { value: 'INACTIVE', label: 'Tạm dừng' },
+        ]}
+      />
 
       {/* Voucher Table */}
-      <Card variant="borderless" style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-        <Table
+      <Card variant="borderless" className="rounded-xl shadow-xs">
+        <DataTable<VoucherRecord>
           rowKey="key"
           columns={columns}
           dataSource={filteredVouchers}
           loading={loading}
-          pagination={{
-            defaultPageSize: 10,
-            showSizeChanger: true,
-            pageSizeOptions: ['5', '10', '20', '50'],
-            showTotal: (total: number, range: [number, number]) => `${range[0]}-${range[1]} của ${total} mục`,
-          }}
           scroll={{ x: 1130 }}
-          style={{ minHeight: 260 }}
-          locale={{ emptyText: loading ? null : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Chưa có mã giảm giá" /> }}
+          emptyDescription="Chưa có mã giảm giá"
         />
       </Card>
 
@@ -261,38 +247,38 @@ export default function VoucherManagementPage() {
         onOk={() => form.submit()}
         okText="Tạo Voucher"
         cancelText="Hủy"
-        okButtonProps={{ style: { backgroundColor: adminDesignTokens.colors.primary } }}
+        okButtonProps={{ className: 'bg-orange-500 font-semibold' }}
       >
         <Form form={form} layout="vertical" onFinish={handleCreateVoucher} initialValues={{ discountType: 'fixed', type: 'Platform' }}>
           <Form.Item name="code" label="Mã Voucher (Code)" rules={[{ required: true, message: 'Vui lòng nhập mã voucher' }]}>
-            <Input placeholder="VD: TRANGIA50K" style={{ textTransform: 'uppercase' }} />
+            <Input placeholder="VD: TRANGIA50K" className="uppercase" />
           </Form.Item>
 
-          <Space size="middle" style={{ display: 'flex' }}>
+          <Space size="middle" className="flex">
             <Form.Item name="discountType" label="Loại Khuyến Mãi" rules={[{ required: true }]}>
-              <Select style={{ width: 180 }}>
+              <Select className="w-44">
                 <Option value="fixed">Giảm tiền cố định (đ)</Option>
                 <Option value="percent">Giảm theo phần trăm (%)</Option>
               </Select>
             </Form.Item>
 
             <Form.Item name="discountValue" label="Giá Trị Giảm" rules={[{ required: true, message: 'Nhập giá trị' }]}>
-              <InputNumber min={1} style={{ width: '100%' }} placeholder="VD: 50000 hoặc 15" />
+              <InputNumber min={1} className="w-full" placeholder="VD: 50000 hoặc 15" />
             </Form.Item>
           </Space>
 
-          <Space size="middle" style={{ display: 'flex' }}>
+          <Space size="middle" className="flex">
             <Form.Item name="minOrderValue" label="Đơn Hàng Tối Thiểu (đ)">
-              <InputNumber min={0} style={{ width: 180 }} placeholder="VD: 100000" />
+              <InputNumber min={0} className="w-44" placeholder="VD: 100000" />
             </Form.Item>
 
             <Form.Item name="totalLimit" label="Số Lượng Lượt Dùng">
-              <InputNumber min={1} style={{ width: 180 }} placeholder="VD: 500" />
+              <InputNumber min={1} className="w-44" placeholder="VD: 500" />
             </Form.Item>
           </Space>
 
           <Form.Item name="validDates" label="Thời Gian Hiệu Lực" rules={[{ required: true, message: 'Chọn khoảng thời gian' }]}>
-            <RangePicker style={{ width: '100%' }} />
+            <RangePicker className="w-full" />
           </Form.Item>
         </Form>
       </Modal>

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Layout, Avatar, Dropdown, Badge, Space, Typography, Button, Drawer, Menu, Divider } from 'antd';
+import { Layout, Avatar, Dropdown, Space, Typography, Button, Drawer, Menu, Divider } from 'antd';
 import {
   BellOutlined,
   UserOutlined,
@@ -67,48 +67,30 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
     <>
       <AntHeader
         data-testid="admin-header"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 20px',
-          backgroundColor: adminDesignTokens.colors.primary,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-          height: '64px',
-          position: 'sticky',
-          top: 0,
-          zIndex: 1000,
-        }}
+        className="flex items-center justify-between px-5 bg-orange-500 shadow-md h-16 sticky top-0 z-50 border-b border-orange-600"
       >
         {/* Brand Logo & Desktop Navigation */}
         <Space size="large" align="center">
-          <Link href="/" prefetch={true} style={{ textDecoration: 'none' }} className="header-brand-logo">
+          <Link href="/" prefetch={true} className="no-underline header-brand-logo">
             <Title
               data-testid="header-title"
               level={4}
-              style={{ color: '#ffffff', margin: 0, fontWeight: 800, letterSpacing: '-0.5px', transition: 'all 0.2s ease' }}
+              className="text-white m-0 font-extrabold tracking-tight transition-all duration-200"
             >
               🍜 Tran Gia Food
             </Title>
           </Link>
 
-          {/* Desktop Nav Links (Hidden on small mobile) */}
-          <div className="desktop-nav" style={{ display: 'flex', gap: 8, marginLeft: 16 }}>
+          {/* Desktop Nav Links */}
+          <div className="desktop-nav flex gap-2 ml-4">
             {navLinks.map((link) => {
               const isActive = pathname === link.key;
               return (
-                <Link key={link.key} href={link.key} prefetch={true} style={{ textDecoration: 'none' }}>
+                <Link key={link.key} href={link.key} prefetch={true} className="no-underline">
                   <Button
                     type={isActive ? 'primary' : 'text'}
                     icon={link.icon}
-                    className={`header-nav-btn ${isActive ? 'active' : ''}`}
-                    style={{
-                      color: '#ffffff',
-                      backgroundColor: isActive ? 'rgba(255, 255, 255, 0.25)' : 'transparent',
-                      fontWeight: isActive ? 700 : 500,
-                      borderRadius: 8,
-                      border: 'none',
-                    }}
+                    className={`header-nav-btn ${isActive ? 'active bg-white/25 font-bold' : 'bg-transparent font-medium'} text-white rounded-lg border-none`}
                   >
                     {link.label}
                   </Button>
@@ -119,19 +101,19 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
         </Space>
 
         {/* Desktop Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className="flex items-center gap-3">
           {/* Notifications & Language */}
           <Space size="small" align="center" className="desktop-nav">
             <Button
               type="text"
-              className="header-icon-btn"
-              icon={<GlobalOutlined style={{ color: '#ffffff', fontSize: 18 }} />}
+              className="header-icon-btn text-white text-lg"
+              icon={<GlobalOutlined className="text-white text-lg" />}
               title="Ngôn ngữ"
             />
             <Button
               type="text"
-              className="header-icon-btn"
-              icon={<BellOutlined style={{ color: '#ffffff', fontSize: 18 }} />}
+              className="header-icon-btn text-white text-lg"
+              icon={<BellOutlined className="text-white text-lg" />}
               title="Thông báo"
             />
           </Space>
@@ -140,12 +122,12 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
           {userName && (
             <div className="desktop-nav">
               <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
-                <Space className="header-user-badge" style={{ cursor: 'pointer' }}>
+                <Space className="header-user-badge cursor-pointer">
                   <Avatar
-                    style={{ backgroundColor: '#ffffff', color: adminDesignTokens.colors.primary }}
+                    className="bg-white text-orange-500 font-bold"
                     icon={<UserOutlined />}
                   />
-                  <Text data-testid="user-greeting" style={{ color: '#ffffff', fontWeight: 600 }}>
+                  <Text data-testid="user-greeting" className="text-white font-semibold">
                     {userName}
                   </Text>
                 </Space>
@@ -155,12 +137,11 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
 
           {/* Hamburger Menu Button (Mobile Trigger) */}
           <Button
-            className="mobile-menu-btn header-icon-btn"
+            className="mobile-menu-btn header-icon-btn hidden text-white text-xl"
             type="text"
-            icon={<MenuOutlined style={{ color: '#ffffff', fontSize: 20 }} />}
+            icon={<MenuOutlined className="text-white text-xl" />}
             onClick={() => setDrawerOpen(true)}
             aria-label="Mở menu quản trị"
-            style={{ display: 'none' }}
           />
         </div>
       </AntHeader>
@@ -169,10 +150,10 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
       <Drawer
         title={
           <Space>
-            <Avatar style={{ backgroundColor: adminDesignTokens.colors.primary }} icon={<UserOutlined />} />
+            <Avatar className="bg-orange-500 text-white" icon={<UserOutlined />} />
             <div>
-              <Text strong style={{ display: 'block' }}>{userName || 'Admin'}</Text>
-              <Text type="secondary" style={{ fontSize: 12 }}>Quản trị viên hệ thống</Text>
+              <Text strong className="block">{userName || 'Admin'}</Text>
+              <Text type="secondary" className="text-xs">Quản trị viên hệ thống</Text>
             </div>
           </Space>
         }
@@ -184,7 +165,7 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
         <Menu
           mode="inline"
           selectedKeys={[pathname]}
-          style={{ borderRight: 0 }}
+          className="border-r-0"
           items={navLinks.map((link) => ({
             key: link.key,
             icon: link.icon,
@@ -192,88 +173,22 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
           }))}
         />
 
-        <Divider style={{ margin: '16px 0' }} />
+        <Divider className="my-4" />
 
-        <div style={{ padding: '0 12px' }}>
-          <Space direction="vertical" style={{ width: '100%' }} size="middle">
-            <Button icon={<BellOutlined />} block style={{ textAlign: 'left' }}>
+        <div className="px-3">
+          <Space direction="vertical" className="w-full" size="middle">
+            <Button icon={<BellOutlined />} block className="text-left">
               Thông Báo Đơn Hàng
             </Button>
-            <Button icon={<SettingOutlined />} block style={{ textAlign: 'left' }}>
+            <Button icon={<SettingOutlined />} block className="text-left">
               Cài Đặt Hệ Thống
             </Button>
-            <Button danger icon={<LogoutOutlined />} block style={{ textAlign: 'left' }}>
+            <Button danger icon={<LogoutOutlined />} block className="text-left">
               Đăng Xuất
             </Button>
           </Space>
         </div>
       </Drawer>
-
-      {/* Responsive & Custom Hover CSS Styles */}
-      <style jsx global>{`
-        .header-brand-logo:hover h4 {
-          opacity: 0.9;
-          transform: scale(1.02);
-        }
-
-        .header-nav-btn {
-          color: #ffffff !important;
-          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        }
-
-        .header-nav-btn:hover {
-          background-color: rgba(255, 255, 255, 0.22) !important;
-          color: #ffffff !important;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
-        }
-
-        .header-nav-btn.active:hover {
-          background-color: rgba(255, 255, 255, 0.32) !important;
-        }
-
-        .header-icon-btn {
-          color: #ffffff !important;
-          border-radius: 50% !important;
-          width: 40px !important;
-          height: 40px !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        }
-
-        .header-icon-btn:hover {
-          background-color: rgba(255, 255, 255, 0.2) !important;
-          color: #ffffff !important;
-          transform: scale(1.12);
-        }
-
-        .header-user-badge {
-          padding: 2px 10px;
-          border-radius: 20px;
-          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .header-user-badge:hover {
-          background-color: rgba(255, 255, 255, 0.2);
-          transform: translateY(-1px);
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .mobile-menu-btn {
-          display: none !important;
-        }
-
-        @media (max-width: 768px) {
-          .desktop-nav {
-            display: none !important;
-          }
-          .mobile-menu-btn {
-            display: inline-flex !important;
-          }
-        }
-      `}</style>
     </>
   );
 };
