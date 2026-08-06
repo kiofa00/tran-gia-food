@@ -11,8 +11,8 @@ export const VehicleBadge: React.FC<VehicleBadgeProps> = ({ vehicle }) => {
   const icon = getVehicleIcon(vehicle);
 
   return (
-    <span style={{ whiteSpace: 'nowrap' }}>
-      <span style={{ marginRight: 6 }}>{icon}</span>
+    <span className="whitespace-nowrap">
+      <span className="mr-1.5">{icon}</span>
       {label}
     </span>
   );

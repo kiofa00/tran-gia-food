@@ -13,7 +13,7 @@ export const PlateBadge: React.FC<PlateBadgeProps> = ({ plate }) => {
   }
 
   return (
-    <Tag color="blue" style={{ fontSize: 13, padding: '2px 10px', fontWeight: 'bold' }}>
+    <Tag color="blue" className="text-xs px-2.5 py-0.5 font-bold rounded-md">
       {plate}
     </Tag>
   );

@@ -22,24 +22,21 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   return (
     <Card
       variant="borderless"
-      style={{
-        borderRadius: adminDesignTokens.borderRadius.lg,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-        height: '100%',
-      }}
+      className="rounded-xl shadow-xs h-full"
     >
       <Space align="center" size="middle">
         {React.isValidElement(icon)
-          ? React.cloneElement(icon as React.ReactElement<{ style?: React.CSSProperties }>, {
-              style: { fontSize: 32, color: iconColor },
+          ? React.cloneElement(icon as React.ReactElement<{ className?: string; style?: React.CSSProperties }>, {
+              className: 'text-3xl',
+              style: { color: iconColor },
             })
           : icon}
         <div>
           <Text type="secondary">{label}</Text>
-          <Title level={3} style={{ margin: 0 }}>
+          <Title level={3} className="m-0">
             {value}
           </Title>
-          {subText && <Text type="secondary" style={{ fontSize: 12 }}>{subText}</Text>}
+          {subText && <Text type="secondary" className="text-xs">{subText}</Text>}
         </div>
       </Space>
     </Card>

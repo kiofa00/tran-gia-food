@@ -35,30 +35,25 @@ export const SearchFilterBox: React.FC<SearchFilterBoxProps> = ({
   return (
     <Card
       variant="borderless"
-      style={{
-        backgroundColor: adminDesignTokens.colors.background,
-        borderRadius: adminDesignTokens.borderRadius.md,
-        padding: adminDesignTokens.padding.sm,
-        marginBottom: 16,
-      }}
+      className="bg-gray-50 rounded-lg p-3 mb-4"
     >
       <Row gutter={[12, 12]} align="middle" justify="space-between">
         <Col xs={24} sm={14} md={10}>
           <Input
             placeholder={searchPlaceholder}
-            prefix={<SearchOutlined style={{ color: adminDesignTokens.colors.textSecondary }} />}
+            prefix={<SearchOutlined className="text-gray-400" />}
             value={searchValue}
             onChange={(e) => onSearchChange(e.target.value)}
             allowClear
           />
         </Col>
         <Col xs={24} sm={10} md={14}>
-          <Space wrap align="center" style={{ width: '100%', justifyContent: 'flex-end' }}>
+          <Space wrap align="center" className="w-full justify-end">
             {filterOptions.length > 0 && onFilterChange && (
               <>
                 <FilterOutlined style={{ color: adminDesignTokens.colors.textSecondary }} />
                 <Text type="secondary">{filterLabel}</Text>
-                <Select value={filterValue} onChange={onFilterChange} style={{ minWidth: 160 }}>
+                <Select value={filterValue} onChange={onFilterChange} className="min-w-40">
                   {filterOptions.map((opt) => (
                     <Option key={opt.value} value={opt.value}>
                       {opt.label}
