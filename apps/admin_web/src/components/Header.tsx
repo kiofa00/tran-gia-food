@@ -16,6 +16,7 @@ import {
   TagOutlined,
   DollarOutlined,
   BarChartOutlined,
+  FileTextOutlined,
 } from '@ant-design/icons';
 import { adminDesignTokens } from '../theme/tokens';
 
@@ -59,6 +60,7 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
     { key: '/vouchers', label: 'Mã Giảm Giá', icon: <TagOutlined /> },
     { key: '/commissions', label: 'Hoa Hồng & Ví', icon: <DollarOutlined /> },
     { key: '/analytics', label: 'Báo Cáo Financials', icon: <BarChartOutlined /> },
+    { key: '/cms', label: 'Quản Lý CMS', icon: <FileTextOutlined /> },
   ];
 
   return (
@@ -80,7 +82,7 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
       >
         {/* Brand Logo & Desktop Navigation */}
         <Space size="large" align="center">
-          <Link href="/" style={{ textDecoration: 'none' }}>
+          <Link href="/" prefetch={true} style={{ textDecoration: 'none' }}>
             <Title
               data-testid="header-title"
               level={4}
@@ -95,7 +97,7 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
             {navLinks.map((link) => {
               const isActive = pathname === link.key;
               return (
-                <Link key={link.key} href={link.key} style={{ textDecoration: 'none' }}>
+                <Link key={link.key} href={link.key} prefetch={true} style={{ textDecoration: 'none' }}>
                   <Button
                     type={isActive ? 'primary' : 'text'}
                     icon={link.icon}
@@ -122,12 +124,10 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
               type="text"
               icon={<GlobalOutlined style={{ color: '#ffffff', fontSize: 18 }} />}
             />
-            <Badge count={5} size="small">
-              <Button
-                type="text"
-                icon={<BellOutlined style={{ color: '#ffffff', fontSize: 18 }} />}
-              />
-            </Badge>
+            <Button
+              type="text"
+              icon={<BellOutlined style={{ color: '#ffffff', fontSize: 18 }} />}
+            />
           </Space>
 
           {/* User profile dropdown (Desktop) */}
@@ -154,6 +154,7 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
             icon={<MenuOutlined style={{ color: '#ffffff', fontSize: 20 }} />}
             onClick={() => setDrawerOpen(true)}
             aria-label="Mở menu quản trị"
+            style={{ display: 'none' }}
           />
         </div>
       </AntHeader>
@@ -189,11 +190,9 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
 
         <div style={{ padding: '0 12px' }}>
           <Space direction="vertical" style={{ width: '100%' }} size="middle">
-            <Badge count={5} size="small" style={{ marginRight: 8 }}>
-              <Button icon={<BellOutlined />} block style={{ textAlign: 'left' }}>
-                Thông Báo Đơn Hàng (5)
-              </Button>
-            </Badge>
+            <Button icon={<BellOutlined />} block style={{ textAlign: 'left' }}>
+              Thông Báo Đơn Hàng
+            </Button>
             <Button icon={<SettingOutlined />} block style={{ textAlign: 'left' }}>
               Cài Đặt Hệ Thống
             </Button>
@@ -206,17 +205,15 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
 
       {/* Responsive CSS Media Queries */}
       <style jsx global>{`
+        .mobile-menu-btn {
+          display: none !important;
+        }
         @media (max-width: 768px) {
           .desktop-nav {
             display: none !important;
           }
           .mobile-menu-btn {
             display: inline-flex !important;
-          }
-        }
-        @media (min-width: 769px) {
-          .mobile-menu-btn {
-            display: none !important;
           }
         }
       `}</style>

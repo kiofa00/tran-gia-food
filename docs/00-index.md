@@ -25,8 +25,9 @@
 | [14-roadmap.md](./14-roadmap.md) | Lộ trình phát triển theo phase |
 | [15-monorepo.md](./15-monorepo.md) | Cấu trúc monorepo, shared packages, melos setup |
 | [16-design-tokens.md](./16-design-tokens.md) | Quy định & hướng dẫn triển khai hệ thống Design Tokens |
-| [implementation_plan.md](./implementation_plan.md) | Bản thiết kế hệ thống kỹ thuật tổng thể System Design Plan (v3) |
+| [17-strapi-cms-architecture.md](./17-strapi-cms-architecture.md) | Kiến trúc Quản lý Nội dung Toàn diện (Universal Headless CMS) |
 | [18-client-implementation-plan.md](./18-client-implementation-plan.md) | Bản kế hoạch triển khai dành cho Khách hàng & Đối tác (Non-technical) |
+| [implementation_plan.md](./implementation_plan.md) | Bản thiết kế hệ thống kỹ thuật tổng thể System Design Plan (v3) |
 
 ---
 

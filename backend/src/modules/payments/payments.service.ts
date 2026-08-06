@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
-import { CreatePaymentUrlDto, MoMoWebhookDto } from './dto/payment.dto';
+import { CreatePaymentUrlDto, MoMoWebhookDto, VNPayWebhookDto } from './dto/payment.dto';
 import { PaymentStatus, PaymentMethod } from '@prisma/client';
 
 @Injectable()
@@ -22,7 +22,6 @@ export class PaymentsService {
     }
 
     if (order.paymentMethod === PaymentMethod.momo) {
-      // Mock / Real MoMo Payment Gateway URL creation
       const payUrl = `https://test-payment.momo.vn/v2/gateway/api/create?orderId=${order.id}&amount=${order.totalAmount}`;
       await this.prisma.payment.upsert({
         where: { orderId: order.id },
@@ -41,7 +40,22 @@ export class PaymentsService {
       return { payUrl, orderId: order.id, amount: order.totalAmount };
     }
 
-    return { payUrl: `https://vnpay.vn/pay?orderId=${order.id}`, amount: order.totalAmount };
+    const payUrl = `https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?vnp_TxnRef=${order.id}&vnp_Amount=${order.totalAmount * 100}`;
+    await this.prisma.payment.upsert({
+      where: { orderId: order.id },
+      create: {
+        orderId: order.id,
+        method: PaymentMethod.bank,
+        amount: order.totalAmount,
+        status: PaymentStatus.pending,
+      },
+      update: {
+        amount: order.totalAmount,
+        status: PaymentStatus.pending,
+      },
+    });
+
+    return { payUrl, orderId: order.id, amount: order.totalAmount };
   }
 
   async handleMoMoWebhook(dto: MoMoWebhookDto) {
@@ -49,9 +63,16 @@ export class PaymentsService {
 
     const status = dto.resultCode === '0' ? PaymentStatus.paid : PaymentStatus.failed;
 
-    await this.prisma.payment.update({
+    await this.prisma.payment.upsert({
       where: { orderId: dto.orderId },
-      data: {
+      create: {
+        orderId: dto.orderId,
+        method: PaymentMethod.momo,
+        amount: parseFloat(dto.amount || '0'),
+        status,
+        transactionId: dto.requestId,
+      },
+      update: {
         status,
         transactionId: dto.requestId,
         gatewayResponse: dto as any,
@@ -61,6 +82,37 @@ export class PaymentsService {
     if (status === PaymentStatus.paid) {
       await this.prisma.order.update({
         where: { id: dto.orderId },
+        data: { paymentStatus: PaymentStatus.paid },
+      });
+    }
+
+    return { RspCode: '00', Message: 'Confirm Success' };
+  }
+
+  async handleVNPayWebhook(dto: VNPayWebhookDto) {
+    this.logger.log(`Received VNPay Webhook for order ${dto.vnp_TxnRef}: responseCode=${dto.vnp_ResponseCode}`);
+
+    const status = dto.vnp_ResponseCode === '00' ? PaymentStatus.paid : PaymentStatus.failed;
+
+    await this.prisma.payment.upsert({
+      where: { orderId: dto.vnp_TxnRef },
+      create: {
+        orderId: dto.vnp_TxnRef,
+        method: PaymentMethod.bank,
+        amount: parseFloat(dto.vnp_Amount || '0') / 100,
+        status,
+        transactionId: dto.vnp_TransactionNo,
+      },
+      update: {
+        status,
+        transactionId: dto.vnp_TransactionNo,
+        gatewayResponse: dto as any,
+      },
+    });
+
+    if (status === PaymentStatus.paid) {
+      await this.prisma.order.update({
+        where: { id: dto.vnp_TxnRef },
         data: { paymentStatus: PaymentStatus.paid },
       });
     }

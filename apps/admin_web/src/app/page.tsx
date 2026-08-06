@@ -1,19 +1,20 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Card, Table, Tag, Button, Row, Col, Statistic, Space, Typography, Spin, message } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Card, Row, Col, Statistic, Typography, Table, Tag, Button, Space, Skeleton, message } from 'antd';
 import {
   DollarOutlined,
   ShoppingOutlined,
   UserOutlined,
   CarOutlined,
+  ReloadOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
   ClockCircleOutlined,
-  ReloadOutlined,
 } from '@ant-design/icons';
 import { adminDesignTokens } from '../theme/tokens';
 import { mapKycStatus } from '../utils/formatters';
+import { useDashboardStatsQuery, usePendingShippersQuery, useVerifyShipperKycMutation } from '../hooks/useAdmin';
 
 const { Title, Text } = Typography;
 
@@ -28,54 +29,53 @@ interface DashboardStats {
 }
 
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useDashboardStatsQuery();
+  const { data: pendingShippersRaw, isLoading: shippersLoading, refetch: refetchShippers } = usePendingShippersQuery();
+  const verifyKycMutation = useVerifyShipperKycMutation();
 
-  const fetchDashboardStats = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('http://localhost:3000/api/v1/admin/overview');
-      if (res.ok) {
-        const data = await res.json();
-        setStats(data);
-      } else {
-        // Fallback demo data if backend server is not running
-        setStats({
-          totalUsers: 1250,
-          totalRestaurants: 48,
-          totalShippers: 154,
-          totalOrders: 4820,
-          totalPlatformRevenue: 125450000,
-          totalFoodGmv: 627250000,
-          totalShipGmv: 45200000,
-        });
-      }
-    } catch {
-      // Fallback demo data on network error
-      setStats({
-        totalUsers: 1250,
-        totalRestaurants: 48,
-        totalShippers: 154,
-        totalOrders: 4820,
-        totalPlatformRevenue: 125450000,
-        totalFoodGmv: 627250000,
-        totalShipGmv: 45200000,
-      });
-    } finally {
-      setLoading(false);
-    }
+  const loading = statsLoading || shippersLoading;
+
+  const pendingShippers = (pendingShippersRaw || []).map((item: any) => ({
+    key: item.id,
+    id: item.id,
+    name: item.user?.name || 'Tài Xế Chưa Đặt Tên',
+    phone: item.user?.phone || 'N/A',
+    vehicle: item.vehicleType || 'Xe Máy',
+    plate: item.licensePlate || 'N/A',
+    status: item.kycStatus || 'PENDING',
+  }));
+
+  const handleApproveKyc = (id: string, name: string) => {
+    verifyKycMutation.mutate(
+      { id, action: 'approve' },
+      {
+        onSuccess: () => {
+          message.success(`Đã duyệt eKYC thành công cho tài xế ${name}!`);
+        },
+        onError: () => {
+          message.error('Không thể cập nhật trạng thái eKYC');
+        },
+      },
+    );
   };
 
-  useEffect(() => {
-    fetchDashboardStats();
-  }, []);
-
-  const handleApproveKyc = (name: string) => {
-    message.success(`Đã duyệt eKYC thành công cho tài xế ${name}!`);
+  const handleRejectKyc = (id: string, name: string) => {
+    verifyKycMutation.mutate(
+      { id, action: 'reject' },
+      {
+        onSuccess: () => {
+          message.error(`Đã từ chối eKYC của tài xế ${name}.`);
+        },
+        onError: () => {
+          message.error('Không thể cập nhật trạng thái eKYC');
+        },
+      },
+    );
   };
 
-  const handleRejectKyc = (name: string) => {
-    message.error(`Đã từ chối eKYC của tài xế ${name}.`);
+  const handleRefresh = () => {
+    refetchStats();
+    refetchShippers();
   };
 
   const columns = [
@@ -125,40 +125,21 @@ export default function AdminDashboardPage() {
       title: 'Hành Động',
       key: 'action',
       width: 260,
-      render: (record: { name: string }) => (
+      render: (record: { id: string; name: string }) => (
         <Space size="small" style={{ whiteSpace: 'nowrap' }}>
           <Button
             type="primary"
             icon={<CheckCircleOutlined />}
             style={{ backgroundColor: adminDesignTokens.colors.statusApproved }}
-            onClick={() => handleApproveKyc(record.name)}
+            onClick={() => handleApproveKyc(record.id, record.name)}
           >
             Duyệt eKYC
           </Button>
-          <Button danger icon={<CloseCircleOutlined />} onClick={() => handleRejectKyc(record.name)}>
+          <Button danger icon={<CloseCircleOutlined />} onClick={() => handleRejectKyc(record.id, record.name)}>
             Từ Chối
           </Button>
         </Space>
       ),
-    },
-  ];
-
-  const dataSource = [
-    {
-      key: '1',
-      name: 'Nguyễn Văn Cường',
-      phone: '0912 345 678',
-      vehicle: 'Xe Máy (Honda Wave)',
-      plate: '59P1-999.88',
-      status: 'PENDING',
-    },
-    {
-      key: '2',
-      name: 'Lê Hoàng Nam',
-      phone: '0987 654 321',
-      vehicle: 'Xe Máy (Yamaha Exciter)',
-      plate: '59X2-123.45',
-      status: 'PENDING',
     },
   ];
 
@@ -171,77 +152,77 @@ export default function AdminDashboardPage() {
           </Title>
           <Text type="secondary">Tích hợp API Realtime theo dõi doanh thu, GMV & tài xế toàn quốc</Text>
         </div>
-        <Button type="primary" ghost icon={<ReloadOutlined />} onClick={fetchDashboardStats} loading={loading} style={{ fontWeight: 600 }}>
+        <Button type="primary" ghost icon={<ReloadOutlined />} onClick={handleRefresh} loading={loading} style={{ fontWeight: 600 }}>
           Làm mới số liệu
         </Button>
       </div>
 
-      {loading && !stats ? (
-        <div style={{ textAlign: 'center', padding: '60px 0' }}>
-          <Spin size="large" tip="Đang tải dữ liệu realtime từ Backend..." />
-        </div>
-      ) : (
-        <>
-          {/* Antd Stat Cards */}
-          <Row gutter={[16, 16]} style={{ marginBottom: 32 }}>
-            <Col xs={24} sm={12} lg={6}>
-              <Card bordered={false}>
-                <Statistic
-                  title="Tổng Doanh Thu Platform"
-                  value={stats?.totalPlatformRevenue ?? 0}
-                  precision={0}
-                  suffix="đ"
-                  prefix={<DollarOutlined style={{ color: adminDesignTokens.colors.primary }} />}
-                  valueStyle={{ color: adminDesignTokens.colors.textPrimary, fontWeight: 800 }}
-                />
-                <Text type="success" style={{ fontWeight: 600 }}>▲ +18.5% so với tháng trước</Text>
-              </Card>
-            </Col>
-            <Col xs={24} sm={12} lg={6}>
-              <Card bordered={false}>
-                <Statistic
-                  title="Tổng GMV Đặt Món"
-                  value={stats?.totalFoodGmv ?? 0}
-                  precision={0}
-                  suffix="đ"
-                  prefix={<ShoppingOutlined style={{ color: adminDesignTokens.colors.primary }} />}
-                  valueStyle={{ color: adminDesignTokens.colors.textPrimary, fontWeight: 800 }}
-                />
-                <Text type="success" style={{ fontWeight: 600 }}>▲ +24.2% GMV đồ ăn</Text>
-              </Card>
-            </Col>
-            <Col xs={24} sm={12} lg={6}>
-              <Card bordered={false}>
-                <Statistic
-                  title="Tổng Số Đơn Hàng"
-                  value={stats?.totalOrders ?? 0}
-                  suffix="đơn"
-                  prefix={<UserOutlined style={{ color: adminDesignTokens.colors.primary }} />}
-                  valueStyle={{ color: adminDesignTokens.colors.textPrimary, fontWeight: 800 }}
-                />
-                <Text style={{ color: adminDesignTokens.colors.primary, fontWeight: 600 }}>● 98.2% giao thành công</Text>
-              </Card>
-            </Col>
-            <Col xs={24} sm={12} lg={6}>
-              <Card bordered={false}>
-                <Statistic
-                  title="Shipper Đang Hoạt Động"
-                  value={stats?.totalShippers ?? 0}
-                  suffix="tài xế"
-                  prefix={<CarOutlined style={{ color: adminDesignTokens.colors.primary }} />}
-                  valueStyle={{ color: adminDesignTokens.colors.textPrimary, fontWeight: 800 }}
-                />
-                <Text type="warning" style={{ fontWeight: 600 }}>⏳ {dataSource.length} hồ sơ chờ duyệt eKYC</Text>
-              </Card>
-            </Col>
-          </Row>
+      {/* Antd Stat Cards */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 32 }}>
+        {loading || !stats
+          ? [1, 2, 3, 4].map((key) => (
+              <Col xs={24} sm={12} lg={6} key={key}>
+                <Card variant="borderless">
+                  <Skeleton active paragraph={{ rows: 1 }} />
+                </Card>
+              </Col>
+            ))
+          : (
+              <>
+                <Col xs={24} sm={12} lg={6}>
+                  <Card variant="borderless">
+                    <Statistic
+                      title="Tổng Doanh Thu Platform"
+                      value={stats.totalPlatformRevenue}
+                      precision={0}
+                      suffix="đ"
+                      prefix={<DollarOutlined style={{ color: adminDesignTokens.colors.primary }} />}
+                      valueStyle={{ color: adminDesignTokens.colors.textPrimary, fontWeight: 800 }}
+                    />
+                  </Card>
+                </Col>
+                <Col xs={24} sm={12} lg={6}>
+                  <Card variant="borderless">
+                    <Statistic
+                      title="Tổng GMV Đặt Món"
+                      value={stats.totalFoodGmv}
+                      precision={0}
+                      suffix="đ"
+                      prefix={<ShoppingOutlined style={{ color: adminDesignTokens.colors.primary }} />}
+                      valueStyle={{ color: adminDesignTokens.colors.textPrimary, fontWeight: 800 }}
+                    />
+                  </Card>
+                </Col>
+                <Col xs={24} sm={12} lg={6}>
+                  <Card variant="borderless">
+                    <Statistic
+                      title="Tổng Số Đơn Hàng"
+                      value={stats.totalOrders}
+                      suffix="đơn"
+                      prefix={<UserOutlined style={{ color: adminDesignTokens.colors.primary }} />}
+                      valueStyle={{ color: adminDesignTokens.colors.textPrimary, fontWeight: 800 }}
+                    />
+                  </Card>
+                </Col>
+                <Col xs={24} sm={12} lg={6}>
+                  <Card variant="borderless">
+                    <Statistic
+                      title="Shipper Đang Hoạt Động"
+                      value={stats.totalShippers}
+                      suffix="tài xế"
+                      prefix={<CarOutlined style={{ color: adminDesignTokens.colors.primary }} />}
+                      valueStyle={{ color: adminDesignTokens.colors.textPrimary, fontWeight: 800 }}
+                    />
+                  </Card>
+                </Col>
+              </>
+            )}
+      </Row>
 
-          {/* Antd Shipper Table */}
-          <Card title="📋 Danh Sách Shipper Chờ Duyệt eKYC" bordered={false}>
-            <Table columns={columns} dataSource={dataSource} pagination={false} scroll={{ x: 1100 }} />
-          </Card>
-        </>
-      )}
+      {/* Antd Shipper Table */}
+      <Card title="📋 Danh Sách Shipper Chờ Duyệt eKYC" variant="borderless">
+        <Table columns={columns} dataSource={pendingShippers} loading={loading} pagination={false} scroll={{ x: 1100 }} />
+      </Card>
     </div>
   );
 }

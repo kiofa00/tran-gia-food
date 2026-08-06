@@ -33,102 +33,55 @@ interface VoucherRecord {
   isActive: boolean;
 }
 
+import { useVouchersQuery, useCreateVoucherMutation } from '../../hooks/useVouchers';
+
 export default function VoucherManagementPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
-  const [vouchers, setVouchers] = useState<VoucherRecord[]>([]);
 
-  React.useEffect(() => {
-    fetchVouchers();
-  }, []);
+  const { data: rawVouchers, isLoading: loading } = useVouchersQuery();
+  const createVoucherMutation = useCreateVoucherMutation();
 
-  const fetchVouchers = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('http://localhost:3000/api/v1/admin/vouchers');
-      if (res.ok) {
-        const data = await res.json();
-        setVouchers(
-          data.map((item: any, idx: number) => ({
-            key: item.id || String(idx + 1),
-            code: item.code,
-            type: item.type || 'Platform',
-            discountType: item.discountType || 'fixed',
-            discountValue: item.discountValue || 50000,
-            minOrderValue: item.minOrderValue || 100000,
-            validFrom: item.validFrom || '2026-08-01',
-            validTo: item.validTo || '2026-08-31',
-            usedCount: item.usedCount || 0,
-            totalLimit: item.totalLimit || 500,
-            isActive: item.isActive !== undefined ? item.isActive : true,
-          })),
-        );
-      } else {
-        throw new Error();
-      }
-    } catch {
-      setVouchers([
-        {
-          key: '1',
-          code: 'TRANGIA50K',
-          type: 'Platform',
-          discountType: 'fixed',
-          discountValue: 50000,
-          minOrderValue: 150000,
-          validFrom: '2026-08-01',
-          validTo: '2026-08-31',
-          usedCount: 142,
-          totalLimit: 500,
-          isActive: true,
-        },
-        {
-          key: '2',
-          code: 'FREESHIP20',
-          type: 'FreeShip',
-          discountType: 'fixed',
-          discountValue: 20000,
-          minOrderValue: 80000,
-          validFrom: '2026-08-05',
-          validTo: '2026-08-20',
-          usedCount: 89,
-          totalLimit: 300,
-          isActive: true,
-        },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  const vouchers: VoucherRecord[] = (rawVouchers || []).map((item: any, idx: number) => ({
+    key: item.id || String(idx + 1),
+    code: item.code,
+    type: item.type || 'Platform',
+    discountType: item.discountType || 'fixed',
+    discountValue: item.discountValue || 50000,
+    minOrderValue: item.minOrderValue || 100000,
+    validFrom: item.validFrom || '2026-08-01',
+    validTo: item.validTo || '2026-08-31',
+    usedCount: item.usedCount || 0,
+    totalLimit: item.totalLimit || 500,
+    isActive: item.isActive !== undefined ? item.isActive : true,
+  }));
 
   const handleToggleActive = (key: string, checked: boolean) => {
-    setVouchers((prev) =>
-      prev.map((item) => (item.key === key ? { ...item, isActive: checked } : item))
-    );
     message.success(`Đã ${checked ? 'kích hoạt' : 'tạm dừng'} mã giảm giá thành công!`);
   };
 
   const handleCreateVoucher = (values: any) => {
-    const newVoucher: VoucherRecord = {
-      key: Date.now().toString(),
+    const payload = {
       code: values.code.toUpperCase(),
       type: values.type || 'Platform',
       discountType: values.discountType,
       discountValue: values.discountValue,
-      maxDiscount: values.maxDiscount,
       minOrderValue: values.minOrderValue || 0,
+      totalLimit: values.totalLimit || 100,
       validFrom: values.validDates ? values.validDates[0].format('YYYY-MM-DD') : '2026-08-05',
       validTo: values.validDates ? values.validDates[1].format('YYYY-MM-DD') : '2026-08-31',
-      usedCount: 0,
-      totalLimit: values.totalLimit || 100,
-      isActive: true,
     };
 
-    setVouchers([newVoucher, ...vouchers]);
-    setIsModalOpen(false);
-    form.resetFields();
-    message.success(`Tạo mã giảm giá ${newVoucher.code} thành công!`);
+    createVoucherMutation.mutate(payload, {
+      onSuccess: () => {
+        setIsModalOpen(false);
+        form.resetFields();
+        message.success(`Tạo mã giảm giá ${payload.code} thành công!`);
+      },
+      onError: () => {
+        message.error('Không thể tạo mã giảm giá');
+      },
+    });
   };
 
   const columns = [
@@ -243,7 +196,7 @@ export default function VoucherManagementPage() {
       </div>
 
       {/* Voucher Table */}
-      <Card bordered={false} style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+      <Card variant="borderless" style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
         <Table columns={columns} dataSource={vouchers} pagination={false} scroll={{ x: 1130 }} />
       </Card>
 

@@ -5,48 +5,24 @@ import { Card, Table, Tag, Typography, Badge } from 'antd';
 import { CompassOutlined, CarOutlined } from '@ant-design/icons';
 import { adminDesignTokens } from '../../theme/tokens';
 import { mapShipperStatus } from '../../utils/formatters';
+import { useFleetQuery } from '../../hooks/useFleet';
 
 const { Title, Text } = Typography;
 
 export default function LiveFleetMonitorPage() {
-  const [loading, setLoading] = React.useState(false);
-  const [shippers, setShippers] = React.useState<any[]>([]);
+  const { data: rawShippers, isLoading: loading } = useFleetQuery();
 
-  React.useEffect(() => {
-    fetchFleetData();
-  }, []);
-
-  const fetchFleetData = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('http://localhost:3000/api/v1/admin/fleet');
-      if (res.ok) {
-        const data = await res.json();
-        setShippers(
-          data.map((item: any, idx: number) => ({
-            key: item.id || String(idx + 1),
-            id: item.id || `S${idx + 1}`,
-            name: item.name || 'Nguyễn Văn Cường',
-            phone: item.phone || '0912 345 678',
-            vehicle: item.vehicle || 'Honda Wave (59P1-999.88)',
-            lat: item.location?.lat || 10.7626,
-            lng: item.location?.lng || 106.6822,
-            status: item.status || 'DELIVERING',
-          })),
-        );
-      } else {
-        throw new Error();
-      }
-    } catch {
-      setShippers([
-        { key: '1', id: 'S1', name: 'Nguyễn Văn Cường', phone: '0912 345 678', vehicle: 'Honda Wave (59P1-999.88)', lat: 10.7626, lng: 106.6822, status: 'DELIVERING' },
-        { key: '2', id: 'S2', name: 'Lê Hoàng Nam', phone: '0987 654 321', vehicle: 'Yamaha Exciter (59X2-123.45)', lat: 10.7550, lng: 106.6800, status: 'IDLE' },
-        { key: '3', id: 'S3', name: 'Phan Thanh Bình', phone: '0903 111 222', vehicle: 'Honda Winner (59Z1-888.99)', lat: 10.7700, lng: 106.6900, status: 'PICKING_UP' },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const shippers = (rawShippers || []).map((item: any, idx: number) => ({
+    key: item.id || String(idx + 1),
+    id: item.id || `S${idx + 1}`,
+    name: item.name || 'Tài Xế',
+    phone: item.phone || 'N/A',
+    vehicle: item.vehicle || 'Xe Máy',
+    plate: item.plate || 'N/A',
+    lat: item.lat || 10.7626 + (idx * 0.005),
+    lng: item.lng || 106.6822 + (idx * 0.005),
+    status: item.status || 'ONLINE',
+  }));
 
   const columns = [
     {
@@ -114,7 +90,7 @@ export default function LiveFleetMonitorPage() {
       </div>
 
       {/* Antd Live Map Card */}
-      <Card bordered={false} style={{ marginBottom: 24 }}>
+      <Card variant="borderless" style={{ marginBottom: 24 }}>
         <div
           style={{
             height: '300px',
@@ -145,7 +121,7 @@ export default function LiveFleetMonitorPage() {
       </Card>
 
       {/* Antd Table */}
-      <Card title={`⚡ Danh Sách Tài Xế Đang Online (${shippers.length})`} bordered={false} loading={loading}>
+      <Card title={`⚡ Danh Sách Tài Xế Đang Online (${shippers.length})`} variant="borderless" loading={loading}>
         <Table columns={columns} dataSource={shippers} pagination={false} scroll={{ x: 1060 }} />
       </Card>
     </div>

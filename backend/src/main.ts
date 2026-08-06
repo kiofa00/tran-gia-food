@@ -12,11 +12,27 @@ async function bootstrap() {
   // Global prefix
   app.setGlobalPrefix('api/v1');
 
-  // CORS
+  // CORS (Allow Admin Web localhost:3001, Strapi CMS localhost:1337 & mobile apps)
   app.enableCors({
-    origin: process.env.CORS_ORIGINS?.split(',') ?? '*',
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const allowedOrigins = [
+        'http://localhost:3001',
+        'http://localhost:3000',
+        'http://localhost:1337',
+        'http://127.0.0.1:3001',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:1337',
+        ...(process.env.CORS_ORIGINS?.split(',') ?? []),
+      ];
+      if (allowedOrigins.includes(origin) || origin.startsWith('http://localhost:')) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   });
 
   // Global validation pipe

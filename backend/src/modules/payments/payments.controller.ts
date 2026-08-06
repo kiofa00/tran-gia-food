@@ -1,7 +1,7 @@
 import { Controller, Post, Get, Body, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { PaymentsService } from './payments.service';
-import { CreatePaymentUrlDto, MoMoWebhookDto } from './dto/payment.dto';
+import { CreatePaymentUrlDto, MoMoWebhookDto, VNPayWebhookDto } from './dto/payment.dto';
 import { JwtAuthGuard, Public } from '../../common/guards/jwt-auth.guard';
 
 @ApiTags('payments')
@@ -22,6 +22,13 @@ export class PaymentsController {
   @ApiOperation({ summary: 'Webhook callback từ MoMo' })
   momoWebhook(@Body() dto: MoMoWebhookDto) {
     return this.paymentsService.handleMoMoWebhook(dto);
+  }
+
+  @Public()
+  @Post('webhook/vnpay')
+  @ApiOperation({ summary: 'Webhook callback từ VNPay IPN' })
+  vnpayWebhook(@Body() dto: VNPayWebhookDto) {
+    return this.paymentsService.handleVNPayWebhook(dto);
   }
 
   @Get('status/:orderId')

@@ -1,0 +1,27 @@
+{
+  "name": "@trangia/eslint-config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "base.js",
+    "next.js",
+    "node.js"
+  ],
+  "exports": {
+    "./base": "./base.js",
+    "./next-js": "./next.js",
+    "./node": "./node.js"
+  },
+  "devDependencies": {
+    "eslint": "^9.15.0",
+    "@next/eslint-plugin-next": "^16.3.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-turbo": "^2.3.0",
+    "typescript-eslint": "^8.16.0",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "eslint-plugin-sonarjs": "^3.0.0"
+  }
+}

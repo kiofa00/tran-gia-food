@@ -1,0 +1,41 @@
+{
+  "kind": "collectionType",
+  "collectionName": "translations",
+  "info": {
+    "singularName": "translation",
+    "pluralName": "translations",
+    "displayName": "Dynamic Translation & Text Copy",
+    "description": "Universal dynamic text labels and i18n dictionary for all apps"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "key": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "locale": {
+      "type": "enumeration",
+      "enum": ["vi", "en"],
+      "default": "vi",
+      "required": true
+    },
+    "appTarget": {
+      "type": "enumeration",
+      "enum": ["CUSTOMER", "SHIPPER", "RESTAURANT", "ADMIN_WEB", "ALL"],
+      "default": "ALL",
+      "required": true
+    },
+    "value": {
+      "type": "text",
+      "required": true
+    },
+    "category": {
+      "type": "string",
+      "default": "GENERAL"
+    }
+  }
+}

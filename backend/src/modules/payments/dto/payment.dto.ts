@@ -17,3 +17,11 @@ export class MoMoWebhookDto {
   @IsString() message: string;
   @IsOptional() @IsObject() extraData?: any;
 }
+
+export class VNPayWebhookDto {
+  @IsString() vnp_TxnRef: string;
+  @IsString() vnp_Amount: string;
+  @IsString() vnp_ResponseCode: string; // '00' = success
+  @IsString() vnp_TransactionNo: string;
+  @IsString() vnp_BankCode: string;
+}
