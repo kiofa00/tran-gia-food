@@ -17,20 +17,17 @@
       "required": true,
       "unique": true
     },
-    "locale": {
-      "type": "enumeration",
-      "enum": ["vi", "en"],
-      "default": "vi",
+    "vi": {
+      "type": "text",
       "required": true
+    },
+    "en": {
+      "type": "text"
     },
     "appTarget": {
       "type": "enumeration",
       "enum": ["CUSTOMER", "SHIPPER", "RESTAURANT", "ADMIN_WEB", "ALL"],
       "default": "ALL",
-      "required": true
-    },
-    "value": {
-      "type": "text",
       "required": true
     },
     "category": {

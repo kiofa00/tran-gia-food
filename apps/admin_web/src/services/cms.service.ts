@@ -1,9 +1,4 @@
-import axios from 'axios';
-
-const cmsClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:1337',
-  timeout: 5000,
-});
+import { apiClient } from './apiClient';
 
 export interface CmsBannerItem {
   id: string | number;
@@ -18,31 +13,36 @@ export interface CmsTranslationItem {
   key: string;
   vi: string;
   en: string;
+  appTarget?: string;
+  category?: string;
+}
+
+export interface CmsFaqItem {
+  id: string | number;
+  question: string;
+  answer: string;
+  category?: string;
+  targetApp?: string;
 }
 
 export interface CmsStatusResponse {
   isOnline: boolean;
   banners: CmsBannerItem[];
   translations: CmsTranslationItem[];
+  faqs?: CmsFaqItem[];
 }
 
 export const cmsService = {
   getCmsData: async (): Promise<CmsStatusResponse> => {
     try {
-      const [bannersRes, transRes] = await Promise.all([
-        cmsClient.get('/api/banners'),
-        cmsClient.get('/api/translations'),
-      ]);
-      return {
-        isOnline: true,
-        banners: bannersRes.data?.data || [],
-        translations: transRes.data?.data || [],
-      };
+      const res = await apiClient.get<CmsStatusResponse>('/cms/status');
+      return res.data;
     } catch {
       return {
         isOnline: false,
         banners: [],
         translations: [],
+        faqs: [],
       };
     }
   },

@@ -22,15 +22,29 @@ export interface TopRestaurantItem {
   revenue: number;
 }
 
+export interface AnalyticsSummary {
+  totalGmv: number;
+  platformRevenue: number;
+  totalOrders: number;
+  avgOrderValue: number;
+  growthRate: number;
+  comparisonLabel: string;
+}
+
 export interface AnalyticsResponse {
+  range?: string;
+  summary?: AnalyticsSummary;
   revenueTrend?: RevenueTrendItem[];
   paymentMethods?: PaymentMethodItem[];
+  paymentSplit?: PaymentMethodItem[];
   topRestaurants?: TopRestaurantItem[];
 }
 
 export const analyticsService = {
-  getAnalyticsData: async (): Promise<AnalyticsResponse> => {
-    const res = await apiClient.get<AnalyticsResponse>('/admin/analytics');
+  getAnalyticsData: async (range?: string): Promise<AnalyticsResponse> => {
+    const res = await apiClient.get<AnalyticsResponse>('/admin/analytics', {
+      params: { range },
+    });
     return res.data;
   },
 };

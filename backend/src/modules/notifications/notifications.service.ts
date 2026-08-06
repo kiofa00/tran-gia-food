@@ -3,7 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import { SendNotificationDto } from './dto/notification.dto';
-import { Order } from '@prisma/client';
+import { Order, Prisma } from '@prisma/client';
 
 @Injectable()
 export class NotificationsService {
@@ -22,7 +22,7 @@ export class NotificationsService {
         title: dto.title,
         body: dto.body,
         type: dto.type ?? 'general',
-        data: dto.data,
+        data: dto.data as Prisma.InputJsonValue,
       },
     });
 
@@ -81,7 +81,7 @@ export class NotificationsService {
     });
   }
 
-  private async sendFcmPush(fcmToken: string, title: string, _body: string, _data?: any) {
+  private async sendFcmPush(fcmToken: string, title: string, _body: string, _data?: Record<string, unknown>) {
     this.logger.log(`[FCM Push] → Token ${fcmToken.slice(0, 10)}... | Title: ${title}`);
     // Integration with Firebase Admin SDK:
     // await admin.messaging().send({ token: fcmToken, notification: { title, body }, data });

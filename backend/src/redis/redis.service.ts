@@ -10,11 +10,18 @@ export class RedisService implements OnModuleDestroy {
   constructor(private config: ConfigService) {
     this.client = new Redis(config.get<string>('REDIS_URL') ?? 'redis://localhost:6379', {
       lazyConnect: true,
-      maxRetriesPerRequest: 3,
+      maxRetriesPerRequest: 1,
+      enableOfflineQueue: false,
+      retryStrategy(times) {
+        if (times > 2) return null; // Stop retrying if Redis is offline
+        return 1000;
+      },
     });
 
     this.client.on('connect', () => this.logger.log('✅ Connected to Redis'));
-    this.client.on('error', (err) => this.logger.error('Redis error:', err.message));
+    this.client.on('error', () => {
+      // Suppress ECONNREFUSED logs when local Redis server is offline
+    });
   }
 
   /** Store OTP (expires in minutes) */

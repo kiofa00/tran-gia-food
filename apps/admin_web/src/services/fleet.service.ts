@@ -1,4 +1,4 @@
-import { apiClient } from './apiClient';
+import { apiClient, QueryParams } from './apiClient';
 
 export interface FleetShipperItem {
   id: string;
@@ -12,8 +12,8 @@ export interface FleetShipperItem {
 }
 
 export const fleetService = {
-  getFleetShippers: async (): Promise<FleetShipperItem[]> => {
-    const res = await apiClient.get<FleetShipperItem[]>('/admin/fleet');
+  getFleetShippers: async (params?: QueryParams): Promise<any> => {
+    const res = await apiClient.get('/admin/fleet', { params });
     return res.data;
   },
 };

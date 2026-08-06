@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Statistic, Typography, Table, Tag, Button, Space, Skeleton, message } from 'antd';
+import React, { useState } from 'react';
+import { Card, Row, Col, Statistic, Typography, Table, Tag, Button, Space, Skeleton, Empty, App, Input, Select } from 'antd';
 import {
   DollarOutlined,
   ShoppingOutlined,
@@ -11,49 +11,82 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   ClockCircleOutlined,
+  SearchOutlined,
+  FilterOutlined,
 } from '@ant-design/icons';
 import { adminDesignTokens } from '../theme/tokens';
-import { mapKycStatus } from '../utils/formatters';
+import { mapKycStatus, mapVehicleType } from '../utils/formatters';
+import { VehicleBadge, PlateBadge } from '../components';
 import { useDashboardStatsQuery, usePendingShippersQuery, useVerifyShipperKycMutation } from '../hooks/useAdmin';
+import { DashboardOverviewStats } from '../services/admin.service';
+import { PendingShipperRecord } from '../types';
 
 const { Title, Text } = Typography;
-
-interface DashboardStats {
-  totalUsers: number;
-  totalRestaurants: number;
-  totalShippers: number;
-  totalOrders: number;
-  totalPlatformRevenue: number;
-  totalFoodGmv: number;
-  totalShipGmv: number;
-}
+const { Option } = Select;
 
 export default function AdminDashboardPage() {
-  const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useDashboardStatsQuery();
-  const { data: pendingShippersRaw, isLoading: shippersLoading, refetch: refetchShippers } = usePendingShippersQuery();
+  const { message } = App.useApp();
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+
+  const { data: statsData, isLoading: statsLoading, refetch: refetchStats } = useDashboardStatsQuery();
+  const { data: rawShippersData, isLoading: shippersLoading, refetch: refetchShippers } = usePendingShippersQuery();
   const verifyKycMutation = useVerifyShipperKycMutation();
 
   const loading = statsLoading || shippersLoading;
 
-  const pendingShippers = (pendingShippersRaw || []).map((item: any) => ({
-    key: item.id,
-    id: item.id,
-    name: item.user?.name || 'Tài Xế Chưa Đặt Tên',
-    phone: item.user?.phone || 'N/A',
-    vehicle: item.vehicleType || 'Xe Máy',
-    plate: item.licensePlate || 'N/A',
-    status: item.kycStatus || 'PENDING',
-  }));
+  const stats: DashboardOverviewStats = statsData || {
+    totalUsers: 0,
+    totalRestaurants: 0,
+    totalShippers: 0,
+    totalOrders: 0,
+    totalPlatformRevenue: 0,
+    totalFoodGmv: 0,
+    totalShipGmv: 0,
+  };
+
+  const pendingShippers: PendingShipperRecord[] = (rawShippersData || []).map((item, idx: number) => {
+    const rawStatus = (item.ekycStatus || item.kycStatus || item.status || 'PENDING').toUpperCase();
+    const normalizedStatus = (rawStatus === 'VERIFIED' || rawStatus === 'APPROVED') ? 'APPROVED' : rawStatus;
+    return {
+      key: item.id || String(idx + 1),
+      id: item.id || `S${idx + 1}`,
+      name: item.user?.name || item.name || '',
+      phone: item.user?.phone || item.phone || '',
+      vehicle: mapVehicleType(item.vehicle || item.vehicleType),
+      plate: item.plate || item.licensePlate || '',
+      status: normalizedStatus,
+      rawStatus,
+    };
+  });
+
+  const filteredPendingShippers = pendingShippers.filter((item: PendingShipperRecord) => {
+    const matchesSearch =
+      !search ||
+      item.name.toLowerCase().includes(search.toLowerCase()) ||
+      item.phone.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus =
+      statusFilter === 'ALL' ||
+      item.status === statusFilter ||
+      (statusFilter === 'APPROVED' && (item.status === 'APPROVED' || item.status === 'VERIFIED'));
+    return matchesSearch && matchesStatus;
+  });
+
+  const handleRefresh = () => {
+    refetchStats();
+    refetchShippers();
+    message.success('Đã cập nhật số liệu mới nhất!');
+  };
 
   const handleApproveKyc = (id: string, name: string) => {
     verifyKycMutation.mutate(
       { id, action: 'approve' },
       {
         onSuccess: () => {
-          message.success(`Đã duyệt eKYC thành công cho tài xế ${name}!`);
+          message.success(`Đã duyệt hồ sơ eKYC cho tài xế ${name} thành công!`);
         },
         onError: () => {
-          message.error('Không thể cập nhật trạng thái eKYC');
+          message.error('Duyệt eKYC thất bại');
         },
       },
     );
@@ -64,27 +97,31 @@ export default function AdminDashboardPage() {
       { id, action: 'reject' },
       {
         onSuccess: () => {
-          message.error(`Đã từ chối eKYC của tài xế ${name}.`);
+          message.info(`Đã từ chối eKYC của tài xế ${name}`);
         },
         onError: () => {
-          message.error('Không thể cập nhật trạng thái eKYC');
+          message.error('Từ chối eKYC thất bại');
         },
       },
     );
   };
 
-  const handleRefresh = () => {
-    refetchStats();
-    refetchShippers();
-  };
-
   const columns = [
+    {
+      title: 'Mã Tài Xế',
+      dataIndex: 'id',
+      key: 'id',
+      width: 120,
+      sorter: (a: PendingShipperRecord, b: PendingShipperRecord) => a.id.localeCompare(b.id),
+      render: (id: string) => <Text strong style={{ color: adminDesignTokens.colors.primary, whiteSpace: 'nowrap' }}>{id}</Text>,
+    },
     {
       title: 'Họ & Tên',
       dataIndex: 'name',
       key: 'name',
-      width: 200,
-      render: (text: string) => <Text strong style={{ whiteSpace: 'nowrap' }}>{text}</Text>,
+      width: 180,
+      sorter: (a: PendingShipperRecord, b: PendingShipperRecord) => a.name.localeCompare(b.name),
+      render: (name: string) => <Text strong style={{ whiteSpace: 'nowrap' }}>{name}</Text>,
     },
     {
       title: 'Số Điện Thoại',
@@ -97,21 +134,23 @@ export default function AdminDashboardPage() {
       title: 'Loại Xe',
       dataIndex: 'vehicle',
       key: 'vehicle',
-      width: 220,
-      render: (text: string) => <Text style={{ whiteSpace: 'nowrap' }}>{text}</Text>,
+      width: 180,
+      sorter: (a: PendingShipperRecord, b: PendingShipperRecord) => a.vehicle.localeCompare(b.vehicle),
+      render: (text: string) => <VehicleBadge vehicle={text} />,
     },
     {
       title: 'Biển Số Xe',
       dataIndex: 'plate',
       key: 'plate',
       width: 150,
-      render: (plate: string) => <Tag color="blue" style={{ fontSize: 13, padding: '2px 10px' }}>{plate}</Tag>,
+      render: (plate: string) => <PlateBadge plate={plate} />,
     },
     {
       title: 'Trạng Thái eKYC',
       dataIndex: 'status',
       key: 'status',
       width: 170,
+      sorter: (a: PendingShipperRecord, b: PendingShipperRecord) => a.status.localeCompare(b.status),
       render: (status: string) => {
         const meta = mapKycStatus(status);
         return (
@@ -125,7 +164,7 @@ export default function AdminDashboardPage() {
       title: 'Hành Động',
       key: 'action',
       width: 260,
-      render: (record: { id: string; name: string }) => (
+      render: (record: PendingShipperRecord) => (
         <Space size="small" style={{ whiteSpace: 'nowrap' }}>
           <Button
             type="primary"
@@ -157,71 +196,106 @@ export default function AdminDashboardPage() {
         </Button>
       </div>
 
-      {/* Antd Stat Cards */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 32 }}>
-        {loading || !stats
-          ? [1, 2, 3, 4].map((key) => (
-              <Col xs={24} sm={12} lg={6} key={key}>
-                <Card variant="borderless">
-                  <Skeleton active paragraph={{ rows: 1 }} />
-                </Card>
-              </Col>
-            ))
-          : (
-              <>
-                <Col xs={24} sm={12} lg={6}>
-                  <Card variant="borderless">
-                    <Statistic
-                      title="Tổng Doanh Thu Platform"
-                      value={stats.totalPlatformRevenue}
-                      precision={0}
-                      suffix="đ"
-                      prefix={<DollarOutlined style={{ color: adminDesignTokens.colors.primary }} />}
-                      valueStyle={{ color: adminDesignTokens.colors.textPrimary, fontWeight: 800 }}
-                    />
-                  </Card>
-                </Col>
-                <Col xs={24} sm={12} lg={6}>
-                  <Card variant="borderless">
-                    <Statistic
-                      title="Tổng GMV Đặt Món"
-                      value={stats.totalFoodGmv}
-                      precision={0}
-                      suffix="đ"
-                      prefix={<ShoppingOutlined style={{ color: adminDesignTokens.colors.primary }} />}
-                      valueStyle={{ color: adminDesignTokens.colors.textPrimary, fontWeight: 800 }}
-                    />
-                  </Card>
-                </Col>
-                <Col xs={24} sm={12} lg={6}>
-                  <Card variant="borderless">
-                    <Statistic
-                      title="Tổng Số Đơn Hàng"
-                      value={stats.totalOrders}
-                      suffix="đơn"
-                      prefix={<UserOutlined style={{ color: adminDesignTokens.colors.primary }} />}
-                      valueStyle={{ color: adminDesignTokens.colors.textPrimary, fontWeight: 800 }}
-                    />
-                  </Card>
-                </Col>
-                <Col xs={24} sm={12} lg={6}>
-                  <Card variant="borderless">
-                    <Statistic
-                      title="Shipper Đang Hoạt Động"
-                      value={stats.totalShippers}
-                      suffix="tài xế"
-                      prefix={<CarOutlined style={{ color: adminDesignTokens.colors.primary }} />}
-                      valueStyle={{ color: adminDesignTokens.colors.textPrimary, fontWeight: 800 }}
-                    />
-                  </Card>
-                </Col>
-              </>
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Col xs={24} sm={12} lg={6}>
+          <Card variant="borderless" style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+            {loading ? (
+              <Skeleton active paragraph={{ rows: 1 }} />
+            ) : (
+              <Statistic
+                title={<Text type="secondary"><DollarOutlined style={{ color: adminDesignTokens.colors.primary, marginRight: 8 }} />Doanh Thu Hoa Hồng (Sàn)</Text>}
+                value={stats.totalPlatformRevenue}
+                suffix="đ"
+                valueStyle={{ color: adminDesignTokens.colors.primary, fontWeight: 700, fontSize: 24 }}
+              />
             )}
+          </Card>
+        </Col>
+
+        <Col xs={24} sm={12} lg={6}>
+          <Card variant="borderless" style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+            {loading ? (
+              <Skeleton active paragraph={{ rows: 1 }} />
+            ) : (
+              <Statistic
+                title={<Text type="secondary"><ShoppingOutlined style={{ color: '#52C41A', marginRight: 8 }} />Tổng GMV Đặt Đồ Ăn</Text>}
+                value={stats.totalFoodGmv}
+                suffix="đ"
+                valueStyle={{ color: '#52C41A', fontWeight: 700, fontSize: 24 }}
+              />
+            )}
+          </Card>
+        </Col>
+
+        <Col xs={24} sm={12} lg={6}>
+          <Card variant="borderless" style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+            {loading ? (
+              <Skeleton active paragraph={{ rows: 1 }} />
+            ) : (
+              <Statistic
+                title={<Text type="secondary"><CarOutlined style={{ color: '#1890FF', marginRight: 8 }} />Tổng Cước Phí Shipping</Text>}
+                value={stats.totalShipGmv}
+                suffix="đ"
+                valueStyle={{ color: '#1890FF', fontWeight: 700, fontSize: 24 }}
+              />
+            )}
+          </Card>
+        </Col>
+
+        <Col xs={24} sm={12} lg={6}>
+          <Card variant="borderless" style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+            {loading ? (
+              <Skeleton active paragraph={{ rows: 1 }} />
+            ) : (
+              <Statistic
+                title={<Text type="secondary"><UserOutlined style={{ color: '#722ED1', marginRight: 8 }} />Đội Ngũ Tài Xế Online</Text>}
+                value={stats.totalShippers}
+                suffix="Tài xế"
+                valueStyle={{ color: '#722ED1', fontWeight: 700, fontSize: 24 }}
+              />
+            )}
+          </Card>
+        </Col>
       </Row>
 
-      {/* Antd Shipper Table */}
+      <Card className="table-filter-card" variant="borderless" style={{ marginBottom: 16, borderRadius: 12 }}>
+        <div className="table-filter-toolbar">
+          <Input
+            placeholder="Tìm theo tên hoặc SĐT tài xế..."
+            prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
+            allowClear
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="filter-search-input"
+          />
+          <div className="filter-select-group">
+            <Text type="secondary" style={{ whiteSpace: 'nowrap' }}><FilterOutlined /> Lọc trạng thái eKYC:</Text>
+            <Select defaultValue="ALL" value={statusFilter} onChange={(val) => setStatusFilter(val)} style={{ minWidth: 160 }}>
+              <Option value="ALL">Tất cả trạng thái</Option>
+              <Option value="PENDING">Chờ duyệt eKYC</Option>
+              <Option value="APPROVED">Đã duyệt eKYC</Option>
+              <Option value="REJECTED">Từ chối</Option>
+            </Select>
+          </div>
+        </div>
+      </Card>
+
       <Card title="📋 Danh Sách Shipper Chờ Duyệt eKYC" variant="borderless">
-        <Table columns={columns} dataSource={pendingShippers} loading={loading} pagination={false} scroll={{ x: 1100 }} />
+        <Table
+          rowKey="key"
+          columns={columns}
+          dataSource={filteredPendingShippers}
+          loading={loading}
+          pagination={{
+            defaultPageSize: 10,
+            showSizeChanger: true,
+            pageSizeOptions: ['5', '10', '20', '50'],
+            showTotal: (total: number, range: [number, number]) => `${range[0]}-${range[1]} của ${total} mục`,
+          }}
+          scroll={{ x: 1100 }}
+          style={{ minHeight: 260 }}
+          locale={{ emptyText: loading ? null : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Không có tài xế chờ duyệt eKYC" /> }}
+        />
       </Card>
     </div>
   );

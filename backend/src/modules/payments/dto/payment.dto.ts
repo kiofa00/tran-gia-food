@@ -15,7 +15,7 @@ export class MoMoWebhookDto {
   @IsString() amount: string;
   @IsString() resultCode: string; // 0 = success
   @IsString() message: string;
-  @IsOptional() @IsObject() extraData?: any;
+  @IsOptional() @IsObject() extraData?: Record<string, unknown>;
 }
 
 export class VNPayWebhookDto {

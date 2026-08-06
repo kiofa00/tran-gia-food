@@ -1,4 +1,4 @@
-import { apiClient } from './apiClient';
+import { apiClient, QueryParams } from './apiClient';
 
 export interface CommissionItem {
   id: string;
@@ -15,8 +15,8 @@ export interface CommissionItem {
 }
 
 export const commissionsService = {
-  getCommissions: async (): Promise<CommissionItem[]> => {
-    const res = await apiClient.get<CommissionItem[]>('/admin/commissions');
+  getCommissions: async (params?: QueryParams): Promise<any> => {
+    const res = await apiClient.get('/admin/commissions', { params });
     return res.data;
   },
 };

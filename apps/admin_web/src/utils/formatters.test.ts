@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatCurrency, formatDistance, truncateText, mapKycStatus, mapShipperStatus, mapOrderStatus } from './formatters';
+import { formatCurrency, formatDistance, truncateText, mapKycStatus, mapShipperStatus, mapOrderStatus, mapVehicleType, formatDate } from './formatters';
 
 describe('formatters utility', () => {
   it('should format currency correctly', () => {
@@ -16,6 +16,11 @@ describe('formatters utility', () => {
   it('should truncate text longer than max length', () => {
     expect(truncateText('Phở Bò Hà Nội Gia Truyền', 10)).toBe('Phở Bò Hà ...');
     expect(truncateText('Phở Bò', 10)).toBe('Phở Bò');
+  });
+
+  it('should format ISO date strings to DD/MM/YYYY', () => {
+    expect(formatDate('2026-08-01T00:00:00.000Z')).toBe('01/08/2026');
+    expect(formatDate('2026-08-31')).toBe('31/08/2026');
   });
 
   it('should map eKYC status to semantic Vietnamese text and badge color', () => {
@@ -36,5 +41,12 @@ describe('formatters utility', () => {
     expect(mapOrderStatus('PREPARING').label).toBe('Quán đang chuẩn bị món');
     expect(mapOrderStatus('DELIVERING').label).toBe('Tài xế đang giao');
     expect(mapOrderStatus('COMPLETED').label).toBe('Hoàn thành');
+  });
+
+  it('should map vehicle type keys to friendly Vietnamese semantic text', () => {
+    expect(mapVehicleType('MOTORBIKE')).toBe('Xe Máy');
+    expect(mapVehicleType('ELECTRIC_BIKE')).toBe('Xe Máy Điện');
+    expect(mapVehicleType('MOTORBIKE_50CC')).toBe('Xe Máy 50cc');
+    expect(mapVehicleType('CAR')).toBe('Ô Tô');
   });
 });

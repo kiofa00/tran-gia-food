@@ -25,5 +25,5 @@ export class SendNotificationDto {
   @ApiPropertyOptional({ example: { orderId: '123' } })
   @IsOptional()
   @IsObject()
-  data?: any;
+  data?: Record<string, unknown>;
 }

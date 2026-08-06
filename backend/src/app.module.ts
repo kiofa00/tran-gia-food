@@ -20,6 +20,7 @@ import { PayoutsModule } from './modules/payouts/payouts.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { CmsModule } from './modules/cms/cms.module';
 import { DeliveryGateway } from './gateways/delivery.gateway';
 
 @Module({
@@ -55,6 +56,7 @@ import { DeliveryGateway } from './gateways/delivery.gateway';
     ChatModule,
     ReviewsModule,
     AdminModule,
+    CmsModule,
   ],
   providers: [DeliveryGateway],
 })

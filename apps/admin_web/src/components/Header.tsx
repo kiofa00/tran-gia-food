@@ -82,11 +82,11 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
       >
         {/* Brand Logo & Desktop Navigation */}
         <Space size="large" align="center">
-          <Link href="/" prefetch={true} style={{ textDecoration: 'none' }}>
+          <Link href="/" prefetch={true} style={{ textDecoration: 'none' }} className="header-brand-logo">
             <Title
               data-testid="header-title"
               level={4}
-              style={{ color: '#ffffff', margin: 0, fontWeight: 800, letterSpacing: '-0.5px' }}
+              style={{ color: '#ffffff', margin: 0, fontWeight: 800, letterSpacing: '-0.5px', transition: 'all 0.2s ease' }}
             >
               🍜 Tran Gia Food
             </Title>
@@ -101,11 +101,13 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
                   <Button
                     type={isActive ? 'primary' : 'text'}
                     icon={link.icon}
+                    className={`header-nav-btn ${isActive ? 'active' : ''}`}
                     style={{
                       color: '#ffffff',
-                      backgroundColor: isActive ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+                      backgroundColor: isActive ? 'rgba(255, 255, 255, 0.25)' : 'transparent',
                       fontWeight: isActive ? 700 : 500,
-                      borderRadius: 6,
+                      borderRadius: 8,
+                      border: 'none',
                     }}
                   >
                     {link.label}
@@ -117,16 +119,20 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
         </Space>
 
         {/* Desktop Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {/* Notifications & Language */}
-          <Space size="middle" align="center" className="desktop-nav">
+          <Space size="small" align="center" className="desktop-nav">
             <Button
               type="text"
+              className="header-icon-btn"
               icon={<GlobalOutlined style={{ color: '#ffffff', fontSize: 18 }} />}
+              title="Ngôn ngữ"
             />
             <Button
               type="text"
+              className="header-icon-btn"
               icon={<BellOutlined style={{ color: '#ffffff', fontSize: 18 }} />}
+              title="Thông báo"
             />
           </Space>
 
@@ -134,7 +140,7 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
           {userName && (
             <div className="desktop-nav">
               <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
-                <Space style={{ cursor: 'pointer' }}>
+                <Space className="header-user-badge" style={{ cursor: 'pointer' }}>
                   <Avatar
                     style={{ backgroundColor: '#ffffff', color: adminDesignTokens.colors.primary }}
                     icon={<UserOutlined />}
@@ -149,7 +155,7 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
 
           {/* Hamburger Menu Button (Mobile Trigger) */}
           <Button
-            className="mobile-menu-btn"
+            className="mobile-menu-btn header-icon-btn"
             type="text"
             icon={<MenuOutlined style={{ color: '#ffffff', fontSize: 20 }} />}
             onClick={() => setDrawerOpen(true)}
@@ -203,11 +209,62 @@ export const Header: React.FC<HeaderProps> = ({ title, userName }) => {
         </div>
       </Drawer>
 
-      {/* Responsive CSS Media Queries */}
+      {/* Responsive & Custom Hover CSS Styles */}
       <style jsx global>{`
+        .header-brand-logo:hover h4 {
+          opacity: 0.9;
+          transform: scale(1.02);
+        }
+
+        .header-nav-btn {
+          color: #ffffff !important;
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        .header-nav-btn:hover {
+          background-color: rgba(255, 255, 255, 0.22) !important;
+          color: #ffffff !important;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+        }
+
+        .header-nav-btn.active:hover {
+          background-color: rgba(255, 255, 255, 0.32) !important;
+        }
+
+        .header-icon-btn {
+          color: #ffffff !important;
+          border-radius: 50% !important;
+          width: 40px !important;
+          height: 40px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        .header-icon-btn:hover {
+          background-color: rgba(255, 255, 255, 0.2) !important;
+          color: #ffffff !important;
+          transform: scale(1.12);
+        }
+
+        .header-user-badge {
+          padding: 2px 10px;
+          border-radius: 20px;
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .header-user-badge:hover {
+          background-color: rgba(255, 255, 255, 0.2);
+          transform: translateY(-1px);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
         .mobile-menu-btn {
           display: none !important;
         }
+
         @media (max-width: 768px) {
           .desktop-nav {
             display: none !important;

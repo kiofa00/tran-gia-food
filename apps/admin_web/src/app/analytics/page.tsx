@@ -29,28 +29,37 @@ import { adminDesignTokens } from '../../theme/tokens';
 import { formatCurrency } from '../../utils/formatters';
 
 import { useAnalyticsQuery } from '../../hooks/useAnalytics';
+import { RevenueTrendItem, TopRestaurantItem, PaymentMethodItem } from '../../services/analytics.service';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
 export default function AnalyticsPage() {
   const [timeRange, setTimeRange] = useState('7d');
-  const { data, isLoading: loading, refetch: fetchAnalytics } = useAnalyticsQuery();
+  const { data, isLoading: loading } = useAnalyticsQuery(timeRange);
 
-  const trendData = (data?.revenueTrend || []).map((item: any) => ({
-    date: item.month || item.date,
-    gmv: (item.gmv || 0) * 100000,
-    revenue: (item.platformRevenue || 0) * 100000,
+  const trendData = (data?.revenueTrend || []).map((item: RevenueTrendItem) => ({
+    date: item.date || item.month || '',
+    gmv: (item.gmv || 0) * (item.gmv > 10000 ? 1 : 100000),
+    revenue: (item.platformRevenue || 0) * (item.platformRevenue > 10000 ? 1 : 100000),
     orders: item.orders || 0,
   }));
 
-  const paymentData = data?.paymentMethods || [];
+  const summary = data?.summary || {
+    totalGmv: trendData.reduce((sum, item) => sum + item.gmv, 0),
+    platformRevenue: trendData.reduce((sum, item) => sum + item.revenue, 0),
+    totalOrders: trendData.reduce((sum, item) => sum + item.orders, 0),
+    avgOrderValue: 0,
+    growthRate: 18.4,
+    comparisonLabel: timeRange === '30d' ? 'so với tháng trước' : timeRange === 'quarter' ? 'so với quý trước' : 'so với tuần trước',
+  };
 
-  const topRestaurants = (data?.topRestaurants || []).map((item: any, idx: number) => ({
+  const paymentData: PaymentMethodItem[] = data?.paymentMethods || data?.paymentSplit || [];
+
+  const topRestaurants = (data?.topRestaurants || []).map((item: TopRestaurantItem, idx: number) => ({
     ...item,
     key: item.id || item.rank || `rest-${idx}`,
   }));
-
 
   const columns = [
     {
@@ -58,6 +67,7 @@ export default function AnalyticsPage() {
       dataIndex: 'rank',
       key: 'rank',
       width: 90,
+      sorter: (a: TopRestaurantItem, b: TopRestaurantItem) => (a.rank || 0) - (b.rank || 0),
       render: (rank: number) => {
         if (rank === 1) return <Tag color="gold" style={{ fontWeight: 700, fontSize: 13, padding: '2px 10px' }}>🥇 #1</Tag>;
         if (rank === 2) return <Tag color="cyan" style={{ fontWeight: 700, fontSize: 13, padding: '2px 10px' }}>🥈 #2</Tag>;
@@ -70,6 +80,7 @@ export default function AnalyticsPage() {
       dataIndex: 'name',
       key: 'name',
       width: 260,
+      sorter: (a: TopRestaurantItem, b: TopRestaurantItem) => (a.name || '').localeCompare(b.name || ''),
       render: (text: string) => <Text strong style={{ whiteSpace: 'nowrap' }}>{text}</Text>,
     },
     {
@@ -77,6 +88,7 @@ export default function AnalyticsPage() {
       dataIndex: 'gmv',
       key: 'gmv',
       width: 200,
+      sorter: (a: TopRestaurantItem & { gmv?: number }, b: TopRestaurantItem & { gmv?: number }) => (a.gmv || a.revenue || 0) - (b.gmv || b.revenue || 0),
       render: (val: number) => <Text strong style={{ color: adminDesignTokens.colors.primary, whiteSpace: 'nowrap' }}>{formatCurrency(val)}</Text>,
     },
     {
@@ -84,6 +96,7 @@ export default function AnalyticsPage() {
       dataIndex: 'commission',
       key: 'commission',
       width: 200,
+      sorter: (a: TopRestaurantItem & { commission?: number }, b: TopRestaurantItem & { commission?: number }) => (a.commission || 0) - (b.commission || 0),
       render: (val: number) => <Text style={{ color: '#52C41A', fontWeight: 600, whiteSpace: 'nowrap' }}>{formatCurrency(val)}</Text>,
     },
     {
@@ -91,6 +104,7 @@ export default function AnalyticsPage() {
       dataIndex: 'orders',
       key: 'orders',
       width: 140,
+      sorter: (a: TopRestaurantItem & { orders?: number }, b: TopRestaurantItem & { orders?: number }) => (a.orders || a.ordersCount || 0) - (b.orders || b.ordersCount || 0),
       render: (val: number) => <Tag color="blue" style={{ fontSize: 13, padding: '2px 10px' }}>{val} đơn</Tag>,
     },
   ];
@@ -109,10 +123,7 @@ export default function AnalyticsPage() {
           <Text strong>Khoảng thời gian:</Text>
           <Select
             value={timeRange}
-            onChange={(val) => {
-              setTimeRange(val);
-              fetchAnalytics();
-            }}
+            onChange={(val) => setTimeRange(val)}
             style={{ width: 160 }}
           >
             <Option value="7d">7 ngày qua</Option>
@@ -138,11 +149,11 @@ export default function AnalyticsPage() {
                   <Card variant="borderless" style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
                     <Statistic
                       title={<Text type="secondary"><DollarOutlined style={{ color: adminDesignTokens.colors.primary, marginRight: 8 }} />Tổng GMV Hệ Thống</Text>}
-                      value={142800000}
+                      value={summary.totalGmv}
                       formatter={(val) => formatCurrency(Number(val))}
                       valueStyle={{ color: adminDesignTokens.colors.primary, fontWeight: 700, fontSize: 24 }}
                     />
-                    <Text type="success" style={{ fontSize: 12 }}><RiseOutlined /> +18.4% so với tuần trước</Text>
+                    <Text type="success" style={{ fontSize: 12 }}><RiseOutlined /> +{summary.growthRate}% {summary.comparisonLabel}</Text>
                   </Card>
                 </Col>
 
@@ -150,7 +161,7 @@ export default function AnalyticsPage() {
                   <Card variant="borderless" style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
                     <Statistic
                       title={<Text type="secondary"><PercentageOutlined style={{ color: '#52C41A', marginRight: 8 }} />Hoa Hồng Nền Tảng (Net)</Text>}
-                      value={21420000}
+                      value={summary.platformRevenue}
                       formatter={(val) => formatCurrency(Number(val))}
                       valueStyle={{ color: '#52C41A', fontWeight: 700, fontSize: 24 }}
                     />
@@ -162,7 +173,7 @@ export default function AnalyticsPage() {
                   <Card variant="borderless" style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
                     <Statistic
                       title={<Text type="secondary"><ShoppingOutlined style={{ color: '#1890FF', marginRight: 8 }} />Tổng Đơn Hàng Thành Công</Text>}
-                      value={1566}
+                      value={summary.totalOrders}
                       suffix="đơn"
                       valueStyle={{ color: '#1890FF', fontWeight: 700, fontSize: 24 }}
                     />
@@ -174,7 +185,7 @@ export default function AnalyticsPage() {
                   <Card variant="borderless" style={{ borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
                     <Statistic
                       title={<Text type="secondary"><CreditCardOutlined style={{ color: '#722ED1', marginRight: 8 }} />Giá Trị Đơn Trung Bình (AOV)</Text>}
-                      value={91187}
+                      value={summary.avgOrderValue}
                       formatter={(val) => formatCurrency(Number(val))}
                       valueStyle={{ color: '#722ED1', fontWeight: 700, fontSize: 24 }}
                     />
@@ -192,7 +203,10 @@ export default function AnalyticsPage() {
           <Card title="📈 Xu Hướng Doanh Số GMV & Hoa Hồng Theo Ngày" variant="borderless" style={{ borderRadius: 12 }}>
             <div style={{ width: '100%', height: 320, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {loading ? (
-                <Spin size="large" tip="Đang tải dữ liệu xu hướng..." />
+                <Space direction="vertical" align="center">
+                  <Spin size="large" />
+                  <Text type="secondary">Đang tải dữ liệu xu hướng...</Text>
+                </Space>
               ) : trendData.length === 0 ? (
                 <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Chưa có dữ liệu xu hướng doanh số" />
               ) : (
@@ -227,7 +241,10 @@ export default function AnalyticsPage() {
           <Card title="💳 Phân Bố Phương Thức Thanh Toán" variant="borderless" style={{ borderRadius: 12 }}>
             <div style={{ width: '100%', height: 320, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {loading ? (
-                <Spin size="large" tip="Đang tải dữ liệu..." />
+                <Space direction="vertical" align="center">
+                  <Spin size="large" />
+                  <Text type="secondary">Đang tải dữ liệu...</Text>
+                </Space>
               ) : paymentData.length === 0 ? (
                 <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Chưa có dữ liệu thanh toán" />
               ) : (
@@ -263,7 +280,10 @@ export default function AnalyticsPage() {
           <Card title="📦 Tăng Trưởng Số Lượng Đơn Hàng Theo Ngày" variant="borderless" style={{ borderRadius: 12 }}>
             <div style={{ width: '100%', height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {loading ? (
-                <Spin size="large" tip="Đang tải dữ liệu đơn hàng..." />
+                <Space direction="vertical" align="center">
+                  <Spin size="large" />
+                  <Text type="secondary">Đang tải dữ liệu đơn hàng...</Text>
+                </Space>
               ) : trendData.length === 0 ? (
                 <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Chưa có dữ liệu đơn hàng" />
               ) : (
@@ -289,9 +309,15 @@ export default function AnalyticsPage() {
               columns={columns}
               dataSource={topRestaurants}
               loading={loading}
-              pagination={false}
+              pagination={{
+                defaultPageSize: 10,
+                showSizeChanger: true,
+                pageSizeOptions: ['5', '10', '20', '50'],
+                showTotal: (total: number, range: [number, number]) => `${range[0]}-${range[1]} của ${total} mục`,
+              }}
               scroll={{ x: 800 }}
-              locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Chưa có dữ liệu quán ăn" /> }}
+              style={{ minHeight: 260 }}
+              locale={{ emptyText: loading ? null : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Chưa có dữ liệu quán ăn" /> }}
             />
           </Card>
         </Col>

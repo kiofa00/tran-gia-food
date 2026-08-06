@@ -384,7 +384,7 @@ export interface ApiBannerBanner extends Schema.CollectionType {
     > &
       Attribute.Private;
     displayOrder: Attribute.Integer & Attribute.DefaultTo<0>;
-    imageUrl: Attribute.String & Attribute.Required;
+    image: Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
     isActive: Attribute.Boolean & Attribute.DefaultTo<true>;
     publishedAt: Attribute.DateTime;
     targetAudience: Attribute.Enumeration<
@@ -467,10 +467,8 @@ export interface ApiTranslationTranslation extends Schema.CollectionType {
       'admin::user'
     > &
       Attribute.Private;
+    en: Attribute.Text;
     key: Attribute.String & Attribute.Required & Attribute.Unique;
-    locale: Attribute.Enumeration<['vi', 'en']> &
-      Attribute.Required &
-      Attribute.DefaultTo<'vi'>;
     publishedAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<
@@ -479,7 +477,7 @@ export interface ApiTranslationTranslation extends Schema.CollectionType {
       'admin::user'
     > &
       Attribute.Private;
-    value: Attribute.Text & Attribute.Required;
+    vi: Attribute.Text & Attribute.Required;
   };
 }
 
@@ -864,6 +862,14 @@ export interface PluginUsersPermissionsUser extends Schema.CollectionType {
   options: {
     draftAndPublish: false;
     timestamps: true;
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: false;
+    };
   };
   attributes: {
     blocked: Attribute.Boolean & Attribute.DefaultTo<false>;

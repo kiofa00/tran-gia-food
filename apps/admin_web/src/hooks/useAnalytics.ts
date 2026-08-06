@@ -5,9 +5,9 @@ export const ANALYTICS_QUERY_KEYS = {
   data: ['analytics', 'data'],
 };
 
-export function useAnalyticsQuery() {
+export function useAnalyticsQuery(range?: string) {
   return useQuery({
-    queryKey: ANALYTICS_QUERY_KEYS.data,
-    queryFn: analyticsService.getAnalyticsData,
+    queryKey: [...ANALYTICS_QUERY_KEYS.data, range],
+    queryFn: () => analyticsService.getAnalyticsData(range),
   });
 }

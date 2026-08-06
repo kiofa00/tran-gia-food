@@ -6,13 +6,21 @@ export interface DashboardOverviewStats {
   totalShipGmv: number;
   totalOrders: number;
   totalShippers: number;
+  totalUsers?: number;
+  totalRestaurants?: number;
 }
 
 export interface PendingShipperItem {
   id: string;
-  vehicleType: string;
-  licensePlate: string;
-  kycStatus: string;
+  vehicleType?: string;
+  licensePlate?: string;
+  kycStatus?: string;
+  ekycStatus?: string;
+  status?: string;
+  name?: string;
+  phone?: string;
+  vehicle?: string;
+  plate?: string;
   user?: {
     name: string;
     phone: string;

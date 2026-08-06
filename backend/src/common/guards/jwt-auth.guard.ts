@@ -23,7 +23,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context);
   }
 
-  handleRequest(err: any, user: any) {
+  handleRequest<TUser = unknown>(err: Error | null, user: TUser) {
     if (process.env.DISABLE_AUTH !== 'false') {
       return user || { id: 'test-user', role: 'admin' };
     }

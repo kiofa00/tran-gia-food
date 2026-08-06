@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Patch, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
+import { QueryOptions, CreateVoucherDto } from './types/admin.types';
 import { UpdateKycStatusDto, UpdateAppConfigDto, PenalizeShipperDto } from './dto/admin.dto';
 import { Public } from '../../common/decorators/public.decorator';
 
@@ -23,19 +24,19 @@ export class AdminController {
   }
 
   @Patch('shippers/:id/kyc')
-  @ApiOperation({ summary: '[Admin] Duyệt / Từ chối eKYC của shipper' })
-  updateShipperKyc(@Param('id') id: string, @Body() dto: UpdateKycStatusDto) {
+  @ApiOperation({ summary: '[Admin] Duyệt/Từ chối hồ sơ eKYC' })
+  updateKycStatus(@Param('id') id: string, @Body() dto: UpdateKycStatusDto) {
     return this.adminService.updateShipperKyc(id, dto);
   }
 
   @Post('shippers/:id/penalize')
-  @ApiOperation({ summary: '[Admin] Xử phạt shipper' })
+  @ApiOperation({ summary: '[Admin] Phạt / Tạm khóa tài xế vi phạm' })
   penalizeShipper(@Param('id') id: string, @Body() dto: PenalizeShipperDto) {
     return this.adminService.penalizeShipper(id, dto);
   }
 
   @Post('config')
-  @ApiOperation({ summary: '[Admin] Cấu hình thông số toàn hệ thống (% phí, bán kính...)' })
+  @ApiOperation({ summary: '[Admin] Cấu hình hệ thống (tỷ lệ chia chia % hoa hồng, phí ship,...)' })
   setConfig(@Body() dto: UpdateAppConfigDto) {
     return this.adminService.setAppConfig(dto);
   }
@@ -48,30 +49,43 @@ export class AdminController {
 
   @Public()
   @Get('vouchers')
-  @ApiOperation({ summary: '[Admin] Danh sách vouchers' })
-  getVouchers() {
-    return this.adminService.getVouchers();
+  @ApiOperation({ summary: '[Admin] Danh sách vouchers (Hỗ trợ sort, filter, pagination, max item limit)' })
+  getVouchers(@Query() query: QueryOptions) {
+    return this.adminService.getVouchers(query);
+  }
+
+  @Public()
+  @Post('vouchers')
+  @ApiOperation({ summary: '[Admin] Tạo mới voucher' })
+  createVoucher(@Body() dto: CreateVoucherDto) {
+    return this.adminService.createVoucher(dto);
+  }
+
+  @Public()
+  @Patch('vouchers/:id/toggle')
+  @ApiOperation({ summary: '[Admin] Kích hoạt / tạm dừng voucher' })
+  toggleVoucher(@Param('id') id: string, @Body('isActive') isActive: boolean) {
+    return this.adminService.toggleVoucherStatus(id, isActive);
   }
 
   @Public()
   @Get('commissions')
-  @ApiOperation({ summary: '[Admin] Bảng phân bổ hoa hồng' })
-  getCommissions() {
-    return this.adminService.getCommissionsBreakdown();
+  @ApiOperation({ summary: '[Admin] Bảng phân bổ hoa hồng (Hỗ trợ sort, filter, pagination, max item limit)' })
+  getCommissions(@Query() query: QueryOptions) {
+    return this.adminService.getCommissionsBreakdown(query);
   }
 
   @Public()
   @Get('analytics')
-  @ApiOperation({ summary: '[Admin] Dữ liệu thống kê doanh thu Recharts' })
-  getAnalytics() {
-    return this.adminService.getAnalyticsData();
+  @ApiOperation({ summary: '[Admin] Dữ liệu thống kê doanh thu Recharts theo khoảng thời gian' })
+  getAnalytics(@Query('range') range?: string) {
+    return this.adminService.getAnalyticsData(range);
   }
 
   @Public()
   @Get('fleet')
-  @ApiOperation({ summary: '[Admin] Dữ liệu vị trí đội xe shipper' })
-  getFleet() {
-    return this.adminService.getFleetData();
+  @ApiOperation({ summary: '[Admin] Dữ liệu vị trí đội xe shipper (Hỗ trợ sort, filter, pagination, max item limit)' })
+  getFleet(@Query() query: QueryOptions) {
+    return this.adminService.getFleetData(query);
   }
 }
-

@@ -15,3 +15,12 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+export interface QueryParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}

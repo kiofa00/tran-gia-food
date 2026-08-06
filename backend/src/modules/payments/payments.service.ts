@@ -75,7 +75,7 @@ export class PaymentsService {
       update: {
         status,
         transactionId: dto.requestId,
-        gatewayResponse: dto as any,
+        gatewayResponse: JSON.parse(JSON.stringify(dto)),
       },
     });
 
@@ -106,7 +106,7 @@ export class PaymentsService {
       update: {
         status,
         transactionId: dto.vnp_TransactionNo,
-        gatewayResponse: dto as any,
+        gatewayResponse: JSON.parse(JSON.stringify(dto)),
       },
     });
 
