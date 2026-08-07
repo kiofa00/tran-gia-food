@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 
 import { authOptions } from '../../auth/[...nextauth]/route';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/api/v1';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 async function proxyHandler(
   request: NextRequest,

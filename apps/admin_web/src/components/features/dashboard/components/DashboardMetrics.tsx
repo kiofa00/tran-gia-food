@@ -3,6 +3,7 @@
 import { CarOutlined, DollarOutlined, ShoppingOutlined, UserOutlined } from '@ant-design/icons';
 import { Card, Col, Row, Skeleton, Statistic, Typography } from 'antd';
 
+import { useTranslation } from '@/providers/LanguageProvider';
 import { adminDesignTokens } from '@/theme/tokens';
 
 import type { DashboardStats } from '../types';
@@ -15,6 +16,8 @@ interface DashboardMetricsProps {
 const { Text } = Typography;
 
 export function DashboardMetrics({ stats, loading }: DashboardMetricsProps) {
+  const { t } = useTranslation();
+
   return (
     <Row gutter={[16, 16]} className="mb-6">
       <Col xs={24} sm={12} lg={6}>
@@ -26,7 +29,7 @@ export function DashboardMetrics({ stats, loading }: DashboardMetricsProps) {
               title={
                 <Text type="secondary">
                   <DollarOutlined className="text-orange-500 mr-2" />
-                  Doanh Thu Hoa Hồng (Sàn)
+                  {t('dashboard.platformRevenue', 'Doanh Thu Hoa Hồng (Sàn)')}
                 </Text>
               }
               value={stats.totalPlatformRevenue}
@@ -50,7 +53,7 @@ export function DashboardMetrics({ stats, loading }: DashboardMetricsProps) {
               title={
                 <Text type="secondary">
                   <ShoppingOutlined className="text-green-600 mr-2" />
-                  Tổng GMV Đặt Đồ Ăn
+                  {t('dashboard.foodGmv', 'Tổng GMV Đặt Đồ Ăn')}
                 </Text>
               }
               value={stats.totalFoodGmv}
@@ -74,7 +77,7 @@ export function DashboardMetrics({ stats, loading }: DashboardMetricsProps) {
               title={
                 <Text type="secondary">
                   <CarOutlined className="text-blue-500 mr-2" />
-                  Tổng Cước Phí Shipping
+                  {t('dashboard.shipGmv', 'Tổng Cước Phí Shipping')}
                 </Text>
               }
               value={stats.totalShipGmv}
@@ -98,11 +101,11 @@ export function DashboardMetrics({ stats, loading }: DashboardMetricsProps) {
               title={
                 <Text type="secondary">
                   <UserOutlined className="text-purple-600 mr-2" />
-                  Đội Ngũ Tài Xế Online
+                  {t('dashboard.onlineShippers', 'Đội Ngũ Tài Xế Online')}
                 </Text>
               }
               value={stats.totalShippers}
-              suffix="Tài xế"
+              suffix={t('users.driverUnit', 'Tài xế')}
               valueStyle={{
                 color: adminDesignTokens.colors.statPurple,
                 fontWeight: adminDesignTokens.fontWeightBold,

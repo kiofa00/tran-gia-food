@@ -65,6 +65,8 @@ catalogs:
     '@hookform/resolvers': '^3.9.0'
     'zod': '^3.23.8'
     'zustand': '^4.5.4'
+    'clsx': '^2.1.1'
+    'tailwind-merge': '^2.5.4'
 
     # Utils & External Services
     'axios': '^1.7.2'
@@ -81,6 +83,7 @@ catalogs:
 
     # Dev Tools & Types
     'typescript': '^5.5.3'
+    'madge': '^8.0.0'
     'prettier': '^3.3.3'
     '@trivago/prettier-plugin-sort-imports': '^4.3.0'
     'eslint-plugin-prettier': '^5.2.6'

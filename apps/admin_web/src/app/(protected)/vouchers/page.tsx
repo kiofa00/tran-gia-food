@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { PlusOutlined } from '@ant-design/icons';
 import { App, Button } from 'antd';
@@ -13,15 +13,19 @@ import {
   VoucherCreateModal,
   VoucherRecord,
   VoucherTable,
-  getVoucherColumns,
+  mapVoucherRecord,
   useCreateVoucherMutation,
   useToggleVoucherMutation,
+  useVoucherColumns,
   useVouchersQuery,
 } from '@/components';
+import { useTranslation } from '@/providers/LanguageProvider';
 import { VOUCHER_STATUS_FILTER_OPTIONS } from '@/shared-config';
 
 export default function VoucherManagementPage() {
   const { message } = App.useApp();
+  const { t } = useTranslation();
+
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -42,40 +46,22 @@ export default function VoucherManagementPage() {
     !Array.isArray(rawVouchersData) &&
     'data' in (rawVouchersData as object);
 
-  const rawList: Record<string, unknown>[] = isPaginated
-    ? ((rawVouchersData as { data: Record<string, unknown>[] }).data ?? [])
-    : ((rawVouchersData as Record<string, unknown>[]) ?? []);
+  const rawList: Record<string, unknown>[] = useMemo(
+    () =>
+      isPaginated
+        ? ((rawVouchersData as { data: Record<string, unknown>[] }).data ?? [])
+        : ((rawVouchersData as Record<string, unknown>[]) ?? []),
+    [isPaginated, rawVouchersData],
+  );
 
   const totalItems: number = isPaginated
     ? ((rawVouchersData as { total: number }).total ?? 0)
     : rawList.length;
 
-  const vouchers: VoucherRecord[] = rawList.map((item: Record<string, unknown>) => {
-    const itemKey = (item.id || item.key) as string;
-    let isActive = true;
-
-    if (statusOverrides[itemKey] !== undefined) {
-      isActive = statusOverrides[itemKey];
-    } else if (item.isActive !== undefined) {
-      isActive = Boolean(item.isActive);
-    }
-
-    return {
-      id: String(item.id || item.key || ''),
-      key: itemKey,
-      code: String(item.code || ''),
-      type: String(item.type || 'Platform'),
-      discountType: (String(item.discountType || 'fixed') === 'percent' ? 'percent' : 'fixed') as
-        'percent' | 'fixed',
-      discountValue: Number(item.discountValue) || 0,
-      minOrderValue: Number(item.minOrderValue) || 0,
-      validFrom: String(item.validFrom || ''),
-      validTo: String(item.validTo || ''),
-      usedCount: Number(item.usedCount) || 0,
-      totalLimit: Number(item.totalLimit) || 0,
-      isActive,
-    };
-  });
+  const vouchers: VoucherRecord[] = useMemo(
+    () => rawList.map((item) => mapVoucherRecord(item, statusOverrides)),
+    [rawList, statusOverrides],
+  );
 
   const handleSearchChange = (val: string) => {
     setSearch(val);
@@ -89,11 +75,22 @@ export default function VoucherManagementPage() {
   const createVoucherMutation = useCreateVoucherMutation();
   const toggleVoucherMutation = useToggleVoucherMutation();
 
-  const handleToggleActive = (key: string, checked: boolean) => {
-    setStatusOverrides((prev) => ({ ...prev, [key]: checked }));
-    toggleVoucherMutation.mutate({ id: key, isActive: checked });
-    message.success(`Đã ${checked ? 'kích hoạt' : 'tạm dừng'} mã giảm giá thành công!`);
-  };
+  const handleToggleActive = useCallback(
+    (key: string, checked: boolean) => {
+      setStatusOverrides((prev) => ({ ...prev, [key]: checked }));
+      toggleVoucherMutation.mutate({ id: key, isActive: checked });
+      const statusText = checked
+        ? t('common.active', 'kích hoạt')
+        : t('common.inactive', 'tạm dừng');
+
+      message.success(
+        t('vouchers.toggleActiveSuccess', 'Đã {status} mã giảm giá thành công!', {
+          status: statusText,
+        }),
+      );
+    },
+    [message, t, toggleVoucherMutation],
+  );
 
   const handleCreateVoucher = (values: CreateVoucherFormValues) => {
     const payload = {
@@ -115,20 +112,27 @@ export default function VoucherManagementPage() {
     createVoucherMutation.mutate(payload, {
       onSuccess: () => {
         setIsModalOpen(false);
-        message.success(`Tạo mã giảm giá ${payload.code} thành công!`);
+        message.success(
+          t('vouchers.createSuccess', 'Tạo mã giảm giá {code} thành công!', {
+            code: payload.code,
+          }),
+        );
       },
-      onError: () => message.error('Không thể tạo mã giảm giá'),
+      onError: () => message.error(t('vouchers.createError', 'Không thể tạo mã giảm giá')),
     });
   };
 
-  const columns = getVoucherColumns({ onToggleActive: handleToggleActive });
+  const columns = useVoucherColumns({ onToggleActive: handleToggleActive });
 
   return (
     <PageContainer>
       <PageHeader
         icon="🎟️"
-        title="Quản Lý Mã Giảm Giá & Khuyến Mãi"
-        subtitle="Tạo mới, thiết lập hạn mức và theo dõi hiệu quả các chương trình Voucher toàn sàn"
+        title={t('vouchers.title', 'Quản Lý Mã Giảm Giá & Khuyến Mãi')}
+        subtitle={t(
+          'vouchers.subtitle',
+          'Tạo mới, thiết lập hạn mức và theo dõi hiệu quả các chương trình Voucher toàn sàn',
+        )}
         action={
           <Button
             type="primary"
@@ -137,16 +141,19 @@ export default function VoucherManagementPage() {
             onClick={() => setIsModalOpen(true)}
             className="bg-orange-500 font-semibold"
           >
-            Tạo Mã Voucher Mới
+            {t('vouchers.createBtn', 'Tạo Mã Voucher Mới')}
           </Button>
         }
       />
 
       <SearchFilterBox
-        searchPlaceholder="Tìm theo mã voucher (vd: TRANGIA50K)..."
+        searchPlaceholder={t(
+          'vouchers.searchPlaceholder',
+          'Tìm theo mã voucher (vd: TRANGIA50K)...',
+        )}
         searchValue={search}
         onSearchChange={handleSearchChange}
-        filterLabel="Lọc trạng thái:"
+        filterLabel={t('vouchers.filterStatusLabel', 'Lọc trạng thái:')}
         filterValue={statusFilter}
         onFilterChange={handleFilterChange}
         filterOptions={VOUCHER_STATUS_FILTER_OPTIONS}

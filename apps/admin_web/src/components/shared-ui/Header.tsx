@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -9,26 +9,33 @@ import {
   BarChartOutlined,
   BellOutlined,
   CarOutlined,
+  CheckOutlined,
   DashboardOutlined,
   DollarOutlined,
   FileTextOutlined,
   GlobalOutlined,
   LogoutOutlined,
   MenuOutlined,
+  MoonOutlined,
   SettingOutlined,
+  SunOutlined,
   TagOutlined,
+  TeamOutlined,
   UserOutlined,
 } from '@ant-design/icons';
 import { Avatar, Button, Divider, Drawer, Dropdown, Layout, Menu, Space, Typography } from 'antd';
 
 import { useAuth } from '@/hooks/useAuth';
+import { TranslationKey, useTranslation } from '@/providers/LanguageProvider';
+import { useTheme } from '@/providers/ThemeProvider';
 import { ADMIN_NAV_LINKS, ADMIN_ROUTES } from '@/shared-config';
+import { cn } from '@/utils/cn';
 
 const { Header: AntHeader } = Layout;
 const { Title, Text } = Typography;
 
 /** Tailwind class để hover icon button trên nền orange giống màu active */
-const ICON_BTN_CLS = 'text-white hover:!bg-white/20 rounded-lg transition-colors duration-150';
+const ICON_BTN_CLS = '!text-white hover:!bg-white/20 rounded-lg transition-colors duration-150';
 
 interface HeaderProps {
   userName?: string;
@@ -39,28 +46,73 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
   const pathname = usePathname();
 
   const { logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
+  const { language, setLanguage, availableLanguages, t } = useTranslation();
 
-  const userMenuItems = [
-    { key: 'profile', label: 'Hồ sơ cá nhân', icon: <UserOutlined /> },
-    { key: 'settings', label: 'Cài đặt hệ thống', icon: <SettingOutlined /> },
-    { type: 'divider' as const },
-    { key: 'logout', label: 'Đăng xuất', icon: <LogoutOutlined />, danger: true, onClick: logout },
-  ];
+  const userMenuItems = useMemo(
+    () => [
+      { key: 'profile', label: t('header.profile', 'Hồ sơ cá nhân'), icon: <UserOutlined /> },
+      {
+        key: 'settings',
+        label: t('header.settings', 'Cài đặt hệ thống'),
+        icon: <SettingOutlined />,
+      },
+      { type: 'divider' as const },
+      {
+        key: 'logout',
+        label: t('header.logout', 'Đăng xuất'),
+        icon: <LogoutOutlined />,
+        danger: true,
+        onClick: logout,
+      },
+    ],
+    [t, logout],
+  );
 
-  const iconMap = {
-    DashboardOutlined: <DashboardOutlined />,
-    CarOutlined: <CarOutlined />,
-    TagOutlined: <TagOutlined />,
-    DollarOutlined: <DollarOutlined />,
-    BarChartOutlined: <BarChartOutlined />,
-    FileTextOutlined: <FileTextOutlined />,
-  };
+  const iconMap = useMemo(
+    () => ({
+      DashboardOutlined: <DashboardOutlined />,
+      CarOutlined: <CarOutlined />,
+      TeamOutlined: <TeamOutlined />,
+      TagOutlined: <TagOutlined />,
+      DollarOutlined: <DollarOutlined />,
+      BarChartOutlined: <BarChartOutlined />,
+      FileTextOutlined: <FileTextOutlined />,
+    }),
+    [],
+  );
 
-  const navLinks = ADMIN_NAV_LINKS.map((link) => ({
-    key: link.key,
-    label: link.label,
-    icon: iconMap[link.iconName],
-  }));
+  const languageMenuItems = useMemo(
+    () =>
+      availableLanguages.map((lang) => ({
+        key: lang.code,
+        label: (
+          <Space className="w-full justify-between">
+            <span>
+              {lang.flag} {lang.label}
+            </span>
+            {language === lang.code && <CheckOutlined className="text-orange-500 text-xs ml-2" />}
+          </Space>
+        ),
+        onClick: () => setLanguage(lang.code),
+      })),
+    [availableLanguages, language, setLanguage],
+  );
+
+  const navLinks = useMemo(
+    () =>
+      ADMIN_NAV_LINKS.map((link) => {
+        const navKey =
+          `nav.${link.key === '/' ? 'dashboard' : link.key.replace('/', '')}` as TranslationKey;
+
+        return {
+          key: link.key,
+          label: t(navKey, link.label),
+          icon: iconMap[link.iconName],
+        };
+      }),
+    [t, iconMap],
+  );
 
   return (
     <>
@@ -75,14 +127,14 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
               <Title
                 data-testid="header-title"
                 level={4}
-                className="!m-0 text-white font-extrabold tracking-tight"
+                className="!m-0 !text-white font-extrabold tracking-tight"
               >
                 🍜 Tran Gia Food
               </Title>
             </Link>
 
             {/* Desktop Nav Links */}
-            <nav className="hidden lg:flex gap-1 ml-6">
+            <nav className="hidden lg:flex gap-2 ml-6">
               {navLinks.map((link) => {
                 const isActive = pathname === link.key;
 
@@ -91,9 +143,10 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
                     <Button
                       type="text"
                       icon={link.icon}
-                      className={`text-white border-none rounded-lg transition-colors duration-150 ${
-                        isActive ? '!bg-white/25 font-semibold' : 'hover:!bg-white/15 font-medium'
-                      }`}
+                      className={cn(
+                        '!text-white border-none rounded-lg transition-colors duration-150',
+                        isActive ? '!bg-white/25 font-semibold' : 'hover:!bg-white/15 font-medium',
+                      )}
                     >
                       {link.label}
                     </Button>
@@ -109,14 +162,26 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
             <div className="hidden lg:flex items-center gap-1">
               <Button
                 type="text"
-                icon={<GlobalOutlined />}
-                title="Ngôn ngữ"
+                icon={isDark ? <SunOutlined /> : <MoonOutlined />}
+                onClick={toggleTheme}
+                title={t(
+                  isDark ? 'header.theme.light' : 'header.theme.dark',
+                  isDark ? 'Giao diện Sáng' : 'Giao diện Tối',
+                )}
                 className={ICON_BTN_CLS}
               />
+              <Dropdown menu={{ items: languageMenuItems }} placement="bottomRight" arrow>
+                <Button
+                  type="text"
+                  icon={<GlobalOutlined />}
+                  title={t('header.language', 'Ngôn ngữ')}
+                  className={ICON_BTN_CLS}
+                />
+              </Dropdown>
               <Button
                 type="text"
                 icon={<BellOutlined />}
-                title="Thông báo"
+                title={t('header.notifications', 'Thông báo')}
                 className={ICON_BTN_CLS}
               />
             </div>
@@ -125,13 +190,13 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
             {userName && (
               <div className="hidden lg:block ml-1">
                 <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
-                  <Space className={`cursor-pointer px-2 py-1 rounded-lg ${ICON_BTN_CLS}`}>
+                  <Space className={cn('cursor-pointer px-2 py-1 rounded-lg', ICON_BTN_CLS)}>
                     <Avatar
                       className="!bg-white !text-orange-500 font-bold"
                       size="small"
                       icon={<UserOutlined />}
                     />
-                    <Text data-testid="user-greeting" className="text-white font-semibold text-sm">
+                    <Text data-testid="user-greeting" className="!text-white font-semibold text-sm">
                       {userName}
                     </Text>
                   </Space>
@@ -163,7 +228,7 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
                 {userName || 'Admin'}
               </Text>
               <Text type="secondary" className="text-xs">
-                Quản trị viên hệ thống
+                {t('header.adminRole', 'Quản trị viên hệ thống')}
               </Text>
             </div>
           </Space>
@@ -193,13 +258,13 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
         <div className="px-3">
           <Space direction="vertical" className="w-full" size="small">
             <Button icon={<BellOutlined />} block className="text-left">
-              Thông Báo
+              {t('header.notifications', 'Thông báo')}
             </Button>
             <Button icon={<SettingOutlined />} block className="text-left">
-              Cài Đặt
+              {t('header.settings', 'Cài đặt hệ thống')}
             </Button>
             <Button danger icon={<LogoutOutlined />} block className="text-left" onClick={logout}>
-              Đăng Xuất
+              {t('header.logout', 'Đăng xuất')}
             </Button>
           </Space>
         </div>

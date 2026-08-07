@@ -8,7 +8,30 @@ describe('AdminService', () => {
   let service: AdminService;
 
   const mockPrismaService = {
-    user: { count: jest.fn().mockResolvedValue(100) },
+    user: {
+      count: jest.fn().mockResolvedValue(100),
+      findMany: jest.fn().mockResolvedValue([
+        {
+          id: 'user-1',
+          name: 'Nguyễn Văn A',
+          phone: '0901234567',
+          email: 'user1@example.com',
+          role: 'customer',
+          createdAt: new Date('2024-01-01'),
+        },
+        {
+          id: 'user-2',
+          name: 'Trần Thị B',
+          phone: '0909876543',
+          email: null,
+          role: 'shipper',
+          createdAt: new Date('2024-02-01'),
+        },
+      ]),
+      findUnique: jest.fn(),
+      update: jest.fn(),
+      findFirst: jest.fn(),
+    },
     restaurant: { count: jest.fn().mockResolvedValue(20) },
     shipper: {
       count: jest.fn().mockResolvedValue(30),
@@ -59,6 +82,42 @@ describe('AdminService', () => {
       const result = await service.updateShipperKyc('shipper-1', { status: KycStatus.verified });
 
       expect(result.ekycStatus).toBe(KycStatus.verified);
+    });
+  });
+
+  describe('getUsersList', () => {
+    it('should return paginated user list with correct structure', async () => {
+      const result = await service.getUsersList({ role: 'ALL' });
+      expect(result).toBeDefined();
+
+      const data = Array.isArray(result) ? result : (result as { data: unknown[] }).data;
+      expect(Array.isArray(data)).toBe(true);
+
+      const first = (data as { id: string; role: string; status: string }[])[0];
+      expect(first.id).toBe('user-1');
+      expect(first.role).toBe('CUSTOMER'); // uppercased
+      expect(first.status).toBe('ACTIVE'); // default
+    });
+
+    it('should filter by role when specified', async () => {
+      const result = await service.getUsersList({ role: 'SHIPPER' });
+      const data = Array.isArray(result) ? result : (result as { data: unknown[] }).data;
+      const items = data as { id: string; role: string }[];
+      expect(items.every((u) => u.role === 'SHIPPER')).toBe(true);
+    });
+  });
+
+  describe('updateUserStatus', () => {
+    it('should update user status', async () => {
+      mockPrismaService.user.findUnique = jest
+        .fn()
+        .mockResolvedValue({ id: 'user-1', name: 'Test' });
+      mockPrismaService.user.update = jest
+        .fn()
+        .mockResolvedValue({ id: 'user-1', status: 'SUSPENDED' });
+
+      const result = await service.updateUserStatus('user-1', { status: 'SUSPENDED' });
+      expect(result.status).toBe('SUSPENDED');
     });
   });
 });

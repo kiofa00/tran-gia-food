@@ -1,8 +1,9 @@
-﻿import React from 'react';
+import React from 'react';
 
 import { Card, Space, Typography } from 'antd';
 
 import { adminDesignTokens } from '@/theme/tokens';
+import { cn } from '@/utils/cn';
 
 const { Title, Text } = Typography;
 
@@ -12,6 +13,7 @@ interface MetricCardProps {
   value: string | number;
   subText?: string;
   iconColor?: string;
+  className?: string;
 }
 
 export const MetricCard: React.FC<MetricCardProps> = ({
@@ -20,9 +22,10 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   value,
   subText,
   iconColor = adminDesignTokens.colors.primary,
+  className,
 }) => {
   return (
-    <Card variant="borderless" className="rounded-xl shadow-xs h-full">
+    <Card variant="borderless" className={cn('rounded-xl shadow-xs h-full', className)}>
       <Space align="center" size="middle">
         {React.isValidElement(icon)
           ? React.cloneElement(

@@ -24,7 +24,7 @@ async function bootstrap() {
         'http://127.0.0.1:3001',
         'http://127.0.0.1:3000',
         'http://127.0.0.1:1337',
-        ...(process.env.CORS_ORIGINS?.split(',') ?? []),
+        ...(process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : []),
       ];
       if (allowedOrigins.includes(origin) || origin.startsWith('http://localhost:')) {
         return callback(null, true);
@@ -64,10 +64,10 @@ async function bootstrap() {
     SwaggerModule.setup('api-docs', app, document, {
       swaggerOptions: { persistAuthorization: true },
     });
-    logger.log(`Swagger docs: http://localhost:${process.env.PORT ?? 3000}/api-docs`);
+    logger.log(`Swagger docs: http://localhost:${process.env.PORT!}/api-docs`);
   }
 
-  const port = process.env.PORT ?? 3000;
+  const port = Number(process.env.PORT!);
   await app.listen(port);
   logger.log(`🚀 Server running on http://localhost:${port}/api/v1`);
 }

@@ -21,15 +21,19 @@
     "db:generate": "pnpm --filter=backend run prisma:generate",
     "db:seed": "pnpm --filter=backend run prisma:seed",
     "db:studio": "pnpm --filter=backend run prisma:studio",
+    "db:create-cms": "node -e \"const p=require.resolve('pg',{paths:['./apps/cms','./backend']});const {Client}=require(p);const c=new Client({host:process.env.DATABASE_HOST||'127.0.0.1',port:process.env.DATABASE_PORT||5432,user:process.env.DATABASE_USERNAME||'postgres',password:process.env.DATABASE_PASSWORD||'postgres',database:'postgres'});c.connect().then(async()=>{try{await c.query('CREATE DATABASE trangiadelivery_cms;');console.log('Database trangiadelivery_cms created.');}catch(e){if(e.code==='42P04')console.log('Database trangiadelivery_cms exists.');else console.error(e.message);}c.end();});\"",
     "fix": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md,yaml,yml}\" --ignore-unknown && pnpm -r --sequential --if-present run fix",
     "check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md,yaml,yml}\" --ignore-unknown && pnpm --filter=!customer_app --filter=!shipper_app --filter=!restaurant_app --sequential --if-present run lint && pnpm --filter=customer_app --filter=shipper_app --filter=restaurant_app --sequential run lint",
     "build": "pnpm --filter=!customer_app --filter=!shipper_app --filter=!restaurant_app --sequential --if-present run build && pnpm --filter=customer_app --filter=shipper_app --filter=restaurant_app --sequential run build",
     "test": "pnpm -r run test && melos test",
     "clean": "pnpm -r run clean && node -e \"['build','.dart_tool','.turbo'].forEach(d=>{try{require('fs').rmSync(d,{recursive:true,force:true})}catch(e){}})\"",
-    "melos:gen": "melos gen"
+    "melos:gen": "melos gen",
+    "translate": "pnpm --filter=admin_web run sync:i18n",
+    "check:circular": "pnpm --filter=admin_web --filter=backend --sequential --if-present run check:circular"
   },
   "devDependencies": {
     "prettier": "catalog:",
-    "@trivago/prettier-plugin-sort-imports": "catalog:"
+    "@trivago/prettier-plugin-sort-imports": "catalog:",
+    "madge": "catalog:"
   }
 }

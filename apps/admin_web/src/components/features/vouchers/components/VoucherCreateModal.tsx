@@ -1,7 +1,8 @@
 'use client';
 
-import { DatePicker, Form, Input, InputNumber, Select, Space } from 'antd';
-import { Modal } from 'antd';
+import { DatePicker, Form, Input, InputNumber, Modal, Select, Space } from 'antd';
+
+import { useTranslation } from '@/providers/LanguageProvider';
 
 import type { CreateVoucherFormValues } from '../types';
 
@@ -21,6 +22,7 @@ export function VoucherCreateModal({
   onSubmit,
   confirmLoading,
 }: VoucherCreateModalProps) {
+  const { t } = useTranslation();
   const [form] = Form.useForm<CreateVoucherFormValues>();
 
   const handleOk = () => form.submit();
@@ -32,12 +34,12 @@ export function VoucherCreateModal({
 
   return (
     <Modal
-      title="✨ Tạo Mã Giảm Giá Mới"
+      title={t('vouchers.modalTitle', '✨ Tạo Mã Giảm Giá Mới')}
       open={open}
       onCancel={handleCancel}
       onOk={handleOk}
-      okText="Tạo Voucher"
-      cancelText="Hủy"
+      okText={t('vouchers.createModalSubmit', 'Tạo Voucher')}
+      cancelText={t('common.cancel', 'Hủy')}
       confirmLoading={confirmLoading}
       okButtonProps={{ className: 'bg-orange-500 font-semibold' }}
     >
@@ -52,43 +54,73 @@ export function VoucherCreateModal({
       >
         <Form.Item
           name="code"
-          label="Mã Voucher (Code)"
-          rules={[{ required: true, message: 'Vui lòng nhập mã voucher' }]}
+          label={t('vouchers.codeLabel', 'Mã Voucher (Code)')}
+          rules={[
+            { required: true, message: t('vouchers.codeRequired', 'Vui lòng nhập mã voucher') },
+          ]}
         >
-          <Input placeholder="VD: TRANGIA50K" className="uppercase" />
+          <Input
+            placeholder={t('vouchers.codePlaceholder', 'VD: TRANGIA50K')}
+            className="uppercase"
+          />
         </Form.Item>
 
         <Space size="middle" className="flex">
-          <Form.Item name="discountType" label="Loại Khuyến Mãi" rules={[{ required: true }]}>
+          <Form.Item
+            name="discountType"
+            label={t('vouchers.discountTypeLabel', 'Loại Khuyến Mãi')}
+            rules={[{ required: true }]}
+          >
             <Select className="w-44">
-              <Option value="fixed">Giảm tiền cố định (đ)</Option>
-              <Option value="percent">Giảm theo phần trăm (%)</Option>
+              <Option value="fixed">{t('vouchers.typeFixed', 'Giảm tiền cố định (đ)')}</Option>
+              <Option value="percent">
+                {t('vouchers.typePercent', 'Giảm theo phần trăm (%)')}
+              </Option>
             </Select>
           </Form.Item>
 
           <Form.Item
             name="discountValue"
-            label="Giá Trị Giảm"
-            rules={[{ required: true, message: 'Nhập giá trị' }]}
+            label={t('vouchers.discountValueLabel', 'Giá Trị Giảm')}
+            rules={[
+              { required: true, message: t('vouchers.discountValueRequired', 'Nhập giá trị') },
+            ]}
           >
-            <InputNumber min={1} className="w-full" placeholder="VD: 50000 hoặc 15" />
+            <InputNumber
+              min={1}
+              className="w-full"
+              placeholder={t('vouchers.discountValuePlaceholder', 'VD: 50000 hoặc 15')}
+            />
           </Form.Item>
         </Space>
 
         <Space size="middle" className="flex">
-          <Form.Item name="minOrderValue" label="Đơn Hàng Tối Thiểu (đ)">
-            <InputNumber min={0} className="w-44" placeholder="VD: 100000" />
+          <Form.Item
+            name="minOrderValue"
+            label={t('vouchers.minOrderLabel', 'Đơn Hàng Tối Thiểu (đ)')}
+          >
+            <InputNumber
+              min={0}
+              className="w-44"
+              placeholder={t('vouchers.minOrderPlaceholder', 'VD: 100000')}
+            />
           </Form.Item>
 
-          <Form.Item name="totalLimit" label="Số Lượng Lượt Dùng">
-            <InputNumber min={1} className="w-44" placeholder="VD: 500" />
+          <Form.Item name="totalLimit" label={t('vouchers.totalLimitLabel', 'Số Lượng Lượt Dùng')}>
+            <InputNumber
+              min={1}
+              className="w-44"
+              placeholder={t('vouchers.totalLimitPlaceholder', 'VD: 500')}
+            />
           </Form.Item>
         </Space>
 
         <Form.Item
           name="validDates"
-          label="Thời Gian Hiệu Lực"
-          rules={[{ required: true, message: 'Chọn khoảng thời gian' }]}
+          label={t('vouchers.validDatesLabel', 'Thời Gian Hiệu Lực')}
+          rules={[
+            { required: true, message: t('vouchers.validDatesRequired', 'Chọn khoảng thời gian') },
+          ]}
         >
           <RangePicker className="w-full" />
         </Form.Item>

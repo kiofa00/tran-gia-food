@@ -2,15 +2,18 @@
 
 import { Tag, Typography } from 'antd';
 
+import { useTranslation } from '@/providers/LanguageProvider';
 import { TopRestaurantItem } from '@/types';
 import { formatCurrency } from '@/utils/formatters';
 
 const { Text } = Typography;
 
-export function getTopRestaurantsColumns() {
+export function useTopRestaurantsColumns() {
+  const { t } = useTranslation();
+
   return [
     {
-      title: 'Hạng',
+      title: t('analytics.growth', 'Hạng'),
       dataIndex: 'rank',
       key: 'rank',
       width: 90,
@@ -43,7 +46,7 @@ export function getTopRestaurantsColumns() {
       },
     },
     {
-      title: 'Tên Quán Ăn',
+      title: t('analytics.restaurantName', 'Tên Nhà Hàng'),
       dataIndex: 'name',
       key: 'name',
       width: 260,
@@ -56,7 +59,7 @@ export function getTopRestaurantsColumns() {
       ),
     },
     {
-      title: 'Tổng Doanh Số (GMV)',
+      title: t('analytics.revenue', 'Tổng Doanh Số (GMV)'),
       dataIndex: 'gmv',
       key: 'gmv',
       width: 200,
@@ -69,7 +72,7 @@ export function getTopRestaurantsColumns() {
       ),
     },
     {
-      title: 'Hoa Hồng Nền Tảng (15%)',
+      title: t('commissions.totalRevenue', 'Hoa Hồng Nền Tảng (15%)'),
       dataIndex: 'commission',
       key: 'commission',
       width: 200,
@@ -84,7 +87,7 @@ export function getTopRestaurantsColumns() {
       ),
     },
     {
-      title: 'Số Đơn Hàng',
+      title: t('analytics.ordersCount', 'Số Đơn Hàng'),
       dataIndex: 'orders',
       key: 'orders',
       width: 140,
@@ -94,7 +97,7 @@ export function getTopRestaurantsColumns() {
       ) => (a.orders || a.ordersCount || 0) - (b.orders || b.ordersCount || 0),
       render: (val: number) => (
         <Tag color="blue" className="text-xs px-2.5 py-0.5">
-          {val} đơn
+          {val} {t('common.items', 'đơn')}
         </Tag>
       ),
     },

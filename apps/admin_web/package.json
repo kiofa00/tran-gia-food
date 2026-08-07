@@ -12,7 +12,9 @@
     "test": "vitest run",
     "clean": "node -e \"['.next','.turbo'].forEach(d=>{require('fs').rmSync(d,{recursive:true,force:true})})\"",
     "type-check": "tsc --noEmit",
-    "gen:api-types": "openapi-typescript http://localhost:3000/api-json -o src/types/api.ts"
+    "check:circular": "madge --circular --extensions ts,tsx src/",
+    "gen:api-types": "openapi-typescript http://localhost:3000/api-json -o src/types/api.ts",
+    "sync:i18n": "node scripts/sync-locales.mjs"
   },
   "dependencies": {
     "@ant-design/icons": "catalog:",
@@ -21,12 +23,16 @@
     "@tanstack/react-query": "catalog:",
     "antd": "catalog:",
     "axios": "catalog:",
+    "clsx": "catalog:",
     "dayjs": "catalog:",
+    "i18next": "^26.3.6",
     "next": "catalog:",
     "next-auth": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "recharts": "catalog:"
+    "react-i18next": "^17.0.11",
+    "recharts": "catalog:",
+    "tailwind-merge": "catalog:"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
@@ -41,6 +47,7 @@
     "eslint": "catalog:",
     "eslint-config-next": "catalog:",
     "jsdom": "catalog:",
+    "madge": "catalog:",
     "openapi-typescript": "catalog:",
     "postcss": "^8.5.25",
     "tailwindcss": "^4.3.3",

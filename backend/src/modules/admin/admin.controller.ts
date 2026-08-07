@@ -3,8 +3,13 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { Public } from '../../common/decorators/public.decorator';
 import { AdminService } from './admin.service';
-import { PenalizeShipperDto, UpdateAppConfigDto, UpdateKycStatusDto } from './dto/admin.dto';
-import { CreateVoucherDto, QueryOptions } from './types/admin.types';
+import {
+  PenalizeShipperDto,
+  UpdateAppConfigDto,
+  UpdateKycStatusDto,
+  UpdateUserStatusDto,
+} from './dto/admin.dto';
+import { CreateVoucherDto, QueryOptions, QueryUserOptions } from './types/admin.types';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -95,5 +100,22 @@ export class AdminController {
   })
   getFleet(@Query() query: QueryOptions) {
     return this.adminService.getFleetData(query);
+  }
+
+  @Public()
+  @Get('users')
+  @ApiOperation({
+    summary:
+      '[Admin] Danh sách người dùng hệ thống (Hỗ trợ sort, filter role/status, pagination, search)',
+  })
+  getUsers(@Query() query: QueryUserOptions) {
+    return this.adminService.getUsersList(query);
+  }
+
+  @Public()
+  @Patch('users/:id/status')
+  @ApiOperation({ summary: '[Admin] Kích hoạt hoặc tạm khóa tài khoản người dùng' })
+  updateUserStatus(@Param('id') id: string, @Body() dto: UpdateUserStatusDto) {
+    return this.adminService.updateUserStatus(id, dto);
   }
 }

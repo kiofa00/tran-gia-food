@@ -2,6 +2,8 @@ import React from 'react';
 
 import { Col, Row, Space, Typography } from 'antd';
 
+import { cn } from '@/utils/cn';
+
 const { Title, Text } = Typography;
 
 interface PageHeaderProps {
@@ -9,11 +11,18 @@ interface PageHeaderProps {
   title: string;
   subtitle?: string;
   action?: React.ReactNode;
+  className?: string;
 }
 
-export const PageHeader: React.FC<PageHeaderProps> = ({ icon, title, subtitle, action }) => {
+export const PageHeader: React.FC<PageHeaderProps> = ({
+  icon,
+  title,
+  subtitle,
+  action,
+  className,
+}) => {
   return (
-    <div className="mb-6">
+    <div className={cn('mb-6', className)}>
       <Row justify="space-between" align="middle" gutter={[16, 16]}>
         <Col xs={24} sm={16} md={18}>
           <Space align="center" size="small">

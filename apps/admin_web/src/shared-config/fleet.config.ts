@@ -1,3 +1,7 @@
+export const FLEET_QUERY_KEYS = {
+  all: ['fleet', 'shippers'],
+} as const;
+
 export const FLEET_STATUS_COLOR_MAP: Record<string, string> = {
   DELIVERING: 'orange',
   IDLE: 'green',

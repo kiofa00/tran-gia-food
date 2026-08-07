@@ -4,6 +4,7 @@ import { CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined } from '@
 import { App, Button, Space, Tag, Typography } from 'antd';
 
 import { PlateBadge, VehicleBadge } from '@/components/shared-ui';
+import { useTranslation } from '@/providers/LanguageProvider';
 import { mapKycStatus } from '@/utils/formatters';
 
 import { useVerifyShipperKycMutation } from '../hooks/useAdmin';
@@ -13,14 +14,20 @@ const { Text } = Typography;
 
 export function useShipperKycColumns() {
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const verifyKycMutation = useVerifyShipperKycMutation();
 
   const handleApproveKyc = (id: string, name: string) => {
     verifyKycMutation.mutate(
       { id, action: 'approve' },
       {
-        onSuccess: () => message.success(`Đã duyệt hồ sơ eKYC cho tài xế ${name} thành công!`),
-        onError: () => message.error('Duyệt eKYC thất bại'),
+        onSuccess: () =>
+          message.success(
+            t('dashboard.approveKycSuccess', 'Đã duyệt hồ sơ eKYC cho tài xế {name} thành công!', {
+              name,
+            }),
+          ),
+        onError: () => message.error(t('dashboard.approveKycFailed', 'Duyệt eKYC thất bại')),
       },
     );
   };
@@ -29,15 +36,18 @@ export function useShipperKycColumns() {
     verifyKycMutation.mutate(
       { id, action: 'reject' },
       {
-        onSuccess: () => message.info(`Đã từ chối eKYC của tài xế ${name}`),
-        onError: () => message.error('Từ chối eKYC thất bại'),
+        onSuccess: () =>
+          message.info(
+            t('dashboard.rejectKycSuccess', 'Đã từ chối eKYC của tài xế {name}', { name }),
+          ),
+        onError: () => message.error(t('dashboard.rejectKycFailed', 'Từ chối eKYC thất bại')),
       },
     );
   };
 
   return [
     {
-      title: 'Mã Tài Xế',
+      title: t('dashboard.shipperId', 'Mã Tài Xế'),
       dataIndex: 'id',
       key: 'id',
       width: 120,
@@ -49,7 +59,7 @@ export function useShipperKycColumns() {
       ),
     },
     {
-      title: 'Họ & Tên',
+      title: t('dashboard.fullName', 'Họ & Tên'),
       dataIndex: 'name',
       key: 'name',
       width: 180,
@@ -61,14 +71,14 @@ export function useShipperKycColumns() {
       ),
     },
     {
-      title: 'Số Điện Thoại',
+      title: t('users.phone', 'Số Điện Thoại'),
       dataIndex: 'phone',
       key: 'phone',
       width: 150,
       render: (text: string) => <Text className="whitespace-nowrap">{text}</Text>,
     },
     {
-      title: 'Loại Xe',
+      title: t('dashboard.vehicleType', 'Loại Xe'),
       dataIndex: 'vehicle',
       key: 'vehicle',
       width: 180,
@@ -77,14 +87,14 @@ export function useShipperKycColumns() {
       render: (text: string) => <VehicleBadge vehicle={text} />,
     },
     {
-      title: 'Biển Số Xe',
+      title: t('dashboard.plateNumber', 'Biển Số Xe'),
       dataIndex: 'plate',
       key: 'plate',
       width: 150,
       render: (plate: string) => <PlateBadge plate={plate} />,
     },
     {
-      title: 'Trạng Thái eKYC',
+      title: t('dashboard.kycStatus', 'Trạng Thái eKYC'),
       dataIndex: 'status',
       key: 'status',
       width: 170,
@@ -105,7 +115,7 @@ export function useShipperKycColumns() {
       },
     },
     {
-      title: 'Hành Động',
+      title: t('common.actions', 'Hành Động'),
       key: 'action',
       width: 260,
       render: (record: PendingShipperRecord) => (
@@ -116,14 +126,14 @@ export function useShipperKycColumns() {
             className="bg-green-600 hover:bg-green-500 border-none"
             onClick={() => handleApproveKyc(record.id, record.name)}
           >
-            Duyệt eKYC
+            {t('dashboard.approveKyc', 'Duyệt eKYC')}
           </Button>
           <Button
             danger
             icon={<CloseCircleOutlined />}
             onClick={() => handleRejectKyc(record.id, record.name)}
           >
-            Từ Chối
+            {t('dashboard.rejectKyc', 'Từ Chối')}
           </Button>
         </Space>
       ),

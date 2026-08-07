@@ -3,6 +3,7 @@
 import { DollarOutlined, PercentageOutlined, ShoppingOutlined } from '@ant-design/icons';
 import { Card, Col, Row, Skeleton, Statistic, Typography } from 'antd';
 
+import { useTranslation } from '@/providers/LanguageProvider';
 import { adminDesignTokens } from '@/theme/tokens';
 import { formatCurrency } from '@/utils/formatters';
 
@@ -21,6 +22,8 @@ export function CommissionsStats({
   totalRestaurantRevenue,
   totalShipperDelivery,
 }: CommissionsStatsProps) {
+  const { t } = useTranslation();
+
   return (
     <Row gutter={[16, 16]} className="mb-6">
       <Col xs={24} sm={12} lg={8}>
@@ -32,7 +35,7 @@ export function CommissionsStats({
               title={
                 <Text type="secondary">
                   <PercentageOutlined className="text-orange-500 mr-2" />
-                  Tổng Phí Hoa Hồng Thu Được
+                  {t('commissions.totalRevenue', 'Tổng Phí Hoa Hồng Thu Được')}
                 </Text>
               }
               value={totalPlatformCommission}
@@ -55,7 +58,7 @@ export function CommissionsStats({
               title={
                 <Text type="secondary">
                   <ShoppingOutlined className="text-green-600 mr-2" />
-                  Doanh Thu Chuyển Ví Quán
+                  {t('commissions.merchantPayouts', 'Doanh Thu Chuyển Ví Quán')}
                 </Text>
               }
               value={totalRestaurantRevenue}
@@ -78,7 +81,7 @@ export function CommissionsStats({
               title={
                 <Text type="secondary">
                   <DollarOutlined className="text-blue-500 mr-2" />
-                  Phí Giao Hàng Thu Hộ Shipper
+                  {t('commissions.pendingPayouts', 'Phí Giao Hàng Thu Hộ Shipper')}
                 </Text>
               }
               value={totalShipperDelivery}

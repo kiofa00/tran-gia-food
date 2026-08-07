@@ -1,3 +1,7 @@
+export const CMS_QUERY_KEYS = {
+  status: ['cms', 'data'],
+} as const;
+
 export const CMS_BANNER_STATUS_FILTER_OPTIONS = [
   { value: 'ALL', label: 'Tất Cả Banner' },
   { value: 'ACTIVE', label: 'Đang Hiển Thị' },

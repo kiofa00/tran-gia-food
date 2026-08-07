@@ -29,3 +29,10 @@ export class PenalizeShipperDto {
   @IsString()
   reason!: string;
 }
+
+export class UpdateUserStatusDto {
+  @ApiProperty({ example: 'SUSPENDED' })
+  @IsString()
+  @IsNotEmpty()
+  status!: string;
+}

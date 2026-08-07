@@ -7,6 +7,23 @@ export interface QueryOptions {
   sortOrder?: 'asc' | 'desc';
 }
 
+export interface QueryUserOptions extends QueryOptions {
+  role?: string;
+  userStatus?: string;
+}
+
+export interface UserRow {
+  id: string;
+  key: string;
+  name: string;
+  phone: string;
+  email: string | null;
+  role: string;
+  status: string;
+  createdAt: Date | string;
+  [key: string]: unknown;
+}
+
 export interface CreateVoucherDto {
   code: string;
   type?: string;

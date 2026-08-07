@@ -1,3 +1,2 @@
-// Analytics feature public API
-export * from './components/TopRestaurantsColumns';
+export * from './components';
 export * from './hooks/useAnalytics';

@@ -79,29 +79,16 @@ export class CmsService {
     try {
       const res = await axios.get(`${this.cmsUrl}/api/translations`, { timeout: 3000 });
       const translations: CmsTranslation[] = (res.data?.data || []).map(
-        (item: Record<string, unknown>) => ({
-          id: (item.id as string | number) || `t_${Date.now()}`,
-          key:
-            ((item.attributes
-              ? (item.attributes as Record<string, unknown>).key
-              : item.key) as string) || '',
-          vi:
-            ((item.attributes
-              ? (item.attributes as Record<string, unknown>).vi
-              : item.vi) as string) || '',
-          en:
-            ((item.attributes
-              ? (item.attributes as Record<string, unknown>).en
-              : item.en) as string) || '',
-          appTarget:
-            ((item.attributes
-              ? (item.attributes as Record<string, unknown>).appTarget
-              : item.appTarget) as string) || 'ALL',
-          category:
-            ((item.attributes
-              ? (item.attributes as Record<string, unknown>).category
-              : item.category) as string) || 'GENERAL',
-        }),
+        (item: Record<string, unknown>) => {
+          const rawAttrs = (item.attributes as Record<string, unknown>) || item;
+          return {
+            ...rawAttrs,
+            id: (item.id as string | number) || `t_${Date.now()}`,
+            key: String(rawAttrs.key || ''),
+            appTarget: String(rawAttrs.appTarget || rawAttrs.targetApp || 'ALL'),
+            category: String(rawAttrs.category || 'GENERAL'),
+          };
+        },
       );
 
       try {

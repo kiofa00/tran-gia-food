@@ -8,7 +8,9 @@ import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { App, Button, Card, Checkbox, Form, Input, Skeleton, Typography } from 'antd';
 
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from '@/providers/LanguageProvider';
 import { ADMIN_ROUTES, STORAGE_KEY_REMEMBERED_EMAIL } from '@/shared-config';
+import { cn } from '@/utils/cn';
 
 const { Title, Text } = Typography;
 
@@ -18,10 +20,15 @@ interface LoginFormValues {
   remember: boolean;
 }
 
-export function LoginForm() {
+interface LoginFormProps {
+  className?: string;
+}
+
+export function LoginForm({ className }: LoginFormProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { message } = App.useApp();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   // Khởi tạo null để phân biệt "chưa mount" vs "không có giá trị"
@@ -52,20 +59,18 @@ export function LoginForm() {
       });
 
       if (result?.error) {
-        // NextAuth trả 'CredentialsSignin' khi authorize() return null (sai credential)
-        // Các lỗi khác (Configuration, Default...) thường do server/infra
         if (result.error === 'CredentialsSignin') {
-          message.error('Email hoặc mật khẩu không đúng. Vui lòng thử lại.');
+          message.error(t('auth.loginFailed', 'Tài khoản hoặc mật khẩu không chính xác.'));
         } else {
-          message.error('Máy chủ đang gặp sự cố. Vui lòng thử lại sau.');
+          message.error(t('common.errorTryAgain', 'Thao tác thất bại, vui lòng thử lại.'));
         }
       } else {
-        message.success('Đăng nhập thành công!');
+        message.success(t('auth.loginSuccess', 'Đăng nhập thành công!'));
         router.push(callbackUrl);
         router.refresh();
       }
     } catch {
-      message.error('Có lỗi xảy ra. Vui lòng thử lại.');
+      message.error(t('common.errorTryAgain', 'Thao tác thất bại, vui lòng thử lại.'));
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +78,7 @@ export function LoginForm() {
 
   return (
     <Card
-      className="w-full max-w-md rounded-2xl shadow-2xl border-0"
+      className={cn('w-full max-w-md rounded-2xl shadow-2xl border-0', className)}
       styles={{ body: { padding: '40px 36px' } }}
     >
       <div className="text-center mb-8">
@@ -81,7 +86,7 @@ export function LoginForm() {
         <Title level={3} className="m-0 text-orange-500">
           Tran Gia Food
         </Title>
-        <Text type="secondary">Cổng Admin quản trị hệ thống</Text>
+        <Text type="secondary">{t('auth.loginSubtitle', 'Tran Gia Food Admin Portal')}</Text>
       </div>
 
       <App>
@@ -106,9 +111,12 @@ export function LoginForm() {
           >
             <Form.Item
               name="email"
-              label="Email"
+              label={t('users.email', 'Email')}
               rules={[
-                { required: true, message: 'Vui lòng nhập email' },
+                {
+                  required: true,
+                  message: t('auth.phoneOrEmailRequired', 'Vui lòng nhập SĐT hoặc Email!'),
+                },
                 { type: 'email', message: 'Email không hợp lệ' },
               ]}
             >
@@ -122,8 +130,10 @@ export function LoginForm() {
 
             <Form.Item
               name="password"
-              label="Mật khẩu"
-              rules={[{ required: true, message: 'Vui lòng nhập mật khẩu' }]}
+              label={t('auth.password', 'Mật khẩu')}
+              rules={[
+                { required: true, message: t('auth.passwordRequired', 'Vui lòng nhập mật khẩu!') },
+              ]}
             >
               <Input.Password
                 id="admin-password-input"
@@ -135,7 +145,7 @@ export function LoginForm() {
 
             <div className="flex justify-between items-center mb-4">
               <Form.Item name="remember" valuePropName="checked" noStyle>
-                <Checkbox>Ghi nhớ đăng nhập</Checkbox>
+                <Checkbox>{t('auth.rememberMe', 'Ghi nhớ đăng nhập')}</Checkbox>
               </Form.Item>
             </div>
 
@@ -149,7 +159,7 @@ export function LoginForm() {
                 loading={isLoading}
                 className="bg-linear-to-r from-orange-500 to-orange-400 border-0 rounded-lg font-semibold h-12"
               >
-                {isLoading ? 'Đang đăng nhập...' : 'Đăng Nhập'}
+                {isLoading ? 'Đang đăng nhập...' : t('auth.submitLogin', 'Đăng Nhập Portal')}
               </Button>
             </Form.Item>
           </Form>
@@ -158,7 +168,7 @@ export function LoginForm() {
 
       <div className="text-center mt-6">
         <Text type="secondary" className="text-xs">
-          Chỉ dành cho Quản Trị Viên Trần Gia Food
+          {t('header.adminRole', 'Quản trị viên hệ thống')}
         </Text>
       </div>
     </Card>

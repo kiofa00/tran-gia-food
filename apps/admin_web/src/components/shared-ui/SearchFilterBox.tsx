@@ -3,6 +3,9 @@ import React from 'react';
 import { FilterOutlined, SearchOutlined } from '@ant-design/icons';
 import { Card, Col, Input, Row, Select, Typography } from 'antd';
 
+import { useTranslation } from '@/providers/LanguageProvider';
+import { cn } from '@/utils/cn';
+
 const { Text } = Typography;
 const { Option } = Select;
 
@@ -20,24 +23,31 @@ interface SearchFilterBoxProps {
   onFilterChange?: (value: string) => void;
   filterOptions?: SelectOptionItem[];
   extraAction?: React.ReactNode;
+  className?: string;
 }
 
 export const SearchFilterBox: React.FC<SearchFilterBoxProps> = ({
-  searchPlaceholder = 'Tìm kiếm...',
+  searchPlaceholder,
   searchValue,
   onSearchChange,
-  filterLabel = 'Lọc:',
+  filterLabel,
   filterValue,
   onFilterChange,
   filterOptions = [],
   extraAction,
+  className,
 }) => {
+  const { t } = useTranslation();
+
+  const resolvedPlaceholder = searchPlaceholder || t('common.search', 'Tìm kiếm...');
+  const resolvedFilterLabel = filterLabel || t('common.filter', 'Lọc:');
+
   return (
-    <Card variant="borderless" className="bg-gray-50 rounded-lg p-3 !mb-4">
+    <Card variant="borderless" className={cn('bg-gray-50 rounded-lg p-3 !mb-4', className)}>
       <Row gutter={[12, 12]} align="middle" justify="space-between">
         <Col xs={24} sm={14} md={10}>
           <Input
-            placeholder={searchPlaceholder}
+            placeholder={resolvedPlaceholder}
             prefix={<SearchOutlined className="text-gray-400" />}
             value={searchValue}
             onChange={(e) => onSearchChange(e.target.value)}
@@ -50,7 +60,7 @@ export const SearchFilterBox: React.FC<SearchFilterBoxProps> = ({
               <>
                 <div className="flex items-center gap-1.5 shrink-0">
                   <FilterOutlined className="text-slate-400" />
-                  <Text type="secondary">{filterLabel}</Text>
+                  <Text type="secondary">{resolvedFilterLabel}</Text>
                 </div>
                 <Select
                   value={filterValue}

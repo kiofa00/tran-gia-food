@@ -5,3 +5,4 @@ export * from './commissions';
 export * from './dashboard';
 export * from './fleet';
 export * from './vouchers';
+export * from './users';

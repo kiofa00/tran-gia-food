@@ -10,6 +10,7 @@ import {
 } from '@ant-design/icons';
 import { Space, Switch, Tag, Typography } from 'antd';
 
+import { useTranslation } from '@/providers/LanguageProvider';
 import { formatCurrency, formatDate } from '@/utils/formatters';
 
 import type { VoucherRecord } from '../types';
@@ -20,10 +21,12 @@ interface VoucherColumnsOptions {
   onToggleActive: (key: string, checked: boolean) => void;
 }
 
-export function getVoucherColumns({ onToggleActive }: VoucherColumnsOptions) {
+export function useVoucherColumns({ onToggleActive }: VoucherColumnsOptions) {
+  const { t } = useTranslation();
+
   return [
     {
-      title: 'Mã Voucher',
+      title: t('vouchers.code', 'Mã Voucher'),
       dataIndex: 'code',
       key: 'code',
       width: 160,
@@ -39,7 +42,7 @@ export function getVoucherColumns({ onToggleActive }: VoucherColumnsOptions) {
       ),
     },
     {
-      title: 'Loại Ưu Đãi',
+      title: t('vouchers.discountType', 'Loại Ưu Đãi'),
       dataIndex: 'discountType',
       key: 'discountType',
       width: 180,
@@ -59,7 +62,7 @@ export function getVoucherColumns({ onToggleActive }: VoucherColumnsOptions) {
       ),
     },
     {
-      title: 'Đơn Tối Thiểu',
+      title: t('vouchers.minOrderValue', 'Đơn Tối Thiểu'),
       dataIndex: 'minOrderValue',
       key: 'minOrderValue',
       width: 150,
@@ -67,7 +70,7 @@ export function getVoucherColumns({ onToggleActive }: VoucherColumnsOptions) {
       render: (val: number) => <Text className="whitespace-nowrap">{formatCurrency(val)}</Text>,
     },
     {
-      title: 'Hạn Sử Dụng',
+      title: t('vouchers.validity', 'Hạn Sử Dụng'),
       key: 'validity',
       width: 220,
       sorter: (a: VoucherRecord, b: VoucherRecord) => a.validFrom.localeCompare(b.validFrom),
@@ -79,51 +82,52 @@ export function getVoucherColumns({ onToggleActive }: VoucherColumnsOptions) {
       ),
     },
     {
-      title: 'Lượt Sử Dụng',
+      title: t('vouchers.usage', 'Lượt Sử Dụng'),
       key: 'usage',
       width: 160,
       sorter: (a: VoucherRecord, b: VoucherRecord) => a.usedCount - b.usedCount,
       render: (record: VoucherRecord) => (
         <Text className="whitespace-nowrap">
-          <Text strong>{record.usedCount}</Text> / {record.totalLimit} lượt
+          <Text strong>{record.usedCount}</Text> / {record.totalLimit}{' '}
+          {t('vouchers.usageUnit', 'lượt')}
         </Text>
       ),
     },
     {
-      title: 'Trạng Thái',
+      title: t('common.status', 'Trạng Thái'),
       key: 'status',
       width: 150,
       sorter: (a: VoucherRecord, b: VoucherRecord) => Number(a.isActive) - Number(b.isActive),
       render: (record: VoucherRecord) => {
-        const isExpired = new Date(record.validTo) < new Date('2026-08-05');
+        const isExpired = new Date(record.validTo) < new Date();
 
         if (isExpired) {
           return (
             <Tag color="default" icon={<CloseCircleOutlined />}>
-              Đã hết hạn
+              {t('vouchers.expired', 'Đã hết hạn')}
             </Tag>
           );
         }
 
         return record.isActive ? (
           <Tag color="success" icon={<CheckCircleOutlined />}>
-            Đang diễn ra
+            {t('vouchers.ongoing', 'Đang diễn ra')}
           </Tag>
         ) : (
-          <Tag color="warning">Tạm dừng</Tag>
+          <Tag color="warning">{t('vouchers.paused', 'Tạm dừng')}</Tag>
         );
       },
     },
     {
-      title: 'Kích Hoạt',
+      title: t('common.actions', 'Kích Hoạt'),
       key: 'action',
       width: 120,
       render: (record: VoucherRecord) => (
         <Switch
           checked={record.isActive}
           onChange={(checked) => onToggleActive(record.key, checked)}
-          checkedChildren="Bật"
-          unCheckedChildren="Tắt"
+          checkedChildren={t('common.active', 'Bật')}
+          unCheckedChildren={t('common.inactive', 'Tắt')}
         />
       ),
     },

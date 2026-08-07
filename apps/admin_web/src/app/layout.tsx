@@ -2,11 +2,12 @@ import React from 'react';
 
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import '@ant-design/v5-patch-for-react-19';
-import { ConfigProvider } from 'antd';
 
+import { AntdThemeConfig } from '@/providers/AntdThemeConfig';
+import { LanguageProvider } from '@/providers/LanguageProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { SessionProvider } from '@/providers/SessionProvider';
-import { adminDesignTokens } from '@/theme/tokens';
+import { ThemeProvider } from '@/providers/ThemeProvider';
 
 import './globals.css';
 
@@ -32,22 +33,17 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="vi">
-      <body className="m-0 p-0 font-sans">
+    <html lang="vi" suppressHydrationWarning>
+      <body className="m-0 p-0 font-sans dark:bg-slate-900 dark:text-slate-100 transition-colors duration-200">
         <SessionProvider>
           <QueryProvider>
-            <AntdRegistry>
-              <ConfigProvider
-                theme={{
-                  token: {
-                    colorPrimary: adminDesignTokens.colors.primary,
-                    borderRadius: adminDesignTokens.borderRadiusAntd,
-                  },
-                }}
-              >
-                {children}
-              </ConfigProvider>
-            </AntdRegistry>
+            <ThemeProvider>
+              <LanguageProvider>
+                <AntdRegistry>
+                  <AntdThemeConfig>{children}</AntdThemeConfig>
+                </AntdRegistry>
+              </LanguageProvider>
+            </ThemeProvider>
           </QueryProvider>
         </SessionProvider>
       </body>

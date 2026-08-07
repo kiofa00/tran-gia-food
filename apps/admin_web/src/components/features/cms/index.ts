@@ -1,3 +1,2 @@
-// CMS feature public API
-export * from './components/CmsColumns';
+export * from './components';
 export * from './hooks/useCms';

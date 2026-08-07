@@ -5,4 +5,5 @@ export * from './commissions.config';
 export * from './dashboard.config';
 export * from './fleet.config';
 export * from './routes.config';
+export * from './users.config';
 export * from './vouchers.config';

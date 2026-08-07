@@ -2,11 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { QueryParams } from '@/services/apiClient';
 import { vouchersService } from '@/services/vouchers.service';
+import { VOUCHER_QUERY_KEYS } from '@/shared-config';
 import { CreateVoucherPayload } from '@/types';
-
-export const VOUCHER_QUERY_KEYS = {
-  all: ['vouchers', 'list'],
-};
 
 export function useVouchersQuery(params?: QueryParams) {
   return useQuery({

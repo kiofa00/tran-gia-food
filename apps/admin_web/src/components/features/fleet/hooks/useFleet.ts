@@ -2,10 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { QueryParams } from '@/services/apiClient';
 import { fleetService } from '@/services/fleet.service';
-
-export const FLEET_QUERY_KEYS = {
-  all: ['fleet', 'shippers'],
-};
+import { FLEET_QUERY_KEYS } from '@/shared-config';
 
 export function useFleetQuery(params?: QueryParams) {
   return useQuery({

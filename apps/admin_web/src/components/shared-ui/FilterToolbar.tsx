@@ -3,6 +3,8 @@ import React from 'react';
 import { FilterOutlined, SearchOutlined } from '@ant-design/icons';
 import { Card, Col, Input, Row, Select, Space, Typography } from 'antd';
 
+import { cn } from '@/utils/cn';
+
 const { Text } = Typography;
 const { Option } = Select;
 
@@ -19,6 +21,7 @@ interface FilterToolbarProps {
   filterValue: string;
   onFilterChange: (value: string) => void;
   filterOptions: FilterOption[];
+  className?: string;
 }
 
 export const FilterToolbar: React.FC<FilterToolbarProps> = ({
@@ -29,9 +32,10 @@ export const FilterToolbar: React.FC<FilterToolbarProps> = ({
   filterValue,
   onFilterChange,
   filterOptions,
+  className,
 }) => {
   return (
-    <Card variant="borderless" className="bg-gray-50 rounded-lg p-3">
+    <Card variant="borderless" className={cn('bg-gray-50 rounded-lg p-3', className)}>
       <Row gutter={[12, 12]} align="middle">
         <Col xs={24} sm={14} md={10}>
           <Input

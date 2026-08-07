@@ -2,11 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { adminService } from '@/services/admin.service';
 import { QueryParams } from '@/services/apiClient';
-
-export const ADMIN_QUERY_KEYS = {
-  overview: ['admin', 'overview'],
-  pendingShippers: ['admin', 'shippers', 'pending'],
-};
+import { ADMIN_QUERY_KEYS } from '@/shared-config';
 
 export function useDashboardStatsQuery() {
   return useQuery({

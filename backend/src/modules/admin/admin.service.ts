@@ -2,21 +2,40 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { KycStatus, Prisma, VoucherType } from '@prisma/client';
 
 import { PrismaService } from '../../prisma/prisma.service';
-import { PenalizeShipperDto, UpdateAppConfigDto, UpdateKycStatusDto } from './dto/admin.dto';
+import {
+  PenalizeShipperDto,
+  UpdateAppConfigDto,
+  UpdateKycStatusDto,
+  UpdateUserStatusDto,
+} from './dto/admin.dto';
 import {
   CommissionRow,
   CreateVoucherDto,
   QueryOptions,
+  QueryUserOptions,
   ShipperRow,
+  UserRow,
   VoucherRow,
 } from './types/admin.types';
 
-/** Named color constants for payment method chart — cấm hardcode hex trực tiếp */
+/**
+ * Named color constants for payment method chart.
+ * Stored in backend to keep chart data self-contained with color metadata.
+ * These are chart-specific UI tokens, not application design tokens.
+ */
 const PAYMENT_CHART_COLORS = {
   MOMO: '#d82d8b',
   BANK: '#1677ff',
   CASH: '#52c41a',
 } as const;
+
+/** Magic string constants — cấm hardcode string literal rải rác trong logic */
+const PENALTY_REASON_MISCONDUCT = 'misconduct';
+const ROLE_ADMIN = 'admin';
+
+/** Default map coordinates for Ho Chi Minh City city center */
+const DEFAULT_MAP_LAT = 10.7769;
+const DEFAULT_MAP_LNG = 106.7009;
 
 function processPaginatedList<T extends object>(items: T[], query?: QueryOptions) {
   if (
@@ -33,9 +52,11 @@ function processPaginatedList<T extends object>(items: T[], query?: QueryOptions
   let list = [...items] as Record<string, unknown>[];
 
   if (query.search) {
-    const s = String(query.search).toLowerCase();
+    const searchTerm = String(query.search).toLowerCase();
     list = list.filter((item) =>
-      Object.values(item).some((val) => val != null && String(val).toLowerCase().includes(s)),
+      Object.values(item).some(
+        (val) => val != null && String(val).toLowerCase().includes(searchTerm),
+      ),
     );
   }
 
@@ -87,40 +108,28 @@ export class AdminService {
   constructor(private prisma: PrismaService) {}
 
   async getDashboardOverview() {
-    try {
-      const totalUsers = await this.prisma.user.count();
-      const totalRestaurants = await this.prisma.restaurant.count();
-      const totalShippers = await this.prisma.shipper.count();
-      const totalOrders = await this.prisma.order.count();
+    const totalUsers = await this.prisma.user.count();
+    const totalRestaurants = await this.prisma.restaurant.count();
+    const totalShippers = await this.prisma.shipper.count();
+    const totalOrders = await this.prisma.order.count();
 
-      const revenueAggregation = await this.prisma.commission.aggregate({
-        _sum: {
-          platformShare: true,
-          foodAmount: true,
-          shipAmount: true,
-        },
-      });
+    const revenueAggregation = await this.prisma.commission.aggregate({
+      _sum: {
+        platformShare: true,
+        foodAmount: true,
+        shipAmount: true,
+      },
+    });
 
-      return {
-        totalUsers,
-        totalRestaurants,
-        totalShippers,
-        totalOrders,
-        totalPlatformRevenue: revenueAggregation._sum.platformShare ?? 0,
-        totalFoodGmv: revenueAggregation._sum.foodAmount ?? 0,
-        totalShipGmv: revenueAggregation._sum.shipAmount ?? 0,
-      };
-    } catch {
-      return {
-        totalUsers: 0,
-        totalRestaurants: 0,
-        totalShippers: 0,
-        totalOrders: 0,
-        totalPlatformRevenue: 0,
-        totalFoodGmv: 0,
-        totalShipGmv: 0,
-      };
-    }
+    return {
+      totalUsers,
+      totalRestaurants,
+      totalShippers,
+      totalOrders,
+      totalPlatformRevenue: revenueAggregation._sum.platformShare ?? 0,
+      totalFoodGmv: revenueAggregation._sum.foodAmount ?? 0,
+      totalShipGmv: revenueAggregation._sum.shipAmount ?? 0,
+    };
   }
 
   async updateShipperKyc(shipperId: string, dto: UpdateKycStatusDto) {
@@ -153,7 +162,7 @@ export class AdminService {
       data: {
         shipperId,
         level: Number(dto.level),
-        reason: 'misconduct',
+        reason: PENALTY_REASON_MISCONDUCT,
         description: dto.reason,
       },
     });
@@ -182,98 +191,51 @@ export class AdminService {
     return processPaginatedList(mapped, query);
   }
 
-  private inMemoryVouchers: VoucherRow[] = [];
-
   async getVouchers(query?: QueryOptions) {
-    let dbVouchers: VoucherRow[] = [];
-    try {
-      const vouchers = await this.prisma.voucher.findMany({
-        orderBy: { createdAt: 'desc' },
-      });
-      dbVouchers = vouchers.map((v) => ({ ...v, key: v.id }));
-    } catch {
-      /* Fallback when database is disconnected */
-    }
-
-    const fullList = [...this.inMemoryVouchers, ...dbVouchers];
-    return processPaginatedList(fullList, query);
+    const vouchers = await this.prisma.voucher.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+    const list: VoucherRow[] = vouchers.map((v) => ({ ...v, key: v.id }));
+    return processPaginatedList(list, query);
   }
 
   async createVoucher(dto: CreateVoucherDto) {
-    let created: VoucherRow | null = null;
-    try {
-      const adminUser =
-        (await this.prisma.user.findFirst({
-          where: { role: 'admin' },
-        })) || (await this.prisma.user.findFirst());
+    const adminUser =
+      (await this.prisma.user.findFirst({
+        where: { role: ROLE_ADMIN },
+      })) || (await this.prisma.user.findFirst());
 
-      if (adminUser) {
-        const voucherData: Prisma.VoucherCreateInput = {
-          code: dto.code.toUpperCase(),
-          type: (dto.type as VoucherType) || VoucherType.platform,
-          discountType: dto.discountType === 'percent' ? 'percent' : 'fixed',
-          discountValue: dto.discountValue,
-          minOrderValue: dto.minOrderValue || 0,
-          totalLimit: dto.totalLimit || 100,
-          validFrom: new Date(dto.validFrom),
-          validTo: new Date(dto.validTo),
-          issuedById: adminUser.id,
-        };
-        const dbCreated = await this.prisma.voucher.create({ data: voucherData });
-        created = { ...dbCreated, key: dbCreated.id };
-      }
-    } catch {
-      /* Fallback when database is disconnected */
+    if (!adminUser) {
+      throw new NotFoundException('Không tìm thấy tài khoản admin để phát hành voucher');
     }
 
-    if (!created) {
-      created = {
-        id: `v_${Date.now()}`,
-        key: `v_${Date.now()}`,
-        code: dto.code.toUpperCase(),
-        type: dto.type || 'Platform',
-        discountType: dto.discountType || 'fixed',
-        discountValue: dto.discountValue,
-        minOrderValue: dto.minOrderValue || 0,
-        totalLimit: dto.totalLimit || 100,
-        validFrom: dto.validFrom,
-        validTo: dto.validTo,
-        usedCount: 0,
-        isActive: true,
-      };
-    }
-
-    this.inMemoryVouchers.unshift(created);
-    return created;
+    const voucherData: Prisma.VoucherCreateInput = {
+      code: dto.code.toUpperCase(),
+      type: (dto.type as VoucherType) || VoucherType.platform,
+      discountType: dto.discountType === 'percent' ? 'percent' : 'fixed',
+      discountValue: dto.discountValue,
+      minOrderValue: dto.minOrderValue || 0,
+      totalLimit: dto.totalLimit || 100,
+      validFrom: new Date(dto.validFrom),
+      validTo: new Date(dto.validTo),
+      issuedById: adminUser.id,
+    };
+    const dbCreated = await this.prisma.voucher.create({ data: voucherData });
+    return { ...dbCreated, key: dbCreated.id };
   }
 
   async toggleVoucherStatus(id: string, isActive: boolean) {
-    const memVoucher = this.inMemoryVouchers.find((v) => v.id === id || v.key === id);
-    if (memVoucher) {
-      memVoucher.isActive = isActive;
-    }
-
-    try {
-      return await this.prisma.voucher.update({
-        where: { id },
-        data: { isActive } as Prisma.VoucherUpdateInput,
-      });
-    } catch {
-      return { id, isActive };
-    }
+    return this.prisma.voucher.update({
+      where: { id },
+      data: { isActive } as Prisma.VoucherUpdateInput,
+    });
   }
 
   async getCommissionsBreakdown(query?: QueryOptions) {
-    let commissions: CommissionRow[] = [];
-    try {
-      const dbCommissions = await this.prisma.commission.findMany({
-        orderBy: { id: 'desc' },
-      });
-      commissions = dbCommissions.map((c) => ({ ...c, key: c.id }));
-    } catch {
-      /* Fallback when database is disconnected */
-    }
-
+    const dbCommissions = await this.prisma.commission.findMany({
+      orderBy: { id: 'desc' },
+    });
+    const commissions: CommissionRow[] = dbCommissions.map((c) => ({ ...c, key: c.id }));
     return processPaginatedList(commissions, query);
   }
 
@@ -294,32 +256,24 @@ export class AdminService {
     const currentStartDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
     const previousStartDate = new Date(now.getTime() - days * 2 * 24 * 60 * 60 * 1000);
 
-    let currentCommissions: CommissionRow[] = [];
-    let previousCommissions: CommissionRow[] = [];
-    let currentOrdersCount = 0;
+    const dbCurrent = await this.prisma.commission.findMany({
+      where: { processedAt: { gte: currentStartDate } },
+    });
+    const currentCommissions: CommissionRow[] = dbCurrent.map((c) => ({ ...c, key: c.id }));
 
-    try {
-      const dbCurrent = await this.prisma.commission.findMany({
-        where: { processedAt: { gte: currentStartDate } },
-      });
-      currentCommissions = dbCurrent.map((c) => ({ ...c, key: c.id }));
-
-      const dbPrev = await this.prisma.commission.findMany({
-        where: {
-          processedAt: {
-            gte: previousStartDate,
-            lt: currentStartDate,
-          },
+    const dbPrev = await this.prisma.commission.findMany({
+      where: {
+        processedAt: {
+          gte: previousStartDate,
+          lt: currentStartDate,
         },
-      });
-      previousCommissions = dbPrev.map((c) => ({ ...c, key: c.id }));
+      },
+    });
+    const previousCommissions: CommissionRow[] = dbPrev.map((c) => ({ ...c, key: c.id }));
 
-      currentOrdersCount = await this.prisma.order.count({
-        where: { createdAt: { gte: currentStartDate } },
-      });
-    } catch {
-      /* Fallback when database is disconnected */
-    }
+    const currentOrdersCount = await this.prisma.order.count({
+      where: { createdAt: { gte: currentStartDate } },
+    });
 
     const totalGmv = currentCommissions.reduce(
       (sum, c) => sum + (Number(c.foodAmount || 0) + Number(c.shipAmount || 0)),
@@ -426,85 +380,59 @@ export class AdminService {
       }
     }
 
-    let paymentSplit: { name: string; value: number; color: string }[] = [];
-    try {
-      const momoCount = await this.prisma.payment.count({ where: { method: 'momo' } });
-      const bankCount = await this.prisma.payment.count({ where: { method: 'bank' } });
-      const cashCount = await this.prisma.payment.count({ where: { method: 'cash' } });
-      const totalPayments = momoCount + bankCount + cashCount;
+    const momoCount = await this.prisma.payment.count({ where: { method: 'momo' } });
+    const bankCount = await this.prisma.payment.count({ where: { method: 'bank' } });
+    const cashCount = await this.prisma.payment.count({ where: { method: 'cash' } });
+    const totalPayments = momoCount + bankCount + cashCount;
 
-      if (totalPayments > 0) {
-        paymentSplit = [
-          {
-            name: 'MoMo Wallet',
-            value: Math.round((momoCount / totalPayments) * 100),
-            color: PAYMENT_CHART_COLORS.MOMO,
-          },
-          {
-            name: 'Ngân Hàng / VNPay',
-            value: Math.round((bankCount / totalPayments) * 100),
-            color: PAYMENT_CHART_COLORS.BANK,
-          },
-          {
-            name: 'Tiền Mặt (COD)',
-            value: Math.round((cashCount / totalPayments) * 100),
-            color: PAYMENT_CHART_COLORS.CASH,
-          },
-        ];
-      } else {
-        paymentSplit = [
-          { name: 'MoMo Wallet', value: 0, color: PAYMENT_CHART_COLORS.MOMO },
-          { name: 'Ngân Hàng / VNPay', value: 0, color: PAYMENT_CHART_COLORS.BANK },
-          { name: 'Tiền Mặt (COD)', value: 0, color: PAYMENT_CHART_COLORS.CASH },
-        ];
-      }
-    } catch {
-      paymentSplit = [
-        { name: 'MoMo Wallet', value: 0, color: PAYMENT_CHART_COLORS.MOMO },
-        { name: 'Ngân Hàng / VNPay', value: 0, color: PAYMENT_CHART_COLORS.BANK },
-        { name: 'Tiền Mặt (COD)', value: 0, color: PAYMENT_CHART_COLORS.CASH },
-      ];
-    }
+    const paymentSplit: { name: string; value: number; color: string }[] =
+      totalPayments > 0
+        ? [
+            {
+              name: 'MoMo Wallet',
+              value: Math.round((momoCount / totalPayments) * 100),
+              color: PAYMENT_CHART_COLORS.MOMO,
+            },
+            {
+              name: 'Ngân Hàng / VNPay',
+              value: Math.round((bankCount / totalPayments) * 100),
+              color: PAYMENT_CHART_COLORS.BANK,
+            },
+            {
+              name: 'Tiền Mặt (COD)',
+              value: Math.round((cashCount / totalPayments) * 100),
+              color: PAYMENT_CHART_COLORS.CASH,
+            },
+          ]
+        : [];
 
-    let topRestaurants: {
-      rank: number;
-      name: string;
-      orders: number;
-      gmv: number;
-      commission: number;
-      rating: number;
-    }[] = [];
-    try {
-      const dbRestaurants = await this.prisma.restaurant.findMany({
-        take: 10,
-        include: {
-          orders: {
-            where: { createdAt: { gte: currentStartDate } },
-          },
+    const dbRestaurants = await this.prisma.restaurant.findMany({
+      take: 10,
+      include: {
+        orders: {
+          where: { createdAt: { gte: currentStartDate } },
         },
-      });
+      },
+    });
 
-      const mapped = dbRestaurants.map((r) => {
-        const rOrders = r.orders.length;
-        const rGmv = r.orders.reduce((sum, o) => sum + o.totalAmount, 0);
-        const rComm = Math.round(rGmv * r.platformFeeRate);
-        return {
-          name: r.name,
-          orders: rOrders,
-          gmv: rGmv,
-          commission: rComm,
-          rating: r.avgRating || 5.0,
-        };
-      });
+    const mapped = dbRestaurants.map((r) => {
+      const rOrders = r.orders.length;
+      const rGmv = r.orders.reduce((sum, o) => sum + o.totalAmount, 0);
+      const rComm = Math.round(rGmv * r.platformFeeRate);
+      return {
+        name: r.name,
+        orders: rOrders,
+        gmv: rGmv,
+        commission: rComm,
+        rating: r.avgRating || 5.0,
+      };
+    });
 
-      mapped.sort((a, b) => b.gmv - a.gmv);
-      topRestaurants = mapped.slice(0, 3).map((item, idx) => ({
-        rank: idx + 1,
-        ...item,
-      }));
-    } catch {
-      /* Fallback when database is disconnected */
-    }
+    mapped.sort((a, b) => b.gmv - a.gmv);
+    const topRestaurants = mapped.slice(0, 3).map((item, idx) => ({
+      rank: idx + 1,
+      ...item,
+    }));
 
     const summary = {
       totalGmv,
@@ -525,108 +453,80 @@ export class AdminService {
   }
 
   async getFleetData(query?: QueryOptions) {
-    let shippers: ShipperRow[] = [];
-    try {
-      const dbShippers = await this.prisma.shipper.findMany({
-        include: { user: true },
-      });
-      if (dbShippers.length > 0) {
-        shippers = dbShippers.map((s) => {
-          let status = 'OFFLINE';
-          if (s.ekycStatus === KycStatus.pending) {
-            status = 'PENDING_KYC';
-          } else if (s.isActive) {
-            status = 'DELIVERING';
-          }
-          return {
-            id: s.id,
-            key: s.id,
-            name: s.user?.name || '',
-            phone: s.user?.phone || '',
-            vehicle: s.vehicleType || 'MOTORBIKE',
-            plate: s.vehiclePlate || '29A-12345',
-            lat: s.lat ?? 10.7769,
-            lng: s.lng ?? 106.7009,
-            status,
-            ekycStatus: s.ekycStatus,
-            rating: s.avgRating ?? 4.9,
-          };
-        });
-      }
-    } catch {
-      /* Fallback when database is disconnected */
-    }
+    const dbShippers = await this.prisma.shipper.findMany({
+      include: { user: true },
+    });
 
-    if (shippers.length === 0) {
-      shippers = [
-        {
-          id: 'SHIP-001',
-          key: 'SHIP-001',
-          name: 'Nguyễn Văn Hùng',
-          phone: '0901234567',
-          vehicle: 'MOTORBIKE',
-          plate: '29F1-888.88',
-          lat: 10.7769,
-          lng: 106.7009,
-          status: 'DELIVERING',
-          ekycStatus: 'APPROVED',
-          rating: 4.9,
-        },
-        {
-          id: 'SHIP-002',
-          key: 'SHIP-002',
-          name: 'Trần Quốc Bảo',
-          phone: '0912345678',
-          vehicle: 'MOTORBIKE',
-          plate: '59P2-999.99',
-          lat: 10.7801,
-          lng: 106.699,
-          status: 'IDLE',
-          ekycStatus: 'APPROVED',
-          rating: 4.8,
-        },
-        {
-          id: 'SHIP-003',
-          key: 'SHIP-003',
-          name: 'Lê Hoàng Nam',
-          phone: '0987654321',
-          vehicle: 'ELECTRIC_BIKE',
-          plate: '30E1-123.45',
-          lat: 10.7735,
-          lng: 106.705,
-          status: 'DELIVERING',
-          ekycStatus: 'APPROVED',
-          rating: 5.0,
-        },
-        {
-          id: 'SHIP-004',
-          key: 'SHIP-004',
-          name: 'Phạm Đức Anh',
-          phone: '0933445566',
-          vehicle: 'MOTORBIKE',
-          plate: '51F-678.90',
-          lat: 10.771,
-          lng: 106.695,
-          status: 'IDLE',
-          ekycStatus: 'APPROVED',
-          rating: 4.7,
-        },
-        {
-          id: 'SHIP-005',
-          key: 'SHIP-005',
-          name: 'Đặng Minh Triết',
-          phone: '0944556677',
-          vehicle: 'CAR',
-          plate: '51K-555.55',
-          lat: 10.782,
-          lng: 106.711,
-          status: 'OFFLINE',
-          ekycStatus: 'APPROVED',
-          rating: 4.9,
-        },
-      ];
-    }
+    const shippers: ShipperRow[] = dbShippers.map((s) => {
+      let status = 'OFFLINE';
+      if (s.ekycStatus === KycStatus.pending) {
+        status = 'PENDING_KYC';
+      } else if (s.isActive) {
+        status = 'DELIVERING';
+      }
+      return {
+        id: s.id,
+        key: s.id,
+        name: s.user?.name || '',
+        phone: s.user?.phone || '',
+        vehicle: s.vehicleType || 'MOTORBIKE',
+        plate: s.vehiclePlate || '',
+        lat: s.lat ?? DEFAULT_MAP_LAT,
+        lng: s.lng ?? DEFAULT_MAP_LNG,
+        status,
+        ekycStatus: s.ekycStatus,
+        rating: s.avgRating ?? 5.0,
+      };
+    });
 
     return processPaginatedList(shippers, query);
+  }
+
+  async getUsersList(query?: QueryUserOptions) {
+    const dbUsers = await this.prisma.user.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        email: true,
+        role: true,
+        createdAt: true,
+      },
+    });
+
+    let users: UserRow[] = dbUsers.map((u) => {
+      return {
+        id: u.id,
+        key: u.id,
+        name: u.name || 'Người dùng',
+        phone: u.phone || '',
+        email: u.email,
+        role: String(u.role).toUpperCase(),
+        status: 'ACTIVE', // Default — status field managed separately via updateUserStatus
+        createdAt: u.createdAt,
+      };
+    });
+
+    if (query?.role && query.role !== 'ALL') {
+      const r = query.role.toUpperCase();
+      users = users.filter((u) => u.role === r);
+    }
+    if (query?.userStatus && query.userStatus !== 'ALL') {
+      const st = query.userStatus.toUpperCase();
+      users = users.filter((u) => u.status === st);
+    }
+
+    return processPaginatedList(users, query);
+  }
+
+  async updateUserStatus(id: string, dto: UpdateUserStatusDto) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException('Người dùng không tồn tại');
+
+    return this.prisma.user.update({
+      where: { id },
+      data: { status: dto.status } as Prisma.UserUpdateInput,
+    });
   }
 }

@@ -33,6 +33,9 @@ export interface QueryParams {
   limit?: number;
   search?: string;
   status?: string;
+  role?: string;
+  userStatus?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  [key: string]: unknown;
 }

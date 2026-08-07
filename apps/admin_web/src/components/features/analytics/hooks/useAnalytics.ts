@@ -1,10 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { analyticsService } from '@/services/analytics.service';
-
-export const ANALYTICS_QUERY_KEYS = {
-  data: ['analytics', 'data'],
-};
+import { ANALYTICS_QUERY_KEYS } from '@/shared-config';
 
 export function useAnalyticsQuery(range?: string) {
   return useQuery({

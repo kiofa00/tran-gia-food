@@ -4,9 +4,13 @@ import { ReactNode, useState } from 'react';
 
 import { Empty, Pagination, Table, TableProps } from 'antd';
 
+import { useTranslation } from '@/providers/LanguageProvider';
+import { cn } from '@/utils/cn';
+
 export interface DataTableProps<T> extends Omit<TableProps<T>, 'pagination'> {
   emptyDescription?: string;
   defaultPageSize?: number;
+  className?: string;
   /** Pass false to disable pagination, or an object for server-side pagination config */
   pagination?:
     | false
@@ -21,33 +25,43 @@ export interface DataTableProps<T> extends Omit<TableProps<T>, 'pagination'> {
 }
 
 export function DataTable<T extends object>({
-  emptyDescription = 'Không có dữ liệu',
+  emptyDescription,
   defaultPageSize = 10,
   loading,
   pagination,
   dataSource,
+  className,
   ...tableProps
 }: DataTableProps<T>) {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(defaultPageSize);
 
+  const resolvedEmptyDescription = emptyDescription || t('common.noData', 'Không có dữ liệu');
+
   const locale = {
     emptyText: loading ? null : (
-      <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={emptyDescription} />
+      <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={resolvedEmptyDescription} />
     ),
     ...tableProps.locale,
   };
 
+  const tableClassName =
+    'flex-1 flex flex-col [&_.ant-spin-nested-loading]:flex-1 [&_.ant-spin-nested-loading]:flex [&_.ant-spin-nested-loading]:flex-col [&_.ant-spin-container]:flex-1 [&_.ant-spin-container]:flex [&_.ant-spin-container]:flex-col';
+
   // Pagination disabled
   if (pagination === false) {
     return (
-      <Table<T>
-        {...tableProps}
-        dataSource={dataSource}
-        loading={loading}
-        pagination={false}
-        locale={locale}
-      />
+      <div className={cn('flex flex-col min-h-96', className)}>
+        <Table<T>
+          {...tableProps}
+          className={tableClassName}
+          dataSource={dataSource}
+          loading={loading}
+          pagination={false}
+          locale={locale}
+        />
+      </div>
     );
   }
 
@@ -74,10 +88,11 @@ export function DataTable<T extends object>({
   };
 
   return (
-    <div className="flex flex-col min-h-65">
+    <div className={cn('flex flex-col min-h-96', className)}>
       {/* Table without built-in pagination */}
       <Table<T>
         {...tableProps}
+        className={tableClassName}
         dataSource={pagedData}
         loading={loading}
         pagination={false}
@@ -92,7 +107,12 @@ export function DataTable<T extends object>({
           total={total}
           showSizeChanger
           pageSizeOptions={['5', '10', '20', '50']}
-          showTotal={(t, range) => `${range[0]}-${range[1]} của ${t} mục`}
+          showTotal={
+            pagination && pagination.showTotal
+              ? pagination.showTotal
+              : (totalCount, range) =>
+                  `${range[0]}-${range[1]} ${t('common.of', 'của')} ${totalCount} ${t('common.items', 'mục')}`
+          }
           onChange={handleChange}
           onShowSizeChange={handleChange}
         />

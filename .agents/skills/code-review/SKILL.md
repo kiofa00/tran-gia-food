@@ -9,7 +9,7 @@ Kỹ năng đánh giá & review chất lượng mã nguồn tự động cho d�
 
 ---
 
-## 1. Các Trục Đánh Giá (7 Review Axes)
+## 1. Các Trục Đánh Giá (8 Review Axes)
 
 ### Trục 1 — Design Tokens Compliance
 
@@ -95,3 +95,13 @@ Khi review, báo cáo theo format:
 - Blockers: X | Warnings: Y | Nits: Z
 - Trạng thái: PASS / FAIL (fail nếu có bất kỳ blocker nào)
 ```
+
+---
+
+## 4. Verification Checklist (Bắt Buộc Trước Khi Báo Cáo)
+
+Trước khi xuất báo cáo review cho người dùng, AI Agent **BẮT BUỘC** thực hiện tuần tự:
+
+1. **`pnpm fix`** — Auto-format Prettier + ESLint --fix toàn workspace.
+2. **`pnpm build`** — Đảm bảo toàn bộ workspace compile thành công (Next.js, NestJS, Flutter).
+3. **Git Push Policy** — Giữ mọi thay đổi ở local. **KHÔNG** chạy `git commit` hay `git push` trừ khi người dùng ra lệnh rõ ràng.

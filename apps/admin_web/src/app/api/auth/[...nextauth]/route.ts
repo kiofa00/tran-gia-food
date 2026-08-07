@@ -4,7 +4,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 
 import { ADMIN_ROUTES } from '@/shared-config';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/api/v1';
+const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 // 14 phút (backend accessToken hết hạn sau 15 phút, buffer 60s để refresh kịp)
 const ACCESS_TOKEN_TTL_MS = 14 * 60 * 1000;

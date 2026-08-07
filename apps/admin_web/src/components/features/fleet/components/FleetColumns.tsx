@@ -9,15 +9,18 @@ import {
 import { Tag, Typography } from 'antd';
 
 import { PlateBadge, VehicleBadge } from '@/components/shared-ui';
+import { useTranslation } from '@/providers/LanguageProvider';
 import { ShipperRecord } from '@/types';
 import { mapShipperStatus } from '@/utils/formatters';
 
 const { Text } = Typography;
 
-export function getFleetColumns() {
+export function useFleetColumns() {
+  const { t } = useTranslation();
+
   return [
     {
-      title: 'Mã Shipper',
+      title: t('fleet.shipperCode', 'Mã Shipper'),
       dataIndex: 'id',
       key: 'id',
       width: 140,
@@ -28,7 +31,7 @@ export function getFleetColumns() {
       ),
     },
     {
-      title: 'Tài Xế',
+      title: t('fleet.driverName', 'Tài Xế'),
       dataIndex: 'name',
       key: 'name',
       width: 180,
@@ -40,28 +43,28 @@ export function getFleetColumns() {
       ),
     },
     {
-      title: 'Số Điện Thoại',
+      title: t('fleet.phone', 'Số Điện Thoại'),
       dataIndex: 'phone',
       key: 'phone',
       width: 160,
       render: (text: string) => <Text className="whitespace-nowrap">{text}</Text>,
     },
     {
-      title: 'Phương Tiện',
+      title: t('fleet.vehicle', 'Phương Tiện'),
       dataIndex: 'vehicle',
       key: 'vehicle',
       width: 160,
       render: (type: string) => <VehicleBadge vehicle={type} />,
     },
     {
-      title: 'Biển Số Xe',
+      title: t('fleet.plate', 'Biển Số Xe'),
       dataIndex: 'plate',
       key: 'plate',
       width: 160,
       render: (plate: string) => <PlateBadge plate={plate} />,
     },
     {
-      title: 'Tọa Độ GPS',
+      title: t('fleet.gps', 'Tọa Độ GPS'),
       key: 'gps',
       width: 180,
       render: (_: unknown, record: ShipperRecord) => (
@@ -71,7 +74,7 @@ export function getFleetColumns() {
       ),
     },
     {
-      title: 'Trạng Thái',
+      title: t('fleet.status', 'Trạng Thái'),
       dataIndex: 'status',
       key: 'status',
       width: 220,

@@ -18,9 +18,4 @@ Tệp tổng hợp và điều hướng các quy định vận hành chính th�
 ## 🛠️ 2. Skills (Kỹ Năng Chuyên Biệt)
 
 - **Code Review Skill**: [`skills/code-review/SKILL.md`](./skills/code-review/SKILL.md)
-  - Đánh giá chất lượng code theo 5 trục (Design tokens, Type safety, Logic, Testing, Security).
-
-## 🔄 3. Workflows (Quy Trình Tự Động)
-
-- **Self-Review Workflow**: [`workflows/self-review.md`](./workflows/self-review.md)
-  - Checklist tự kiểm tra code (Lint, Test, Design Tokens) trước khi báo cáo kết quả cho người dùng.
+  - Đánh giá chất lượng code theo 8 trục (Design Tokens, Type Safety, Naming, Magic Values, Async Safety, Architecture, Security, Testing). Bao gồm Verification Checklist bắt buộc (`pnpm fix` → `pnpm build`).

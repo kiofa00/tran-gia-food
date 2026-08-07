@@ -1,9 +1,15 @@
 import { Card, Skeleton } from 'antd';
 
-export function LoginPageFallback() {
+import { cn } from '@/utils/cn';
+
+interface LoginPageFallbackProps {
+  className?: string;
+}
+
+export function LoginPageFallback({ className }: LoginPageFallbackProps = {}) {
   return (
     <Card
-      className="w-full max-w-md rounded-2xl shadow-2xl border-0"
+      className={cn('w-full max-w-md rounded-2xl shadow-2xl border-0', className)}
       styles={{ body: { padding: '40px 36px' } }}
     >
       <div className="text-center mb-8">

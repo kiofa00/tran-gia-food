@@ -76,10 +76,9 @@ export interface CmsBannerItem {
 export interface CmsTranslationItem {
   id: string | number;
   key: string;
-  vi: string;
-  en: string;
   appTarget?: string;
   category?: string;
+  [langKey: string]: unknown;
 }
 
 export interface CmsFaqItem {

@@ -3,15 +3,18 @@
 import { CheckCircleOutlined, SyncOutlined } from '@ant-design/icons';
 import { Tag, Typography } from 'antd';
 
+import { useTranslation } from '@/providers/LanguageProvider';
 import { CommissionRecord } from '@/types';
 import { formatCurrency } from '@/utils/formatters';
 
 const { Text } = Typography;
 
-export function getCommissionsColumns() {
+export function useCommissionsColumns() {
+  const { t } = useTranslation();
+
   return [
     {
-      title: 'Mã Đơn Hàng',
+      title: t('commissions.accountCode', 'Mã Ví / Tài Khoản'),
       dataIndex: 'orderId',
       key: 'orderId',
       width: 140,
@@ -23,7 +26,7 @@ export function getCommissionsColumns() {
       ),
     },
     {
-      title: 'Tên Quán Ăn',
+      title: t('commissions.owner', 'Tên Quán Ăn'),
       dataIndex: 'restaurantName',
       key: 'restaurantName',
       width: 200,
@@ -36,7 +39,7 @@ export function getCommissionsColumns() {
       ),
     },
     {
-      title: 'Tiền Món (GMV)',
+      title: t('dashboard.foodGmv', 'Tiền Món (GMV)'),
       dataIndex: 'foodAmount',
       key: 'foodAmount',
       width: 150,
@@ -44,7 +47,7 @@ export function getCommissionsColumns() {
       render: (val: number) => <Text className="whitespace-nowrap">{formatCurrency(val)}</Text>,
     },
     {
-      title: 'Phí Ship',
+      title: t('dashboard.shipGmv', 'Phí Ship'),
       dataIndex: 'shipAmount',
       key: 'shipAmount',
       width: 130,
@@ -52,7 +55,7 @@ export function getCommissionsColumns() {
       render: (val: number) => <Text className="whitespace-nowrap">{formatCurrency(val)}</Text>,
     },
     {
-      title: 'Ví Quán (85%)',
+      title: t('commissions.merchantPayouts', 'Ví Quán (85%)'),
       dataIndex: 'restaurantShare',
       key: 'restaurantShare',
       width: 150,
@@ -64,7 +67,7 @@ export function getCommissionsColumns() {
       ),
     },
     {
-      title: 'Ví Shipper (100% Ship)',
+      title: t('commissions.pendingPayouts', 'Ví Shipper (100% Ship)'),
       dataIndex: 'shipperShare',
       key: 'shipperShare',
       width: 180,
@@ -74,7 +77,7 @@ export function getCommissionsColumns() {
       ),
     },
     {
-      title: 'Hoa Hồng Sàn (15%)',
+      title: t('commissions.totalRevenue', 'Hoa Hồng Sàn (15%)'),
       dataIndex: 'platformShare',
       key: 'platformShare',
       width: 170,
@@ -84,7 +87,7 @@ export function getCommissionsColumns() {
       ),
     },
     {
-      title: 'Trạng Thái',
+      title: t('common.status', 'Trạng Thái'),
       dataIndex: 'status',
       key: 'status',
       width: 140,
@@ -95,12 +98,14 @@ export function getCommissionsColumns() {
           icon={status === 'PROCESSED' ? <CheckCircleOutlined /> : <SyncOutlined spin />}
           className="whitespace-nowrap"
         >
-          {status === 'PROCESSED' ? 'Đã Giải Ngân' : 'Chờ Quyết Toán'}
+          {status === 'PROCESSED'
+            ? t('users.active', 'Đã Giải Ngân')
+            : t('users.suspended', 'Chờ Quyết Toán')}
         </Tag>
       ),
     },
     {
-      title: 'Thời Gian',
+      title: t('users.createdAt', 'Thời Gian'),
       dataIndex: 'createdAt',
       key: 'createdAt',
       width: 160,
