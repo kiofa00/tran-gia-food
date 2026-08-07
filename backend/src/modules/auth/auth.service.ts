@@ -2,11 +2,12 @@ import { BadRequestException, Injectable, Logger, UnauthorizedException } from '
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User, UserRole } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
 
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
-import { GoogleAuthDto, SendOtpDto, VerifyOtpDto } from './dto/auth.dto';
+import { AdminLoginDto, GoogleAuthDto, SendOtpDto, VerifyOtpDto } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -112,6 +113,39 @@ export class AuthService {
 
     const tokens = await this.generateTokens(user);
     return { ...tokens, user: this.sanitizeUser(user), isNewUser };
+  }
+
+  // ──────────────────────────────────────────
+  // Admin Login (Email + Password)
+  // ──────────────────────────────────────────
+
+  async adminLogin(dto: AdminLoginDto): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    user: Partial<User>;
+  }> {
+    const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
+
+    if (!user || user.role !== UserRole.admin) {
+      throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
+    }
+
+    if (!user.passwordHash) {
+      throw new UnauthorizedException('Tài khoản chưa được cấu hình mật khẩu');
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('Tài khoản đã bị vô hiệu hóa');
+    }
+
+    const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
+    }
+
+    this.logger.log(`Admin login: ${user.email}`);
+    const tokens = await this.generateTokens(user);
+    return { ...tokens, user: this.sanitizeUser(user) };
   }
 
   // ──────────────────────────────────────────

@@ -7,6 +7,7 @@ import { ConfigProvider } from 'antd';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { QueryProvider } from '@/providers/QueryProvider';
+import { SessionProvider } from '@/providers/SessionProvider';
 import { adminDesignTokens } from '@/theme/tokens';
 
 import './globals.css';
@@ -35,18 +36,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="vi">
       <body className="m-0 p-0 font-sans">
-        <QueryProvider>
-          <AntdRegistry>
-            <ConfigProvider
-              theme={{
-                token: {
-                  colorPrimary: adminDesignTokens.colors.primary,
-                  borderRadius: adminDesignTokens.borderRadiusAntd,
-                },
-              }}
-            >
-              <div className="flex flex-col min-h-screen bg-gray-50">
-                <style>{`
+        <SessionProvider>
+          <QueryProvider>
+            <AntdRegistry>
+              <ConfigProvider
+                theme={{
+                  token: {
+                    colorPrimary: adminDesignTokens.colors.primary,
+                    borderRadius: adminDesignTokens.borderRadiusAntd,
+                  },
+                }}
+              >
+                <div className="flex flex-col min-h-screen bg-gray-50">
+                  <style>{`
                   .ant-table-wrapper .ant-spin-nested-loading {
                     min-height: 260px;
                   }
@@ -126,13 +128,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     }
                   }
                 `}</style>
-                <Header title="Tran Gia Food — Admin Portal" userName="Admin Tran Gia" />
-                <main className="flex-1">{children}</main>
-                <Footer />
-              </div>
-            </ConfigProvider>
-          </AntdRegistry>
-        </QueryProvider>
+                  <Header title="Tran Gia Food — Admin Portal" userName="Admin Tran Gia" />
+                  <main className="flex-1">{children}</main>
+                  <Footer />
+                </div>
+              </ConfigProvider>
+            </AntdRegistry>
+          </QueryProvider>
+        </SessionProvider>
       </body>
     </html>
   );

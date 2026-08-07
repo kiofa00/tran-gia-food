@@ -11,6 +11,7 @@ import {
   VehicleType,
   VoucherType,
 } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -38,6 +39,9 @@ async function main() {
   console.log('🧹 Cleaned existing database tables.');
 
   // 2. Create Users
+  const ADMIN_DEFAULT_PASSWORD = 'Admin@123456'; // Change after first login!
+  const adminPasswordHash = await bcrypt.hash(ADMIN_DEFAULT_PASSWORD, 10);
+
   const adminUser = await prisma.user.create({
     data: {
       phone: '+84900000000',
@@ -45,8 +49,11 @@ async function main() {
       name: 'Quản Trị Viên Trần Gia',
       role: UserRole.admin,
       address: '720A Điện Biên Phủ, Phường 22, Bình Thạnh, TP.HCM',
+      passwordHash: adminPasswordHash,
     },
   });
+
+  console.log(`🔑 Admin account: admin@trangiafood.vn / ${ADMIN_DEFAULT_PASSWORD}`);
 
   const customer1 = await prisma.user.create({
     data: {

@@ -5,7 +5,7 @@ import { User } from '@prisma/client';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard, Public } from '../../common/guards/jwt-auth.guard';
 import { AuthService } from './auth.service';
-import { GoogleAuthDto, RefreshTokenDto, SendOtpDto, VerifyOtpDto } from './dto/auth.dto';
+import { AdminLoginDto, GoogleAuthDto, RefreshTokenDto, SendOtpDto, VerifyOtpDto } from './dto/auth.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -45,7 +45,7 @@ export class AuthController {
     return this.authService.verifyOtp(dto);
   }
 
-  // ── Social Auth ───────────────────────────
+  // ── Social Auth ─────────────────────────────────
 
   @Public()
   @Post('google')
@@ -53,6 +53,18 @@ export class AuthController {
   @ApiOperation({ summary: 'Đăng nhập bằng Google (Firebase ID token)' })
   googleAuth(@Body() dto: GoogleAuthDto) {
     return this.authService.googleAuth(dto);
+  }
+
+  // ── Admin ─────────────────────────────────────
+
+  @Public()
+  @Post('admin/login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Đăng nhập tài khoản Admin bằng email + mật khẩu' })
+  @ApiResponse({ status: 200, description: 'Đăng nhập thành công' })
+  @ApiResponse({ status: 401, description: 'Email hoặc mật khẩu không đúng' })
+  adminLogin(@Body() dto: AdminLoginDto) {
+    return this.authService.adminLogin(dto);
   }
 
   // ── Token Management ──────────────────────
