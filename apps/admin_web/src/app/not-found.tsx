@@ -10,11 +10,13 @@ import {
 } from '@ant-design/icons';
 import { Button, Card, Result, Space, Typography } from 'antd';
 
+import { ADMIN_ROUTES } from '@/shared-config';
+
 const { Title, Paragraph, Text } = Typography;
 
 export default function NotFound() {
   return (
-    <div className="flex justify-center items-center min-h-[75vh] p-8">
+    <div className="flex justify-center items-center min-h-screen p-8">
       <Card className="max-w-2xl w-full text-center rounded-xl shadow-lg border border-gray-200">
         <Result
           status="404"
@@ -32,7 +34,7 @@ export default function NotFound() {
           extra={
             <Space direction="vertical" size="middle" className="w-full mt-3">
               <Space wrap align="center" className="justify-center">
-                <Link href="/">
+                <Link href={ADMIN_ROUTES.HOME}>
                   <Button
                     type="primary"
                     size="large"
@@ -42,7 +44,7 @@ export default function NotFound() {
                     Về Trang Chủ Dashboard
                   </Button>
                 </Link>
-                <Link href="/fleet">
+                <Link href={ADMIN_ROUTES.FLEET}>
                   <Button size="large" icon={<CarOutlined />} className="h-11 px-6 font-semibold">
                     Giám Sát Đội Xe
                   </Button>

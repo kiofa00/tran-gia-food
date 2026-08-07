@@ -20,8 +20,8 @@ export class AdminController {
 
   @Get('shippers/pending-kyc')
   @ApiOperation({ summary: '[Admin] Danh sách shipper chờ duyệt eKYC' })
-  getPendingShippers() {
-    return this.adminService.listPendingShippers();
+  getPendingShippers(@Query() query: QueryOptions) {
+    return this.adminService.listPendingShippers(query);
   }
 
   @Patch('shippers/:id/kyc')

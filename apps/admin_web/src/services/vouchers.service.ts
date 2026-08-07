@@ -1,29 +1,6 @@
+import { CreateVoucherPayload, VoucherItem } from '@/types';
+
 import { QueryParams, apiClient } from './apiClient';
-
-export interface VoucherItem {
-  id: string;
-  code: string;
-  type: string;
-  discountType: string;
-  discountValue: number;
-  minOrderValue: number;
-  usageCount: number;
-  totalLimit: number;
-  validFrom: string;
-  validTo: string;
-  status: string;
-}
-
-export interface CreateVoucherPayload {
-  code: string;
-  type: string;
-  discountType: string;
-  discountValue: number;
-  minOrderValue: number;
-  totalLimit: number;
-  validFrom: string;
-  validTo: string;
-}
 
 export const vouchersService = {
   getVouchers: async (params?: QueryParams): Promise<Record<string, unknown>> => {

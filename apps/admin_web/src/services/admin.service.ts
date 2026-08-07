@@ -1,31 +1,6 @@
+import { DashboardOverviewStats, PendingShipperItem } from '@/types';
+
 import { apiClient } from './apiClient';
-
-export interface DashboardOverviewStats {
-  totalPlatformRevenue: number;
-  totalFoodGmv: number;
-  totalShipGmv: number;
-  totalOrders: number;
-  totalShippers: number;
-  totalUsers?: number;
-  totalRestaurants?: number;
-}
-
-export interface PendingShipperItem {
-  id: string;
-  vehicleType?: string;
-  licensePlate?: string;
-  kycStatus?: string;
-  ekycStatus?: string;
-  status?: string;
-  name?: string;
-  phone?: string;
-  vehicle?: string;
-  plate?: string;
-  user?: {
-    name: string;
-    phone: string;
-  };
-}
 
 export const adminService = {
   getOverviewStats: async (): Promise<DashboardOverviewStats> => {
@@ -34,8 +9,10 @@ export const adminService = {
     return res.data;
   },
 
-  getPendingShippers: async (): Promise<PendingShipperItem[]> => {
-    const res = await apiClient.get<PendingShipperItem[]>('/admin/shippers/pending-kyc');
+  getPendingShippers: async (
+    params?: import('./apiClient').QueryParams,
+  ): Promise<PendingShipperItem[] | Record<string, unknown>> => {
+    const res = await apiClient.get('/admin/shippers/pending-kyc', { params });
 
     return res.data;
   },

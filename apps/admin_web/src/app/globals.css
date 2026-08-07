@@ -1,1 +1,12 @@
 @import 'tailwindcss';
+
+@utility page-container {
+  width: 100%;
+  max-width: var(--breakpoint-2xl);
+  margin-inline: auto;
+  padding-inline: 1rem; /* px-4 mobile */
+
+  @media (width >= 1024px) {
+    padding-inline: 2rem; /* px-8 desktop */
+  }
+}

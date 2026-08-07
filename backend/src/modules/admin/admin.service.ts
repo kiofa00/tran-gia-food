@@ -164,12 +164,12 @@ export class AdminService {
     });
   }
 
-  async listPendingShippers() {
+  async listPendingShippers(query?: QueryOptions) {
     const list = await this.prisma.shipper.findMany({
       where: { ekycStatus: KycStatus.pending },
       include: { user: true },
     });
-    return list.map((s) => ({
+    const mapped = list.map((s) => ({
       id: s.id,
       key: s.id,
       name: s.user?.name || '',
@@ -179,6 +179,7 @@ export class AdminService {
       status: s.ekycStatus,
       ekycStatus: s.ekycStatus,
     }));
+    return processPaginatedList(mapped, query);
   }
 
   private inMemoryVouchers: VoucherRow[] = [];

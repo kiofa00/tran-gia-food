@@ -8,7 +8,7 @@ File hướng dẫn và quy định tối ưu hóa cho AI Coding Assistants (Cla
 
 Dự án là hệ thống Nền Tảng Giao Đồ Ăn **Tran Gia Food** được thiết kế theo mô hình **Hybrid Monorepo**:
 
-- **Package Manager & Workspaces**: `pnpm v9.15.9` (`pnpm catalog:`).
+- **Package Manager & Workspaces**: `pnpm v11.20.0` (`pnpm catalog:`).
 - **Flutter Orchestration**: `Melos v8.2.2` & `Dart 3.5 Native Pub Workspaces`.
 
 ```

@@ -195,8 +195,15 @@ export class AuthService {
       expiresIn: this.config.get<string>('JWT_REFRESH_EXPIRES_IN') ?? '7d',
     });
 
-    // Store refresh token in Redis (7 days)
-    await this.redis.setRefreshToken(user.id, refreshToken, 7 * 24 * 3600);
+    // Store refresh token in Redis — tách riêng try/catch để lỗi Redis
+    // không bị nhầm thành lỗi xác thực (credentials)
+    try {
+      await this.redis.setRefreshToken(user.id, refreshToken, 7 * 24 * 3600);
+    } catch (err) {
+      this.logger.error(`Failed to store refresh token in Redis for user ${user.id}`, err);
+      // Không throw ở đây — vẫn trả token về để login thành công.
+      // Hệ quả chấp nhận được: user sẽ không thể refresh token cho đến khi Redis phục hồi.
+    }
 
     return { accessToken, refreshToken };
   }

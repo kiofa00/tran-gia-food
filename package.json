@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "description": "Tran Gia Food Delivery Platform - Hybrid Monorepo (Flutter + NestJS + Next.js)",
-  "packageManager": "pnpm@9.15.9",
+  "packageManager": "pnpm@11.20.0",
   "engines": {
-    "node": ">=18.0.0",
-    "pnpm": ">=9.15.9"
+    "node": ">=24.13.0",
+    "pnpm": ">=11.20.0"
   },
   "scripts": {
     "dev": "pnpm -r --parallel --if-present run dev",
@@ -15,6 +15,8 @@
     "dev:cms": "pnpm --filter=cms run dev",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
+    "podman:up": "podman start trangia_postgres trangia_redis",
+    "podman:down": "podman stop trangia_postgres trangia_redis",
     "db:migrate": "pnpm --filter=backend run prisma:migrate",
     "db:generate": "pnpm --filter=backend run prisma:generate",
     "db:seed": "pnpm --filter=backend run prisma:seed",
@@ -27,6 +29,7 @@
     "melos:gen": "melos gen"
   },
   "devDependencies": {
-    "prettier": "catalog:"
+    "prettier": "catalog:",
+    "@trivago/prettier-plugin-sort-imports": "catalog:"
   }
 }

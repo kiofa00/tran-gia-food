@@ -7,6 +7,8 @@ import Link from 'next/link';
 import { CodeOutlined, HomeOutlined, ReloadOutlined, WarningOutlined } from '@ant-design/icons';
 import { Button, Card, Collapse, Result, Space, Typography } from 'antd';
 
+import { ADMIN_ROUTES } from '@/shared-config';
+
 const { Title, Paragraph, Text } = Typography;
 
 export default function ErrorBoundary({
@@ -22,7 +24,7 @@ export default function ErrorBoundary({
   }, [error]);
 
   return (
-    <div className="flex justify-center items-center min-h-[75vh] p-8">
+    <div className="flex justify-center items-center min-h-screen p-8">
       <Card className="max-w-2xl w-full text-center rounded-xl shadow-lg border border-gray-200">
         <Result
           status="500"
@@ -48,7 +50,7 @@ export default function ErrorBoundary({
                 >
                   Thử Tải Lại Trang
                 </Button>
-                <Link href="/">
+                <Link href={ADMIN_ROUTES.HOME}>
                   <Button size="large" icon={<HomeOutlined />} className="h-11 px-6 font-semibold">
                     Về Trang Chủ Dashboard
                   </Button>

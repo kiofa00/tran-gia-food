@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { MenuCategory, MenuItem, User } from '@prisma/client';
 
 import { PrismaService } from '../../prisma/prisma.service';
@@ -17,14 +22,22 @@ export class MenuService {
   // Categories
   // ──────────────────────────────────────────
 
-  async createCategory(user: User, restaurantId: string, dto: CreateCategoryDto): Promise<MenuCategory> {
+  async createCategory(
+    user: User,
+    restaurantId: string,
+    dto: CreateCategoryDto,
+  ): Promise<MenuCategory> {
     await this.assertRestaurantOwner(user, restaurantId);
     return this.prisma.menuCategory.create({
       data: { ...dto, restaurantId },
     });
   }
 
-  async updateCategory(user: User, categoryId: string, dto: UpdateCategoryDto): Promise<MenuCategory> {
+  async updateCategory(
+    user: User,
+    categoryId: string,
+    dto: UpdateCategoryDto,
+  ): Promise<MenuCategory> {
     const category = await this.prisma.menuCategory.findUnique({ where: { id: categoryId } });
     if (!category) throw new NotFoundException('Danh mục không tồn tại');
     await this.assertRestaurantOwner(user, category.restaurantId);
@@ -75,7 +88,11 @@ export class MenuService {
     });
   }
 
-  async toggleItemAvailability(user: User, itemId: string, isAvailable: boolean): Promise<MenuItem> {
+  async toggleItemAvailability(
+    user: User,
+    itemId: string,
+    isAvailable: boolean,
+  ): Promise<MenuItem> {
     const item = await this.prisma.menuItem.findUnique({
       where: { id: itemId },
       include: { category: true },

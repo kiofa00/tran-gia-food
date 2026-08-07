@@ -1,6 +1,4 @@
-import dayjs from 'dayjs';
-
-export interface DashboardStats {
+export interface DashboardOverviewStats {
   totalPlatformRevenue: number;
   totalFoodGmv: number;
   totalShipGmv: number;
@@ -10,40 +8,118 @@ export interface DashboardStats {
   totalRestaurants?: number;
 }
 
-export interface PendingShipperRecord {
-  key: string;
+export interface PendingShipperItem {
   id: string;
-  name: string;
-  phone: string;
-  vehicle: string;
-  plate: string;
-  status: string;
-  rawStatus: string;
+  vehicleType?: string;
+  licensePlate?: string;
+  kycStatus?: string;
+  ekycStatus?: string;
+  status?: string;
+  name?: string;
+  phone?: string;
+  vehicle?: string;
+  plate?: string;
+  user?: {
+    name: string;
+    phone: string;
+  };
 }
 
-export interface VoucherRecord {
+export interface RevenueTrendItem {
+  date: string;
+  month?: string;
+  gmv: number;
+  platformRevenue: number;
+  orders: number;
+}
+
+export interface PaymentMethodItem {
+  name: string;
+  value: number;
+  color: string;
+}
+
+export interface TopRestaurantItem {
+  id?: string;
+  rank: number;
+  name: string;
+  ordersCount: number;
+  revenue: number;
+}
+
+export interface AnalyticsSummary {
+  totalGmv: number;
+  platformRevenue: number;
+  totalOrders: number;
+  avgOrderValue: number;
+  growthRate: number;
+  comparisonLabel: string;
+}
+
+export interface AnalyticsResponse {
+  range?: string;
+  summary?: AnalyticsSummary;
+  revenueTrend?: RevenueTrendItem[];
+  paymentMethods?: PaymentMethodItem[];
+  paymentSplit?: PaymentMethodItem[];
+  topRestaurants?: TopRestaurantItem[];
+}
+
+export interface CmsBannerItem {
+  id: string | number;
+  title: string;
+  imageUrl?: string;
+  linkUrl?: string;
+  isActive?: boolean;
+}
+
+export interface CmsTranslationItem {
+  id: string | number;
   key: string;
+  vi: string;
+  en: string;
+  appTarget?: string;
+  category?: string;
+}
+
+export interface CmsFaqItem {
+  id: string | number;
+  question: string;
+  answer: string;
+  category?: string;
+  targetApp?: string;
+}
+
+export interface CmsStatusResponse {
+  isOnline: boolean;
+  banners: CmsBannerItem[];
+  translations: CmsTranslationItem[];
+  faqs?: CmsFaqItem[];
+}
+
+export interface VoucherItem {
+  id: string;
   code: string;
   type: string;
-  discountType: 'percent' | 'fixed';
+  discountType: string;
   discountValue: number;
-  maxDiscount?: number;
   minOrderValue: number;
+  usageCount: number;
+  totalLimit: number;
   validFrom: string;
   validTo: string;
-  usedCount: number;
-  totalLimit: number;
-  isActive: boolean;
+  status: string;
 }
 
-export interface CreateVoucherFormValues {
+export interface CreateVoucherPayload {
   code: string;
-  type?: string;
-  discountType: 'percent' | 'fixed';
+  type: string;
+  discountType: string;
   discountValue: number;
-  minOrderValue?: number;
-  totalLimit?: number;
-  validDates?: [dayjs.Dayjs, dayjs.Dayjs];
+  minOrderValue: number;
+  totalLimit: number;
+  validFrom: string;
+  validTo: string;
 }
 
 export interface CommissionRecord {
@@ -69,21 +145,6 @@ export interface ShipperRecord {
   lat: number;
   lng: number;
   status: string;
-}
-
-export interface BannerRecord {
-  title: string;
-  target?: string;
-  status?: string;
-  updated?: string;
-  isActive?: boolean;
-}
-
-export interface TranslationRecord {
-  key: string;
-  locale?: string;
-  app?: string;
-  value?: string;
-  vi?: string;
-  en?: string;
+  ekycStatus?: string;
+  rating?: number;
 }

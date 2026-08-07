@@ -3,7 +3,6 @@ import {
   KycStatus,
   OrderStatus,
   OrderType,
-  OrderTypeFilter,
   PaymentMethod,
   PaymentStatus,
   PrismaClient,
@@ -39,6 +38,7 @@ async function main() {
   console.log('🧹 Cleaned existing database tables.');
 
   // 2. Create Users
+  // eslint-disable-next-line sonarjs/no-hardcoded-passwords
   const ADMIN_DEFAULT_PASSWORD = 'Admin@123456'; // Change after first login!
   const adminPasswordHash = await bcrypt.hash(ADMIN_DEFAULT_PASSWORD, 10);
 
@@ -142,7 +142,7 @@ async function main() {
     },
   });
 
-  const shipper2 = await prisma.shipper.create({
+  await prisma.shipper.create({
     data: {
       userId: shipperUser2.id,
       vehicleType: VehicleType.motorbike,
@@ -279,7 +279,7 @@ async function main() {
     include: { categories: { include: { items: true } } },
   });
 
-  const rest3 = await prisma.restaurant.create({
+  await prisma.restaurant.create({
     data: {
       ownerId: owner3.id,
       name: 'Bánh Mì Huỳnh Hoa - Quận 1',
@@ -318,7 +318,7 @@ async function main() {
   console.log('🍲 Created Restaurants and Menu Items.');
 
   // 5. Create Vouchers
-  const voucher1 = await prisma.voucher.create({
+  await prisma.voucher.create({
     data: {
       code: 'TRANGIA50K',
       type: VoucherType.platform,
@@ -351,8 +351,8 @@ async function main() {
   console.log('🎫 Created Platform Vouchers.');
 
   // 6. Create Orders, Payments & Commissions
-  const item1 = rest1.categories[0].items[0];
-  const item2 = rest1.categories[0].items[1];
+  const item1 = rest1.categories[0]!.items[0]!;
+  const item2 = rest1.categories[0]!.items[1]!;
 
   const order1 = await prisma.order.create({
     data: {
@@ -436,8 +436,8 @@ async function main() {
       items: {
         create: [
           {
-            itemId: rest2.categories[0].items[0].id,
-            itemName: rest2.categories[0].items[0].name,
+            itemId: rest2.categories[0]!.items[0]!.id,
+            itemName: rest2.categories[0]!.items[0]!.name,
             quantity: 2,
             unitPrice: 85000,
             totalPrice: 170000,

@@ -4,8 +4,6 @@ import { AntdRegistry } from '@ant-design/nextjs-registry';
 import '@ant-design/v5-patch-for-react-19';
 import { ConfigProvider } from 'antd';
 
-import { Footer } from '@/components/Footer';
-import { Header } from '@/components/Header';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { SessionProvider } from '@/providers/SessionProvider';
 import { adminDesignTokens } from '@/theme/tokens';
@@ -47,91 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   },
                 }}
               >
-                <div className="flex flex-col min-h-screen bg-gray-50">
-                  <style>{`
-                  .ant-table-wrapper .ant-spin-nested-loading {
-                    min-height: 260px;
-                  }
-                  .ant-table-wrapper .ant-spin-nested-loading .ant-spin {
-                    position: absolute !important;
-                    top: 50% !important;
-                    left: 50% !important;
-                    transform: translate(-50%, -50%) !important;
-                    margin: 0 !important;
-                  }
-                  .table-filter-card .ant-card-body {
-                    padding: 10px 14px !important;
-                  }
-                  .table-filter-toolbar {
-                    display: flex;
-                    flex-wrap: wrap;
-                    align-items: center;
-                    justify-content: space-between;
-                    gap: 12px;
-                    width: 100%;
-                  }
-                  .table-filter-toolbar .filter-search-input,
-                  .table-filter-toolbar .filter-search-input.ant-input-affix-wrapper {
-                    flex: 1 1 260px;
-                    max-width: 360px;
-                    width: 100%;
-                    height: 38px !important;
-                    min-height: 38px !important;
-                    max-height: 38px !important;
-                    box-sizing: border-box !important;
-                  }
-                  .table-filter-toolbar .filter-select-group {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    flex-wrap: wrap;
-                  }
-                  @media (max-width: 576px) {
-                    .table-filter-card .ant-card-body {
-                      padding: 10px 12px !important;
-                    }
-                    .table-filter-toolbar {
-                      display: flex !important;
-                      flex-direction: column !important;
-                      align-items: stretch !important;
-                      gap: 8px !important;
-                    }
-                    .table-filter-toolbar .filter-search-input,
-                    .table-filter-toolbar .filter-search-input.ant-input-affix-wrapper {
-                      width: 100% !important;
-                      max-width: 100% !important;
-                      height: 36px !important;
-                      min-height: 36px !important;
-                      max-height: 36px !important;
-                      padding: 4px 11px !important;
-                    }
-                    .table-filter-toolbar .filter-search-input input {
-                      font-size: ${adminDesignTokens.typography['body'][0]} !important;
-                      height: 28px !important;
-                    }
-                    .table-filter-toolbar .filter-select-group {
-                      display: flex !important;
-                      align-items: center !important;
-                      justify-content: space-between !important;
-                      width: 100% !important;
-                      gap: 8px !important;
-                    }
-                    .table-filter-toolbar .filter-select-group .ant-select {
-                      flex: 1 !important;
-                      height: 36px !important;
-                    }
-                    .table-filter-toolbar .filter-select-group .ant-select-selector {
-                      height: 36px !important;
-                      display: flex !important;
-                      align-items: center !important;
-                      font-size: ${adminDesignTokens.typography['body'][0]} !important;
-                    }
-                  }
-                `}</style>
-                  <Header title="Tran Gia Food — Admin Portal" userName="Admin Tran Gia" />
-                  <main className="flex-1">{children}</main>
-                  <Footer />
-                </div>
+                {children}
               </ConfigProvider>
             </AntdRegistry>
           </QueryProvider>

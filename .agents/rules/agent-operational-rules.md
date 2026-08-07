@@ -3,14 +3,23 @@
 ## 1. GIT COMMIT & PUSH POLICY (STRICT ENFORCEMENT)
 
 - **LOCAL-ONLY CODE EDITS**: All code edits, build checks, and refactoring must remain local in the workspace.
-- **NO AUTO COMMIT / NO AUTO PUSH**: The agent is strictly forbidden from executing `git commit` or `git push` automatically without prior permission.
-- **EXPLICIT USER COMMAND REQUIRED**: Execute `git commit` or `git push` ONLY when the user explicitly gives permission or requests it (e.g. _"commit code đi"_, _"push code giúp tôi"_).
+- **NO AUTO COMMIT / NO AUTO PUSH**: The agent is strictly forbidden from executing `git commit` or `git push` in ANY situation except one (see below).
+- **ONLY VIA push-code SKILL**: The ONLY permitted way to run `git commit` or `git push` is when the user explicitly triggers the **push-code skill** (e.g. `/push`, `push code`, `push đi`, `commit đi`). No other context, command, or approval grants this permission.
+- **PLAN APPROVAL ≠ GIT PERMISSION**: User approving an implementation plan (clicking Proceed) does NOT grant permission to commit or push. Approval only grants permission to write code.
+- **AFTER IMPLEMENTATION**: When implementation is complete, report results and STOP. Do NOT commit or push. Wait for the user to trigger the push-code skill.
+- **NO EXCEPTIONS**: Even if the user says "done", "looks good", "ship it" in passing — do NOT commit or push unless the push-code skill is explicitly triggered.
 
-## 2. STYLING POLICY (TAILWINDCSS STANDARD)
+## 2. STYLING POLICY (TAILWINDCSS — STRICT ENFORCEMENT)
 
-- **Zero Inline Styles**: Avoid using inline styles (`style={{ ... }}`) unless strictly necessary for dynamic runtime math (e.g. position offsets).
-- **TailwindCSS Utility Classes**: Use TailwindCSS utility classes (`className="..."`) across all React/Next.js components.
-- **Design Tokens**: Match colors with `adminDesignTokens` tokens and Tailwind colors (`orange-500`, `gray-50`, etc.).
+- **ZERO INLINE STYLES (NO EXCEPTIONS)**: NEVER write `style={{ ... }}` on any HTML element or React component. This is strictly forbidden.
+- **TailwindCSS ONLY**: ALL styling must use `className="..."` with TailwindCSS utility classes. This includes colors, spacing, typography, layout, shadows, borders, gradients, and animations.
+- **Design Tokens for Colors**: Use Tailwind color scale (`orange-500`, `gray-50`, `green-600`, etc.) or `adminDesignTokens.*` values. NEVER hardcode hex (`#FF6B35`) or rgb values directly in JSX.
+- **Allowed Exceptions** (only these 3 cases permit `style`):
+  1. **Ant Design component API props** that only accept object format (e.g. `styles={{ body: { padding: '...' } }}` on `<Card>`, `valueStyle={{ ... }}` on `<Statistic>`). Use sparingly.
+  2. **Dynamic runtime values** that cannot be expressed as static Tailwind classes (e.g. calculated pixel offsets, canvas dimensions).
+  3. **CSS custom property injection** (`style={{ '--var': value }}`).
+- **`!important` modifier — dùng có chọn lọc**: Tailwind's `!` prefix (e.g. `!bg-orange-500`, `!px-0`) được phép dùng **khi cần thiết** để override Ant Design CSS-in-JS hoặc third-party library styles có specificity cao hơn. Ưu tiên dùng giải pháp không cần `!` trước (plain HTML wrapper, restructure, v.v.), nhưng không bắt buộc.
+- **Self-Check Before Writing**: Before writing any `style={{ }}`, ask: "Can this be a Tailwind class?" — if yes, use className. If it falls outside the 3 exceptions above, it is FORBIDDEN.
 
 ## 3. TESTING ENFORCEMENT & STRATEGY
 

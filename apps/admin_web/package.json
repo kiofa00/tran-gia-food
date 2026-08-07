@@ -18,9 +18,7 @@
     "@ant-design/icons": "catalog:",
     "@ant-design/nextjs-registry": "catalog:",
     "@ant-design/v5-patch-for-react-19": "catalog:",
-    "@hookform/resolvers": "catalog:",
     "@tanstack/react-query": "catalog:",
-    "@vis.gl/react-google-maps": "catalog:",
     "antd": "catalog:",
     "axios": "catalog:",
     "dayjs": "catalog:",
@@ -28,11 +26,7 @@
     "next-auth": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "react-hook-form": "catalog:",
-    "recharts": "catalog:",
-    "socket.io-client": "catalog:",
-    "zod": "catalog:",
-    "zustand": "catalog:"
+    "recharts": "catalog:"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",

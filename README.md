@@ -20,7 +20,7 @@ tran_gia_app/
 ├── backend/               ← NestJS REST API + PostgreSQL + Redis
 ├── docs/                  ← 16 tài liệu thiết kế hệ thống
 ├── pnpm-workspace.yaml    ← Cấu hình pnpm workspaces & catalog
-├── package.json           ← Root scripts & pnpm v9.15.9 engine
+├── package.json           ← Root scripts & pnpm v11.20.0 engine
 ├── turbo.json             ← Turborepo build pipeline
 ├── melos.yaml             ← Melos Flutter workspace orchestration
 └── README.md

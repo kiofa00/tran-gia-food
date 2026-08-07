@@ -5,7 +5,13 @@ import { User } from '@prisma/client';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard, Public } from '../../common/guards/jwt-auth.guard';
 import { AuthService } from './auth.service';
-import { AdminLoginDto, GoogleAuthDto, RefreshTokenDto, SendOtpDto, VerifyOtpDto } from './dto/auth.dto';
+import {
+  AdminLoginDto,
+  GoogleAuthDto,
+  RefreshTokenDto,
+  SendOtpDto,
+  VerifyOtpDto,
+} from './dto/auth.dto';
 
 @ApiTags('auth')
 @Controller('auth')
