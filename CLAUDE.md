@@ -59,21 +59,21 @@ tran_gia_app/
 
 ## 🛠️ 3. Quick CLI Commands Cheat Sheet
 
-| Thao tác                          | Lệnh                | Dùng khi nào          |
-| --------------------------------- | ------------------- | --------------------- |
-| Chạy dev toàn bộ                  | `pnpm dev`          | Local                 |
-| Chạy Backend dev                  | `pnpm dev:backend`  | Local                 |
-| Chạy Admin Web dev                | `pnpm dev:admin`    | Local                 |
-| Format + Lint fix (JS/TS)         | `pnpm fix`          | Trước khi commit      |
-| Check format + lint (tất cả)      | `pnpm check`        | CI / pre-push         |
-| Build toàn bộ (JS/TS + Flutter)   | `pnpm build`        | Release / CI          |
-| Chạy toàn bộ Tests                | `pnpm test`         | CI                    |
-| Sync DB schema                    | `pnpm db:migrate`   | Sau sửa schema.prisma |
-| Generate Prisma Client            | `pnpm db:generate`  | Sau sửa schema.prisma |
-| Seed dữ liệu mẫu                  | `pnpm db:seed`      | Setup lần đầu         |
-| Mở Prisma Studio GUI              | `pnpm db:studio`    | Debug dữ liệu         |
-| Generate Flutter code             | `pnpm melos:gen`    | Sau sửa model Dart    |
-| Xóa build artifacts               | `pnpm clean`        | Khi cần reset         |
+| Thao tác                        | Lệnh               | Dùng khi nào          |
+| ------------------------------- | ------------------ | --------------------- |
+| Chạy dev toàn bộ                | `pnpm dev`         | Local                 |
+| Chạy Backend dev                | `pnpm dev:backend` | Local                 |
+| Chạy Admin Web dev              | `pnpm dev:admin`   | Local                 |
+| Format + Lint fix (JS/TS)       | `pnpm fix`         | Trước khi commit      |
+| Check format + lint (tất cả)    | `pnpm check`       | CI / pre-push         |
+| Build toàn bộ (JS/TS + Flutter) | `pnpm build`       | Release / CI          |
+| Chạy toàn bộ Tests              | `pnpm test`        | CI                    |
+| Sync DB schema                  | `pnpm db:migrate`  | Sau sửa schema.prisma |
+| Generate Prisma Client          | `pnpm db:generate` | Sau sửa schema.prisma |
+| Seed dữ liệu mẫu                | `pnpm db:seed`     | Setup lần đầu         |
+| Mở Prisma Studio GUI            | `pnpm db:studio`   | Debug dữ liệu         |
+| Generate Flutter code           | `pnpm melos:gen`   | Sau sửa model Dart    |
+| Xóa build artifacts             | `pnpm clean`       | Khi cần reset         |
 
 ---
 

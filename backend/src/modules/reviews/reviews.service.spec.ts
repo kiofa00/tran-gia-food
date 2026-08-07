@@ -1,6 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, User } from '@prisma/client';
 
 import { PrismaService } from '../../prisma/prisma.service';
 import { ReviewsService } from './reviews.service';
@@ -8,7 +8,7 @@ import { ReviewsService } from './reviews.service';
 describe('ReviewsService', () => {
   let service: ReviewsService;
 
-  const mockCustomer = { id: 'cust-1' } as any;
+  const mockCustomer = { id: 'cust-1' } as Pick<User, 'id'>;
   const mockCompletedOrder = {
     id: 'order-1',
     customerId: 'cust-1',
@@ -31,10 +31,7 @@ describe('ReviewsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ReviewsService,
-        { provide: PrismaService, useValue: mockPrismaService },
-      ],
+      providers: [ReviewsService, { provide: PrismaService, useValue: mockPrismaService }],
     }).compile();
 
     service = module.get<ReviewsService>(ReviewsService);
@@ -46,7 +43,10 @@ describe('ReviewsService', () => {
       mockPrismaService.order.findUnique.mockResolvedValue(mockCompletedOrder);
       mockPrismaService.review.findUnique.mockResolvedValue(null);
       mockPrismaService.review.create.mockResolvedValue({ id: 'review-1' });
-      mockPrismaService.review.aggregate.mockResolvedValue({ _avg: { restaurantRating: 4.5, shipperRating: 5 }, _count: 10 });
+      mockPrismaService.review.aggregate.mockResolvedValue({
+        _avg: { restaurantRating: 4.5, shipperRating: 5 },
+        _count: 10,
+      });
       mockPrismaService.restaurant.update.mockResolvedValue({});
       mockPrismaService.shipper.update.mockResolvedValue({});
 

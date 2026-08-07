@@ -19,11 +19,11 @@
     "db:generate": "pnpm --filter=backend run prisma:generate",
     "db:seed": "pnpm --filter=backend run prisma:seed",
     "db:studio": "pnpm --filter=backend run prisma:studio",
-    "fix": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md,yaml,yml}\" --ignore-unknown && pnpm --filter=!customer_app --filter=!shipper_app --filter=!restaurant_app --sequential --if-present run lint",
+    "fix": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md,yaml,yml}\" --ignore-unknown && pnpm -r --sequential --if-present run fix",
     "check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md,yaml,yml}\" --ignore-unknown && pnpm --filter=!customer_app --filter=!shipper_app --filter=!restaurant_app --sequential --if-present run lint && pnpm --filter=customer_app --filter=shipper_app --filter=restaurant_app --sequential run lint",
     "build": "pnpm --filter=!customer_app --filter=!shipper_app --filter=!restaurant_app --sequential --if-present run build && pnpm --filter=customer_app --filter=shipper_app --filter=restaurant_app --sequential run build",
     "test": "pnpm -r run test && melos test",
-    "clean": "pnpm -r run clean",
+    "clean": "pnpm -r run clean && node -e \"['build','.dart_tool','.turbo'].forEach(d=>{try{require('fs').rmSync(d,{recursive:true,force:true})}catch(e){}})\"",
     "melos:gen": "melos gen"
   },
   "devDependencies": {

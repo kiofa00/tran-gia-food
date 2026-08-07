@@ -1,5 +1,6 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { User, UserRole } from '@prisma/client';
 
 import { PrismaService } from '../../prisma/prisma.service';
 import { MenuService } from './menu.service';
@@ -7,10 +8,13 @@ import { MenuService } from './menu.service';
 describe('MenuService', () => {
   let service: MenuService;
 
-  const mockOwner = { id: 'owner-1', role: 'restaurant_owner' } as any;
-  const mockOtherUser = { id: 'other-user', role: 'restaurant_owner' } as any;
+  const MOCK_OWNER_ID = 'owner-1';
+  const MOCK_RESTAURANT_ID = 'rest-1';
 
-  const mockRestaurant = { id: 'rest-1', ownerId: 'owner-1', isOpen: true };
+  const mockOwner = { id: MOCK_OWNER_ID, role: UserRole.restaurant } as User;
+  const mockOtherUser = { id: 'other-user', role: UserRole.customer } as User;
+
+  const mockRestaurant = { id: MOCK_RESTAURANT_ID, ownerId: MOCK_OWNER_ID, isOpen: true };
   const mockCategory = { id: 'cat-1', restaurantId: 'rest-1', name: 'Món Chính', isActive: true };
   const mockItem = {
     id: 'item-1',
@@ -29,10 +33,7 @@ describe('MenuService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        MenuService,
-        { provide: PrismaService, useValue: mockPrismaService },
-      ],
+      providers: [MenuService, { provide: PrismaService, useValue: mockPrismaService }],
     }).compile();
 
     service = module.get<MenuService>(MenuService);

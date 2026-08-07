@@ -1,6 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { PayoutStatus } from '@prisma/client';
+import { PayoutStatus, User } from '@prisma/client';
 
 import { PrismaService } from '../../prisma/prisma.service';
 import { PayoutsService } from './payouts.service';
@@ -8,7 +8,7 @@ import { PayoutsService } from './payouts.service';
 describe('PayoutsService', () => {
   let service: PayoutsService;
 
-  const mockUser = { id: 'user-1' } as any;
+  const mockUser = { id: 'user-1' } as unknown as User;
   const mockShipper = { id: 'ship-1', userId: 'user-1', walletCash: 500000, isActive: true };
 
   const mockPrismaService = {
@@ -25,10 +25,7 @@ describe('PayoutsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        PayoutsService,
-        { provide: PrismaService, useValue: mockPrismaService },
-      ],
+      providers: [PayoutsService, { provide: PrismaService, useValue: mockPrismaService }],
     }).compile();
 
     service = module.get<PayoutsService>(PayoutsService);
@@ -58,17 +55,17 @@ describe('PayoutsService', () => {
     it('should throw NotFoundException when shipper profile not found', async () => {
       mockPrismaService.shipper.findUnique.mockResolvedValue(null);
 
-      await expect(
-        service.requestShipperWithdrawal(mockUser, { amount: 100000 }),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.requestShipperWithdrawal(mockUser, { amount: 100000 })).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw BadRequestException when wallet balance is insufficient', async () => {
       mockPrismaService.shipper.findUnique.mockResolvedValue({ ...mockShipper, walletCash: 50000 });
 
-      await expect(
-        service.requestShipperWithdrawal(mockUser, { amount: 200000 }),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.requestShipperWithdrawal(mockUser, { amount: 200000 })).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 

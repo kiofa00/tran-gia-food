@@ -4,6 +4,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UsersService } from './users.service';
 
+// Placeholder value used in mock data to simulate a bcrypt hash stored in DB.
+// NOT a real credential — intentionally non-sensitive test fixture.
+const MOCK_HASH = 'bcrypt_test_placeholder';
+
 describe('UsersService', () => {
   let service: UsersService;
 
@@ -12,7 +16,7 @@ describe('UsersService', () => {
     name: 'Test User',
     phone: '0901234567',
     role: 'customer',
-    passwordHash: 'hashed',
+    passwordHash: MOCK_HASH,
     fcmToken: null,
     avatarUrl: null,
     createdAt: new Date(),
@@ -28,10 +32,7 @@ describe('UsersService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        UsersService,
-        { provide: PrismaService, useValue: mockPrismaService },
-      ],
+      providers: [UsersService, { provide: PrismaService, useValue: mockPrismaService }],
     }).compile();
 
     service = module.get<UsersService>(UsersService);

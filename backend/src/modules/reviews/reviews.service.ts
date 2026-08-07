@@ -8,7 +8,7 @@ import { CreateReviewDto } from './dto/review.dto';
 export class ReviewsService {
   constructor(private prisma: PrismaService) {}
 
-  async createReview(customer: User, dto: CreateReviewDto) {
+  async createReview(customer: Pick<User, 'id'>, dto: CreateReviewDto) {
     const order = await this.prisma.order.findUnique({ where: { id: dto.orderId } });
     if (!order) throw new NotFoundException('Đơn hàng không tồn tại');
     if (order.customerId !== customer.id) {

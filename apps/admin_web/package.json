@@ -6,10 +6,11 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "lint:check": "next lint",
     "test": "vitest run",
-    "clean": "node -e \"require('fs').rmSync('.next', {recursive: true, force: true})\"",
+    "clean": "node -e \"['.next','.turbo'].forEach(d=>{require('fs').rmSync(d,{recursive:true,force:true})})\"",
     "type-check": "tsc --noEmit",
     "gen:api-types": "openapi-typescript http://localhost:3000/api-json -o src/types/api.ts"
   },

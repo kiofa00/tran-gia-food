@@ -34,10 +34,7 @@ describe('RestaurantsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        RestaurantsService,
-        { provide: PrismaService, useValue: mockPrismaService },
-      ],
+      providers: [RestaurantsService, { provide: PrismaService, useValue: mockPrismaService }],
     }).compile();
 
     service = module.get<RestaurantsService>(RestaurantsService);
@@ -97,9 +94,9 @@ describe('RestaurantsService', () => {
     it('should throw ForbiddenException for non-owner', async () => {
       mockPrismaService.restaurant.findUnique.mockResolvedValue(mockRestaurant);
 
-      await expect(
-        service.update(mockOtherUser as User, 'rest-1', { name: 'X' }),
-      ).rejects.toThrow(ForbiddenException);
+      await expect(service.update(mockOtherUser as User, 'rest-1', { name: 'X' })).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 
@@ -116,9 +113,9 @@ describe('RestaurantsService', () => {
     it('should throw ForbiddenException for non-owner', async () => {
       mockPrismaService.restaurant.findUnique.mockResolvedValue(mockRestaurant);
 
-      await expect(
-        service.toggleOpen(mockOtherUser as User, 'rest-1', true),
-      ).rejects.toThrow(ForbiddenException);
+      await expect(service.toggleOpen(mockOtherUser as User, 'rest-1', true)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 });

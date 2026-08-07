@@ -5,6 +5,7 @@
   "description": "Tran Gia Food - Shipper App (Flutter)",
   "scripts": {
     "build": "flutter build web --release --no-tree-shake-icons",
+    "fix": "dart fix --apply && flutter analyze lib",
     "lint": "flutter analyze lib",
     "clean": "flutter clean"
   }
