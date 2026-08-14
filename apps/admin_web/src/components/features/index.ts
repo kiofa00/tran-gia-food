@@ -4,5 +4,7 @@ export * from './cms';
 export * from './commissions';
 export * from './dashboard';
 export * from './fleet';
+export * from './payouts';
+export * from './restaurants';
 export * from './vouchers';
 export * from './users';

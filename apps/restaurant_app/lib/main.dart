@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_ui/shared_ui.dart';
-import 'features/orders/restaurant_orders_screen.dart';
+import 'core/router/app_router.dart';
 
 void main() {
-  runApp(const RestaurantApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const ProviderScope(child: RestaurantApp()));
 }
 
 class RestaurantApp extends StatelessWidget {
@@ -11,11 +13,13 @@ class RestaurantApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Tran Gia Partner',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const RestaurantOrdersScreen(),
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.light,
+      routerConfig: restaurantRouter,
     );
   }
 }

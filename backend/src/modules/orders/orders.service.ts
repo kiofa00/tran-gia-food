@@ -8,6 +8,7 @@ import {
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { OrderStatus, OrderType, PaymentStatus, Prisma, User, UserRole } from '@prisma/client';
 
+import { DeliveryGateway } from '../../gateways/delivery.gateway';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CancelOrderDto, CreateOrderDto } from './dto/order.dto';
 
@@ -16,6 +17,7 @@ export class OrdersService {
   constructor(
     private prisma: PrismaService,
     private eventEmitter: EventEmitter2,
+    private deliveryGateway: DeliveryGateway,
   ) {}
 
   // eslint-disable-next-line sonarjs/cognitive-complexity
@@ -146,6 +148,19 @@ export class OrdersService {
     // 5. Trigger notifications & auto-assign events
     this.eventEmitter.emit('order.created', order);
 
+    // 6. Broadcast new order to available shippers via WebSocket
+    this.deliveryGateway.emitNewOrderAvailable({
+      orderId: order.id,
+      restaurantId: restaurant.id,
+      restaurantName: restaurant.name,
+      restaurantLat: restaurant.lat,
+      restaurantLng: restaurant.lng,
+      deliveryLat: dto.deliveryLat ?? 0,
+      deliveryLng: dto.deliveryLng ?? 0,
+      distanceKm,
+      shipFee,
+    });
+
     return order;
   }
 
@@ -199,6 +214,9 @@ export class OrdersService {
     } else {
       this.eventEmitter.emit('order.status_updated', updatedOrder);
     }
+
+    // Emit realtime status change via WebSocket
+    this.deliveryGateway.emitOrderStatusChanged(orderId, status);
 
     return updatedOrder;
   }

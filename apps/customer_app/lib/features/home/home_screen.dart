@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_ui/shared_ui.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -30,7 +31,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   IconButton(
                     icon: const Icon(Iconsax.notification5, color: AppColors.textPrimaryLight),
-                    onPressed: () {},
+                    onPressed: () => context.push('/notifications'),
                   ),
                 ],
               ),

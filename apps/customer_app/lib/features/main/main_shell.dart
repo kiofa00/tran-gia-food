@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:shared_ui/shared_ui.dart';
 import '../home/home_screen.dart';
+import '../orders/order_history_screen.dart';
+import '../profile/profile_screen.dart';
 
-class MainShell extends StatefulWidget {
+class MainShell extends ConsumerStatefulWidget {
   const MainShell({super.key});
 
   @override
-  State<MainShell> createState() => _MainShellState();
+  ConsumerState<MainShell> createState() => _MainShellState();
 }
 
-class _MainShellState extends State<MainShell> {
+class _MainShellState extends ConsumerState<MainShell> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = const [
     HomeScreen(),
-    Center(child: Text('Đơn Hàng Của Tôi 📦', style: TextStyle(fontSize: AppFontSize.lg, fontWeight: AppFontWeight.bold))),
-    Center(child: Text('Giỏ Hàng 🛒', style: TextStyle(fontSize: AppFontSize.lg, fontWeight: AppFontWeight.bold))),
-    Center(child: Text('Tài Khoản & Profile 👤', style: TextStyle(fontSize: AppFontSize.lg, fontWeight: AppFontWeight.bold))),
+    OrderHistoryScreen(),
+    CartPlaceholder(),
+    ProfileScreen(),
   ];
 
   @override
@@ -59,5 +63,19 @@ class _MainShellState extends State<MainShell> {
         ],
       ),
     );
+  }
+}
+
+/// Placeholder giỏ hàng — navigate tới /cart route có sẵn
+class CartPlaceholder extends StatelessWidget {
+  const CartPlaceholder({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Redirect to full cart screen
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.mounted) context.go('/cart');
+    });
+    return const SizedBox.shrink();
   }
 }

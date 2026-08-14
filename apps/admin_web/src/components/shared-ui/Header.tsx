@@ -17,11 +17,14 @@ import {
   LogoutOutlined,
   MenuOutlined,
   MoonOutlined,
+  SafetyCertificateOutlined,
   SettingOutlined,
+  ShopOutlined,
   SunOutlined,
   TagOutlined,
   TeamOutlined,
   UserOutlined,
+  WalletOutlined,
 } from '@ant-design/icons';
 import { Avatar, Button, Divider, Drawer, Dropdown, Layout, Menu, Space, Typography } from 'antd';
 
@@ -78,6 +81,9 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
       DollarOutlined: <DollarOutlined />,
       BarChartOutlined: <BarChartOutlined />,
       FileTextOutlined: <FileTextOutlined />,
+      ShopOutlined: <ShopOutlined />,
+      WalletOutlined: <WalletOutlined />,
+      SafetyCertificateOutlined: <SafetyCertificateOutlined />,
     }),
     [],
   );

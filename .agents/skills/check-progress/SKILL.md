@@ -63,8 +63,50 @@ Phase 5 — Polish:      [██░░░░░░░░] X%
 2. ...
 ```
 
+## Bước 4 — Lưu Report Ra File (BẮT BUỘC)
+
+Sau khi tổng hợp xong báo cáo, **BẮT BUỘC** lưu nội dung vào file theo các bước:
+
+### 4.1 — Xác định tên file từ thời điểm hiện tại
+
+Tên file theo format: `progress_YYYY-MM-DD_HH-mm.md`  
+Dùng giờ Việt Nam (UTC+7).
+
+Ví dụ: `progress_2026-08-14_15-41.md`
+
+### 4.2 — Tạo thư mục nếu chưa có
+
+```powershell
+New-Item -ItemType Directory -Force -Path "docs/daily-progress" | Out-Null
+```
+
+### 4.3 — Ghi file bằng run_command (PowerShell)
+
+Dùng `run_command` tool với PowerShell để ghi file (KHÔNG dùng `write_to_file` vì tool đó chỉ cho phép ghi vào artifact directory):
+
+```powershell
+$content = @'
+[toàn bộ nội dung báo cáo markdown ở Bước 3]
+'@
+
+$content | Out-File -FilePath "docs/daily-progress/progress_<timestamp>.md" -Encoding utf8 -Force
+Write-Host "Saved OK"
+```
+
+- **Cwd**: `c:\Users\PC220218\Downloads\tran_gia_app`
+- **WaitMsBeforeAsync**: `8000`
+
+### 4.4 — Thông báo kết quả
+
+Sau khi lưu xong, hiển thị link clickable ở cuối response:
+
+```
+✅ Report đã lưu: [progress_<timestamp>.md](file:///c:/Users/PC220218/Downloads/tran_gia_app/docs/daily-progress/progress_<timestamp>.md)
+```
+
 ## Lưu ý
 
 - Chỉ báo cáo dựa trên **code thực tế** trong repo, không đoán mò.
 - Nếu file tồn tại nhưng chỉ là scaffold (ít hơn 30 dòng code thực), đánh dấu ⚠️ scaffold.
 - So sánh với `docs/18-client-implementation-plan.md` cho phần roadmap.
+- File report **PHẢI** được tạo mỗi lần skill được gọi, kể cả khi nội dung không đổi so với lần trước.

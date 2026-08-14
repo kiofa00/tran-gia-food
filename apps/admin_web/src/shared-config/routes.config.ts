@@ -7,6 +7,9 @@ export const ADMIN_ROUTES = {
   ANALYTICS: '/analytics',
   CMS: '/cms',
   USERS: '/users',
+  RESTAURANTS: '/restaurants',
+  PAYOUTS: '/payouts',
+  KYC: '/kyc',
 } as const;
 
 export interface NavLinkConfig {
@@ -19,15 +22,21 @@ export interface NavLinkConfig {
     | 'DollarOutlined'
     | 'BarChartOutlined'
     | 'FileTextOutlined'
-    | 'TeamOutlined';
+    | 'TeamOutlined'
+    | 'ShopOutlined'
+    | 'WalletOutlined'
+    | 'SafetyCertificateOutlined';
 }
 
 export const ADMIN_NAV_LINKS: NavLinkConfig[] = [
   { key: ADMIN_ROUTES.HOME, label: 'Dashboard', iconName: 'DashboardOutlined' },
-  { key: ADMIN_ROUTES.FLEET, label: 'Đội Xe', iconName: 'CarOutlined' },
-  { key: ADMIN_ROUTES.USERS, label: 'Người Dùng', iconName: 'TeamOutlined' },
-  { key: ADMIN_ROUTES.VOUCHERS, label: 'Mã Giảm Giá', iconName: 'TagOutlined' },
-  { key: ADMIN_ROUTES.COMMISSIONS, label: 'Hoa Hồng & Ví', iconName: 'DollarOutlined' },
-  { key: ADMIN_ROUTES.ANALYTICS, label: 'Báo Cáo', iconName: 'BarChartOutlined' },
+  { key: ADMIN_ROUTES.RESTAURANTS, label: 'Nha Hang', iconName: 'ShopOutlined' },
+  { key: ADMIN_ROUTES.FLEET, label: 'Doi Xe', iconName: 'CarOutlined' },
+  { key: ADMIN_ROUTES.KYC, label: 'Duyet KYC', iconName: 'SafetyCertificateOutlined' },
+  { key: ADMIN_ROUTES.USERS, label: 'Nguoi Dung', iconName: 'TeamOutlined' },
+  { key: ADMIN_ROUTES.VOUCHERS, label: 'Ma Giam Gia', iconName: 'TagOutlined' },
+  { key: ADMIN_ROUTES.COMMISSIONS, label: 'Hoa Hong & Vi', iconName: 'DollarOutlined' },
+  { key: ADMIN_ROUTES.PAYOUTS, label: 'Giai Ngan', iconName: 'WalletOutlined' },
+  { key: ADMIN_ROUTES.ANALYTICS, label: 'Bao Cao', iconName: 'BarChartOutlined' },
   { key: ADMIN_ROUTES.CMS, label: 'CMS', iconName: 'FileTextOutlined' },
 ];
