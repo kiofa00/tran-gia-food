@@ -2,6 +2,7 @@ import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { OrderStatus, User, UserRole } from '@prisma/client';
 
+import { DeliveryGateway } from '../../gateways/delivery.gateway';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ChatService } from './chat.service';
 
@@ -24,9 +25,17 @@ describe('ChatService', () => {
     },
   };
 
+  const mockDeliveryGateway = {
+    emitChatMessage: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ChatService, { provide: PrismaService, useValue: mockPrismaService }],
+      providers: [
+        ChatService,
+        { provide: PrismaService, useValue: mockPrismaService },
+        { provide: DeliveryGateway, useValue: mockDeliveryGateway },
+      ],
     }).compile();
 
     service = module.get<ChatService>(ChatService);
@@ -38,7 +47,7 @@ describe('ChatService', () => {
   describe('sendMessage', () => {
     it('should send message on active order', async () => {
       mockPrismaService.order.findUnique.mockResolvedValue(mockActiveOrder);
-      mockPrismaService.chatMessage.create.mockResolvedValue({ id: 'msg-1' });
+      mockPrismaService.chatMessage.create.mockResolvedValue({ id: 'msg-1', createdAt: new Date() });
 
       const result = await service.sendMessage(mockSender as User, {
         orderId: 'order-1',
@@ -99,7 +108,7 @@ describe('ChatService', () => {
 
     it('should default message type to text when not provided', async () => {
       mockPrismaService.order.findUnique.mockResolvedValue(mockActiveOrder);
-      mockPrismaService.chatMessage.create.mockResolvedValue({ id: 'msg-2', type: 'text' });
+      mockPrismaService.chatMessage.create.mockResolvedValue({ id: 'msg-2', type: 'text', createdAt: new Date() });
 
       await service.sendMessage(mockSender as User, {
         orderId: 'order-1',

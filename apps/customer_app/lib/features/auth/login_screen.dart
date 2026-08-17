@@ -104,6 +104,30 @@ class _LoginScreenState extends State<LoginScreen> {
                   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(AppRadius.sm)),
                 ),
               ),
+              const SizedBox(height: 24),
+              Center(
+                child: TextButton(
+                  onPressed: () => context.go('/register'),
+                  child: RichText(
+                    text: const TextSpan(
+                      text: 'Chưa có tài khoản? ',
+                      style: TextStyle(
+                        color: AppColors.textSecondaryLight,
+                        fontSize: AppFontSize.sm,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: 'Đăng ký ngay',
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: AppFontWeight.semiBold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -111,3 +135,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+

@@ -8,7 +8,7 @@
 | **State Management**  | flutter_riverpod        | Reactive, testable          |
 | **Navigation**        | go_router               | Declarative routing         |
 | **HTTP Client**       | dio                     | Interceptors, retry         |
-| **Maps**              | google_maps_flutter     | Maps SDK                    |
+| **Maps**              | flutter_map (OpenStreetMap) | Không cần API key           |
 | **Realtime**          | socket_io_client        | Tracking shipper            |
 | **Push Notification** | firebase_messaging      | FCM                         |
 | **Local Storage**     | hive                    | Fast, type-safe             |

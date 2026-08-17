@@ -676,7 +676,7 @@ Reviews             → id, order_id, customer_id, restaurant_rating, shipper_ra
 | ------------------ | ---------------------------------------- |
 | Framework          | **Flutter** (code 1 lần → Android + iOS) |
 | State Management   | **Riverpod**                             |
-| Maps               | **google_maps_flutter**                  |
+| Maps               | **flutter_map** (OpenStreetMap — không cần API key)  |
 | Real-time tracking | **Socket.IO** client                     |
 | HTTP               | **Dio**                                  |
 | Push Notification  | **Firebase Cloud Messaging**             |

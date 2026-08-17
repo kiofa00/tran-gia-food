@@ -139,7 +139,8 @@ dependencies:
   # App-specific dependencies
   go_router: ^13.0.0
   flutter_riverpod: ^2.5.0
-  google_maps_flutter: ^2.6.0
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
   firebase_messaging: ^14.9.0
   easy_localization: ^3.0.7
 ```

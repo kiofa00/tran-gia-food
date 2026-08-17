@@ -3,6 +3,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { OrderStatus, OrderType, PaymentMethod, User } from '@prisma/client';
 
+import { DeliveryGateway } from '../../gateways/delivery.gateway';
 import { PrismaService } from '../../prisma/prisma.service';
 import { OrdersService } from './orders.service';
 
@@ -29,6 +30,7 @@ describe('OrdersService', () => {
         OrdersService,
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: EventEmitter2, useValue: mockEventEmitter },
+        { provide: DeliveryGateway, useValue: { emitOrderStatusUpdate: jest.fn(), emitNewOrderAvailable: jest.fn() } },
       ],
     }).compile();
 

@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:shared_ui/shared_ui.dart';
 import '../../../core/providers/api_client_provider.dart';
 
@@ -30,8 +31,7 @@ class DeliveryNavigationScreen extends ConsumerStatefulWidget {
 
 class _DeliveryNavigationScreenState
     extends ConsumerState<DeliveryNavigationScreen> {
-  // ignore: unused_field
-  GoogleMapController? _mapController;
+  final _mapController = MapController();
   String _currentStatus = '';
 
   @override
@@ -41,7 +41,7 @@ class _DeliveryNavigationScreenState
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Giao Hàng #${widget.orderId.length > 6 ? widget.orderId.substring(0, 6) : widget.orderId}',
+          'Giao Hang #${widget.orderId.length > 6 ? widget.orderId.substring(0, 6) : widget.orderId}',
           style: const TextStyle(fontWeight: AppFontWeight.bold),
         ),
         leading: IconButton(
@@ -51,12 +51,15 @@ class _DeliveryNavigationScreenState
       ),
       body: orderAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Lỗi: ${e.toString()}')),
+        error: (e, _) => Center(child: Text('Loi: ${e.toString()}')),
         data: (order) => _NavigationBody(
           order: order,
-          currentStatus: _currentStatus.isEmpty ? (order['status'] as String? ?? '') : _currentStatus,
-          onStatusUpdate: (status) => _updateOrderStatus(order['id'] as String, status),
-          onMapCreated: (controller) => _mapController = controller,
+          mapController: _mapController,
+          currentStatus: _currentStatus.isEmpty
+              ? (order['status'] as String? ?? '')
+              : _currentStatus,
+          onStatusUpdate: (status) =>
+              _updateOrderStatus(order['id'] as String, status),
         ),
       ),
     );
@@ -83,17 +86,17 @@ class _DeliveryNavigationScreenState
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi: ${e.toString()}')),
+        SnackBar(content: Text('Loi: ${e.toString()}')),
       );
     }
   }
 
   String _statusMessage(String status) => switch (status) {
-    'picking_up' => 'Đang di chuyển đến quán',
-    'delivering' => 'Đã lấy hàng, đang giao cho khách',
-    'delivered' => 'Đã giao hàng thành công!',
-    _ => 'Đã cập nhật trạng thái',
-  };
+        'picking_up' => 'Dang di chuyen den quan',
+        'delivering' => 'Da lay hang, dang giao cho khach',
+        'delivered' => 'Da giao hang thanh cong!',
+        _ => 'Da cap nhat trang thai',
+      };
 }
 
 // ---------------------------------------------------------------------------
@@ -104,13 +107,13 @@ class _NavigationBody extends StatelessWidget {
   final Map<String, dynamic> order;
   final String currentStatus;
   final ValueChanged<String> onStatusUpdate;
-  final void Function(GoogleMapController) onMapCreated;
+  final MapController mapController;
 
   const _NavigationBody({
     required this.order,
     required this.currentStatus,
     required this.onStatusUpdate,
-    required this.onMapCreated,
+    required this.mapController,
   });
 
   @override
@@ -121,42 +124,51 @@ class _NavigationBody extends StatelessWidget {
     final delivLat = (order['deliveryLat'] as num? ?? 10.7700).toDouble();
     final delivLng = (order['deliveryLng'] as num? ?? 106.6900).toDouble();
 
-    final markers = {
-      Marker(
-        markerId: const MarkerId('restaurant'),
-        position: LatLng(restLat, restLng),
-        infoWindow: InfoWindow(title: restaurant['name'] as String? ?? 'Quán'),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
-      ),
-      Marker(
-        markerId: const MarkerId('customer'),
-        position: LatLng(delivLat, delivLng),
-        infoWindow: const InfoWindow(title: 'Địa chỉ khách'),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-      ),
-    };
+    final centerLat = currentStatus == 'delivering' ? delivLat : restLat;
+    final centerLng = currentStatus == 'delivering' ? delivLng : restLng;
 
     return Column(
       children: [
-        // Google Map
         Expanded(
           flex: 6,
-          child: GoogleMap(
-            onMapCreated: onMapCreated,
-            initialCameraPosition: CameraPosition(
-              target: currentStatus == 'delivering'
-                  ? LatLng(delivLat, delivLng)
-                  : LatLng(restLat, restLng),
-              zoom: 15,
+          child: FlutterMap(
+            mapController: mapController,
+            options: MapOptions(
+              initialCenter: LatLng(centerLat, centerLng),
+              initialZoom: 15,
             ),
-            markers: markers,
-            myLocationEnabled: true,
-            myLocationButtonEnabled: true,
-            mapType: MapType.normal,
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.trangia.shipper',
+              ),
+              MarkerLayer(
+                markers: [
+                  Marker(
+                    point: LatLng(restLat, restLng),
+                    width: 44,
+                    height: 44,
+                    child: _MapPin(
+                      icon: Iconsax.shop,
+                      color: AppColors.warning,
+                      tooltip: restaurant['name'] as String? ?? 'Quan',
+                    ),
+                  ),
+                  Marker(
+                    point: LatLng(delivLat, delivLng),
+                    width: 44,
+                    height: 44,
+                    child: _MapPin(
+                      icon: Iconsax.location5,
+                      color: AppColors.success,
+                      tooltip: 'Dia chi khach',
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
-
-        // Bottom status panel
         Expanded(
           flex: 4,
           child: Container(
@@ -170,11 +182,11 @@ class _NavigationBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Status indicator
                   Row(
                     children: [
                       Container(
-                        width: 12, height: 12,
+                        width: 12,
+                        height: 12,
                         decoration: BoxDecoration(
                           color: _statusColor(currentStatus),
                           shape: BoxShape.circle,
@@ -183,39 +195,41 @@ class _NavigationBody extends StatelessWidget {
                       const SizedBox(width: 8),
                       Text(
                         _statusLabel(currentStatus),
-                        style: const TextStyle(fontSize: AppFontSize.title, fontWeight: AppFontWeight.bold),
+                        style: const TextStyle(
+                          fontSize: AppFontSize.title,
+                          fontWeight: AppFontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
-
-                  // Destination info
                   Text(
                     currentStatus == 'delivering'
-                        ? 'Giao đến: ${order['deliveryAddress'] ?? ''}'
-                        : 'Đến lấy tại: ${restaurant['address'] ?? ''}',
-                    style: const TextStyle(fontSize: AppFontSize.sm, color: AppColors.textSecondaryLight),
+                        ? 'Giao den: ${order['deliveryAddress'] ?? ''}'
+                        : 'Den lay tai: ${restaurant['address'] ?? ''}',
+                    style: const TextStyle(
+                      fontSize: AppFontSize.sm,
+                      color: AppColors.textSecondaryLight,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 16),
-
-                  // Action button
                   if (currentStatus == 'confirmed' || currentStatus == 'pending')
                     AppButton(
-                      text: 'Xác Nhận Đang Đến Lấy Hàng',
+                      text: 'Xac Nhan Dang Den Lay Hang',
                       icon: Iconsax.shop,
                       onPressed: () => onStatusUpdate('picking_up'),
                     )
                   else if (currentStatus == 'picking_up')
                     AppButton(
-                      text: 'Đã Lấy Hàng — Bắt Đầu Giao',
+                      text: 'Da Lay Hang - Bat Dau Giao',
                       icon: Iconsax.truck_fast,
                       onPressed: () => onStatusUpdate('delivering'),
                     )
                   else if (currentStatus == 'delivering')
                     AppButton(
-                      text: 'Xác Nhận Đã Giao Hàng ✅',
+                      text: 'Xac Nhan Da Giao Hang',
                       icon: Iconsax.tick_circle,
                       onPressed: () => onStatusUpdate('delivered'),
                     )
@@ -232,7 +246,13 @@ class _NavigationBody extends StatelessWidget {
                         children: [
                           Icon(Iconsax.tick_circle, color: AppColors.success),
                           SizedBox(width: 8),
-                          Text('Đơn hàng đã hoàn thành', style: TextStyle(color: AppColors.success, fontWeight: AppFontWeight.bold)),
+                          Text(
+                            'Don hang da hoan thanh',
+                            style: TextStyle(
+                              color: AppColors.success,
+                              fontWeight: AppFontWeight.bold,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -246,17 +266,50 @@ class _NavigationBody extends StatelessWidget {
   }
 
   Color _statusColor(String s) => switch (s) {
-    'picking_up' => AppColors.warning,
-    'delivering' => AppColors.primary,
-    'delivered' => AppColors.success,
-    _ => AppColors.textSecondaryLight,
-  };
+        'picking_up' => AppColors.warning,
+        'delivering' => AppColors.primary,
+        'delivered' => AppColors.success,
+        _ => AppColors.textSecondaryLight,
+      };
 
   String _statusLabel(String s) => switch (s) {
-    'confirmed' => 'Đơn đã xác nhận — Di chuyển đến quán',
-    'picking_up' => 'Đang đến lấy hàng',
-    'delivering' => 'Đang giao hàng cho khách',
-    'delivered' => 'Đã giao xong',
-    _ => 'Đang xử lý...',
-  };
+        'confirmed' => 'Don da xac nhan - Di chuyen den quan',
+        'picking_up' => 'Dang den lay hang',
+        'delivering' => 'Dang giao hang cho khach',
+        'delivered' => 'Da giao xong',
+        _ => 'Dang xu ly...',
+      };
+}
+
+class _MapPin extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String tooltip;
+
+  const _MapPin({
+    required this.icon,
+    required this.color,
+    required this.tooltip,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Container(
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.4),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Icon(icon, color: Colors.white, size: 22),
+      ),
+    );
+  }
 }
