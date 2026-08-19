@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
-import { App, Card, Modal, Space, Typography } from 'antd';
+import { App, Button, Card, Modal, Space, Typography } from 'antd';
 
 import {
   DataTable,
@@ -17,6 +17,7 @@ import {
   useRejectPayoutMutation,
 } from '@/components';
 import { PAYOUT_STATUS_FILTER_OPTIONS } from '@/shared-config';
+import { convertToCsv, downloadCsv } from '@/utils';
 
 const { Text } = Typography;
 
@@ -89,6 +90,31 @@ export default function PayoutsManagementPage() {
     [rejectMutation, message],
   );
 
+  const handleExportCsv = useCallback(() => {
+    if (payouts.length === 0) {
+      message.warning('Không có dữ liệu để xuất file');
+
+      return;
+    }
+
+    const csvContent = convertToCsv(payouts, [
+      { header: 'Mã Yêu Cầu', key: 'id' },
+      { header: 'Đối Tác / Quán', key: 'restaurantName' },
+      {
+        header: 'Số Tiền (VNĐ)',
+        key: (p) => p.amount,
+      },
+      { header: 'Trạng Thái', key: 'status' },
+      { header: 'Kỳ Thanh Toán', key: 'period' },
+      { header: 'Ngày Tạo', key: 'createdAt' },
+    ]);
+
+    const filename = `sao_ke_giai_ngan_${new Date().toISOString().slice(0, 10)}.csv`;
+
+    downloadCsv(csvContent, filename);
+    message.success(`Đã xuất ${payouts.length} bản ghi sao kê ra file CSV`);
+  }, [payouts, message]);
+
   const columns = useMemo(
     () => getPayoutColumns({ onProcess: handleProcess, onReject: handleReject }),
     [handleProcess, handleReject],
@@ -139,15 +165,25 @@ export default function PayoutsManagementPage() {
 
         <Card variant="borderless" className="rounded-xl shadow-xs">
           <Space direction="vertical" className="w-full" size="middle">
-            <SearchFilterBox
-              searchPlaceholder="Tìm theo tên nhà hàng..."
-              searchValue={search}
-              onSearchChange={setSearch}
-              filterLabel="Lọc Trạng Thái:"
-              filterValue={statusFilter}
-              onFilterChange={setStatusFilter}
-              filterOptions={PAYOUT_STATUS_FILTER_OPTIONS}
-            />
+            <div className="flex flex-wrap justify-between items-center gap-4">
+              <div className="flex-1 min-w-[300px]">
+                <SearchFilterBox
+                  searchPlaceholder="Tìm theo tên nhà hàng..."
+                  searchValue={search}
+                  onSearchChange={setSearch}
+                  filterLabel="Lọc Trạng Thái:"
+                  filterValue={statusFilter}
+                  onFilterChange={setStatusFilter}
+                  filterOptions={PAYOUT_STATUS_FILTER_OPTIONS}
+                />
+              </div>
+              <Button
+                onClick={handleExportCsv}
+                className="!bg-orange-500 !text-white font-medium hover:!bg-orange-600 border-none shadow-xs"
+              >
+                📥 Xuất Báo Cáo Sao Kê (CSV)
+              </Button>
+            </div>
 
             <DataTable<PayoutRecord>
               rowKey="id"

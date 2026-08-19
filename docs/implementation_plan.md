@@ -672,16 +672,16 @@ Reviews             → id, order_id, customer_id, restaurant_rating, shipper_ra
 
 ### Mobile Apps (3 app riêng biệt — Android + iOS song song)
 
-| Layer              | Tech                                     |
-| ------------------ | ---------------------------------------- |
-| Framework          | **Flutter** (code 1 lần → Android + iOS) |
-| State Management   | **Riverpod**                             |
-| Maps               | **flutter_map** (OpenStreetMap — không cần API key)  |
-| Real-time tracking | **Socket.IO** client                     |
-| HTTP               | **Dio**                                  |
-| Push Notification  | **Firebase Cloud Messaging**             |
-| Local Storage      | **Hive**                                 |
-| eKYC               | SDK của VNPT eKYC / FPT.AI               |
+| Layer              | Tech                                                |
+| ------------------ | --------------------------------------------------- |
+| Framework          | **Flutter** (code 1 lần → Android + iOS)            |
+| State Management   | **Riverpod**                                        |
+| Maps               | **flutter_map** (OpenStreetMap — không cần API key) |
+| Real-time tracking | **Socket.IO** client                                |
+| HTTP               | **Dio**                                             |
+| Push Notification  | **Firebase Cloud Messaging**                        |
+| Local Storage      | **Hive**                                            |
+| eKYC               | SDK của VNPT eKYC / FPT.AI                          |
 
 ### Backend
 

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
@@ -285,6 +285,13 @@ class _SettingsBody extends StatelessWidget {
         const Text('Quản Lý Nhanh', style: TextStyle(fontSize: AppFontSize.title, fontWeight: AppFontWeight.bold)),
         const SizedBox(height: 12),
         _QuickNavTile(
+          icon: Iconsax.document_text,
+          title: 'Hồ Sơ eKYC Đối Tác',
+          subtitle: 'Xác minh CCCD & Giấy phép ATTP / ĐKKD',
+          onTap: () => context.push('/kyc'),
+        ),
+        const SizedBox(height: 8),
+        _QuickNavTile(
           icon: Iconsax.clock,
           title: 'Giờ Mở Cửa Chi Tiết',
           subtitle: 'Chỉnh lịch theo từng ngày trong tuần',
@@ -296,6 +303,20 @@ class _SettingsBody extends StatelessWidget {
           title: 'Voucher Của Quán',
           subtitle: 'Tạo và quản lý mã giảm giá riêng',
           onTap: () => context.push('/vouchers'),
+        ),
+        const SizedBox(height: 24),
+
+        OutlinedButton.icon(
+          icon: const Icon(Iconsax.logout, color: AppColors.error),
+          label: const Text('Đăng Xuất Tài Khoản Quán', style: TextStyle(color: AppColors.error, fontWeight: AppFontWeight.bold)),
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: AppColors.error),
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(AppRadius.sm)),
+          ),
+          onPressed: () {
+            context.go('/login');
+          },
         ),
         const SizedBox(height: 32),
       ],

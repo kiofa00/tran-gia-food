@@ -18,9 +18,13 @@ async function bootstrap() {
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
       const allowedOrigins = [
+        'http://localhost:8080',
+        'http://localhost:6000',
         'http://localhost:3001',
         'http://localhost:3000',
         'http://localhost:1337',
+        'http://127.0.0.1:8080',
+        'http://127.0.0.1:6000',
         'http://127.0.0.1:3001',
         'http://127.0.0.1:3000',
         'http://127.0.0.1:1337',

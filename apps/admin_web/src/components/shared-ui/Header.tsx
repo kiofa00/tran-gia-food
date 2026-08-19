@@ -12,6 +12,7 @@ import {
   CheckOutlined,
   DashboardOutlined,
   DollarOutlined,
+  DownOutlined,
   FileTextOutlined,
   GlobalOutlined,
   LogoutOutlined,
@@ -31,13 +32,13 @@ import { Avatar, Button, Divider, Drawer, Dropdown, Layout, Menu, Space, Typogra
 import { useAuth } from '@/hooks/useAuth';
 import { TranslationKey, useTranslation } from '@/providers/LanguageProvider';
 import { useTheme } from '@/providers/ThemeProvider';
-import { ADMIN_NAV_LINKS, ADMIN_ROUTES } from '@/shared-config';
+import { ADMIN_NAV_GROUPS, ADMIN_ROUTES, IconName } from '@/shared-config';
 import { cn } from '@/utils/cn';
 
 const { Header: AntHeader } = Layout;
 const { Title, Text } = Typography;
 
-/** Tailwind class để hover icon button trên nền orange giống màu active */
+/** Tailwind class để hover icon button trên nền orange */
 const ICON_BTN_CLS = '!text-white hover:!bg-white/20 rounded-lg transition-colors duration-150';
 
 interface HeaderProps {
@@ -72,7 +73,7 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
     [t, logout],
   );
 
-  const iconMap = useMemo(
+  const iconMap = useMemo<Record<IconName, React.ReactNode>>(
     () => ({
       DashboardOutlined: <DashboardOutlined />,
       CarOutlined: <CarOutlined />,
@@ -105,16 +106,38 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
     [availableLanguages, language, setLanguage],
   );
 
-  const navLinks = useMemo(
+  // Grouped Navigation with i18n
+  const navGroups = useMemo(
     () =>
-      ADMIN_NAV_LINKS.map((link) => {
-        const navKey =
-          `nav.${link.key === '/' ? 'dashboard' : link.key.replace('/', '')}` as TranslationKey;
+      ADMIN_NAV_GROUPS.map((group) => {
+        const groupKey = `nav.${group.key}` as TranslationKey;
+        const icon = group.iconName ? iconMap[group.iconName] : undefined;
+
+        if (group.children) {
+          const children = group.children.map((child) => {
+            const childNavKey =
+              `nav.${child.key === '/' ? 'dashboard' : child.key.replace('/', '')}` as TranslationKey;
+
+            return {
+              key: child.key,
+              label: t(childNavKey, child.label),
+              icon: iconMap[child.iconName],
+            };
+          });
+
+          return {
+            key: group.key,
+            label: t(groupKey, group.label),
+            icon,
+            children,
+          };
+        }
 
         return {
-          key: link.key,
-          label: t(navKey, link.label),
-          icon: iconMap[link.iconName],
+          key: group.key,
+          label: t(groupKey, group.label),
+          icon,
+          href: group.href || '/',
         };
       }),
     [t, iconMap],
@@ -124,37 +147,93 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
     <>
       <AntHeader
         data-testid="admin-header"
-        className="!bg-orange-500 !px-0 shadow-md h-16 sticky top-0 z-50 border-b border-orange-600"
+        className="!bg-orange-500 !px-4 lg:!px-8 shadow-md h-16 sticky top-0 z-50 border-b border-orange-600"
       >
-        <div className="page-container h-full flex items-center justify-between">
-          {/* Left: Brand + Desktop Nav */}
-          <div className="flex items-center">
-            <Link href={ADMIN_ROUTES.HOME} prefetch={true} className="no-underline">
+        <div className="max-w-7xl mx-auto h-full flex items-center justify-between gap-4">
+          {/* Left: Brand Logo + Desktop Nav */}
+          <div className="flex items-center gap-6 shrink-0">
+            <Link
+              href={ADMIN_ROUTES.HOME}
+              prefetch={true}
+              className="no-underline flex items-center shrink-0"
+            >
               <Title
                 data-testid="header-title"
                 level={4}
-                className="!m-0 !text-white font-extrabold tracking-tight"
+                className="!m-0 !text-white font-black tracking-tight whitespace-nowrap select-none hover:opacity-90 transition-opacity"
               >
                 🍜 Tran Gia Food
               </Title>
             </Link>
 
-            {/* Desktop Nav Links */}
-            <nav className="hidden lg:flex gap-2 ml-6">
-              {navLinks.map((link) => {
-                const isActive = pathname === link.key;
+            {/* Desktop Grouped Navigation Links */}
+            <nav className="hidden lg:flex items-center gap-1.5">
+              {navGroups.map((group) => {
+                if (group.children) {
+                  const isChildActive = group.children.some((c) => pathname === c.key);
+
+                  const dropdownItems = group.children.map((child) => ({
+                    key: child.key,
+                    icon: child.icon,
+                    label: (
+                      <Link
+                        href={child.key}
+                        prefetch={true}
+                        className={cn(
+                          'block px-1 py-0.5 no-underline transition-colors',
+                          pathname === child.key
+                            ? 'text-orange-600 font-bold'
+                            : 'text-gray-700 hover:text-orange-500 font-medium',
+                        )}
+                      >
+                        {child.label}
+                      </Link>
+                    ),
+                    className:
+                      pathname === child.key ? '!bg-orange-50/80 rounded-md' : 'rounded-md',
+                  }));
+
+                  return (
+                    <Dropdown
+                      key={group.key}
+                      menu={{ items: dropdownItems }}
+                      placement="bottomLeft"
+                      arrow
+                    >
+                      <Button
+                        type="text"
+                        className={cn(
+                          '!text-white border-none rounded-lg transition-all duration-150 text-sm font-medium flex items-center gap-1.5 px-3 py-1.5 h-auto',
+                          isChildActive ? '!bg-white/25 font-bold shadow-xs' : 'hover:!bg-white/15',
+                        )}
+                      >
+                        {group.icon}
+                        <span>{group.label}</span>
+                        <DownOutlined
+                          className={cn(
+                            'text-[10px] ml-0.5 transition-transform duration-200',
+                            isChildActive ? 'opacity-100 font-bold' : 'opacity-70',
+                          )}
+                        />
+                      </Button>
+                    </Dropdown>
+                  );
+                }
+
+                // Direct top-level button
+                const isActive = pathname === group.href;
 
                 return (
-                  <Link key={link.key} href={link.key} prefetch={true} className="no-underline">
+                  <Link key={group.key} href={group.href!} prefetch={true} className="no-underline">
                     <Button
                       type="text"
-                      icon={link.icon}
+                      icon={group.icon}
                       className={cn(
-                        '!text-white border-none rounded-lg transition-colors duration-150',
-                        isActive ? '!bg-white/25 font-semibold' : 'hover:!bg-white/15 font-medium',
+                        '!text-white border-none rounded-lg transition-all duration-150 text-sm font-medium px-3 py-1.5 h-auto flex items-center gap-1.5',
+                        isActive ? '!bg-white/25 font-bold shadow-xs' : 'hover:!bg-white/15',
                       )}
                     >
-                      {link.label}
+                      {group.label}
                     </Button>
                   </Link>
                 );
@@ -162,9 +241,9 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
             </nav>
           </div>
 
-          {/* Right: Controls */}
-          <div className="flex items-center gap-1">
-            {/* Icon buttons — desktop only */}
+          {/* Right: Controls & User Profile */}
+          <div className="flex items-center gap-1 shrink-0">
+            {/* Desktop Actions */}
             <div className="hidden lg:flex items-center gap-1">
               <Button
                 type="text"
@@ -192,17 +271,25 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
               />
             </div>
 
-            {/* User dropdown — desktop only */}
+            {/* User Dropdown */}
             {userName && (
-              <div className="hidden lg:block ml-1">
+              <div className="hidden lg:block ml-2">
                 <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
-                  <Space className={cn('cursor-pointer px-2 py-1 rounded-lg', ICON_BTN_CLS)}>
+                  <Space
+                    className={cn(
+                      'cursor-pointer px-2.5 py-1 rounded-lg select-none',
+                      ICON_BTN_CLS,
+                    )}
+                  >
                     <Avatar
-                      className="!bg-white !text-orange-500 font-bold"
+                      className="!bg-white !text-orange-500 font-bold shadow-xs"
                       size="small"
                       icon={<UserOutlined />}
                     />
-                    <Text data-testid="user-greeting" className="!text-white font-semibold text-sm">
+                    <Text
+                      data-testid="user-greeting"
+                      className="!text-white font-semibold text-sm whitespace-nowrap"
+                    >
                       {userName}
                     </Text>
                   </Space>
@@ -210,7 +297,7 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
               </div>
             )}
 
-            {/* Hamburger — mobile only */}
+            {/* Mobile Hamburger Menu */}
             <div className="lg:hidden">
               <Button
                 type="text"
@@ -224,7 +311,7 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
         </div>
       </AntHeader>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer Navigation */}
       <Drawer
         title={
           <Space>
@@ -242,21 +329,41 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
         placement="right"
         onClose={() => setDrawerOpen(false)}
         open={drawerOpen}
-        width={280}
+        width={300}
       >
         <Menu
           mode="inline"
           selectedKeys={[pathname]}
+          defaultOpenKeys={['operations', 'finance']}
           className="!border-none"
-          items={navLinks.map((link) => ({
-            key: link.key,
-            icon: link.icon,
-            label: (
-              <Link href={link.key} onClick={() => setDrawerOpen(false)}>
-                {link.label}
-              </Link>
-            ),
-          }))}
+          items={navGroups.map((group) => {
+            if (group.children) {
+              return {
+                key: group.key,
+                icon: group.icon,
+                label: <span className="font-semibold text-gray-900">{group.label}</span>,
+                children: group.children.map((child) => ({
+                  key: child.key,
+                  icon: child.icon,
+                  label: (
+                    <Link href={child.key} onClick={() => setDrawerOpen(false)}>
+                      {child.label}
+                    </Link>
+                  ),
+                })),
+              };
+            }
+
+            return {
+              key: group.href!,
+              icon: group.icon,
+              label: (
+                <Link href={group.href!} onClick={() => setDrawerOpen(false)}>
+                  {group.label}
+                </Link>
+              ),
+            };
+          })}
         />
 
         <Divider className="my-4" />

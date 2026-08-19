@@ -32,6 +32,14 @@ export class PaymentsController {
     return this.paymentsService.handleVNPayWebhook(dto);
   }
 
+  @Post(':orderId/refund')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Xử lý hoàn tiền cho đơn hàng online khi hủy đơn' })
+  refundPayment(@Param('orderId') orderId: string, @Body('reason') reason?: string) {
+    return this.paymentsService.refundPayment(orderId, reason);
+  }
+
   @Get('status/:orderId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')

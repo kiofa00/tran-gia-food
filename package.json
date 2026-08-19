@@ -9,10 +9,10 @@
     "pnpm": ">=11.20.0"
   },
   "scripts": {
-    "dev": "pnpm -r --parallel --if-present run dev",
-    "dev:backend": "pnpm --filter=backend run start:dev",
+    "dev": "node scripts/ensure-services.js && pnpm -r --parallel --if-present run dev",
+    "dev:backend": "node scripts/ensure-services.js && pnpm --filter=backend run start:dev",
     "dev:admin": "pnpm --filter=admin_web run dev",
-    "dev:cms": "pnpm --filter=cms run dev",
+    "dev:cms": "node scripts/ensure-services.js && pnpm --filter=cms run dev",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "podman:up": "podman start trangia_postgres trangia_redis",

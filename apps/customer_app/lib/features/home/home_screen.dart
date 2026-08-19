@@ -38,9 +38,14 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 20),
 
               // Search Bar
-              const AppTextField(
-                hintText: 'Tìm món ăn, trà sữa, phở bò...',
-                prefixIcon: Iconsax.search_normal_1,
+              GestureDetector(
+                onTap: () => context.push('/search'),
+                child: AbsorbPointer(
+                  child: const AppTextField(
+                    hintText: 'Tìm món ăn, trà sữa, phở bò...',
+                    prefixIcon: Iconsax.search_normal_1,
+                  ),
+                ),
               ),
               const SizedBox(height: 24),
 

@@ -28,6 +28,13 @@ yarn.lock
 *.min.css
 *.map
 
+# Next.js generated
+**/next-env.d.ts
+
 # Strapi CMS generated
 apps/cms/.cache
+apps/cms/.strapi
+apps/cms/.strapi-updater.json
+apps/cms/build
+apps/cms/dist
 apps/cms/public/uploads

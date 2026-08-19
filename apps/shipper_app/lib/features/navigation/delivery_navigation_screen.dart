@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax/iconsax.dart';
@@ -41,7 +41,7 @@ class _DeliveryNavigationScreenState
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Giao Hang #${widget.orderId.length > 6 ? widget.orderId.substring(0, 6) : widget.orderId}',
+          'Giao Hàng #${widget.orderId.length > 6 ? widget.orderId.substring(0, 6) : widget.orderId}',
           style: const TextStyle(fontWeight: AppFontWeight.bold),
         ),
         leading: IconButton(
@@ -51,24 +51,49 @@ class _DeliveryNavigationScreenState
       ),
       body: orderAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Loi: ${e.toString()}')),
+        error: (e, _) => Center(child: Text('Lỗi: ${e.toString()}')),
         data: (order) => _NavigationBody(
           order: order,
           mapController: _mapController,
           currentStatus: _currentStatus.isEmpty
               ? (order['status'] as String? ?? '')
               : _currentStatus,
-          onStatusUpdate: (status) =>
-              _updateOrderStatus(order['id'] as String, status),
+          onStatusUpdate: (status) {
+            if (status == 'delivered') {
+              _showProofOfDeliveryDialog(order['id'] as String);
+            } else {
+              _updateOrderStatus(order['id'] as String, status);
+            }
+          },
         ),
       ),
     );
   }
 
-  Future<void> _updateOrderStatus(String orderId, String status) async {
+  void _showProofOfDeliveryDialog(String orderId) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: AppRadius.xl),
+      ),
+      builder: (ctx) => _ProofOfDeliverySheet(
+        orderId: orderId,
+        onConfirm: (photoAttached, note) {
+          Navigator.of(ctx).pop();
+          _updateOrderStatus(orderId, 'delivered', podNote: note);
+        },
+      ),
+    );
+  }
+
+  Future<void> _updateOrderStatus(String orderId, String status, {String? podNote}) async {
     try {
       final api = ref.read(apiClientProvider);
-      await api.patch('/orders/$orderId/status', {'status': status});
+      await api.patch('/orders/$orderId/status', {
+        'status': status,
+        'podNote': ?podNote,
+      });
       setState(() => _currentStatus = status);
       ref.invalidate(orderDetailProvider(widget.orderId));
 
@@ -86,17 +111,173 @@ class _DeliveryNavigationScreenState
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Loi: ${e.toString()}')),
+        SnackBar(content: Text('Lỗi: ${e.toString()}')),
       );
     }
   }
 
   String _statusMessage(String status) => switch (status) {
-        'picking_up' => 'Dang di chuyen den quan',
-        'delivering' => 'Da lay hang, dang giao cho khach',
-        'delivered' => 'Da giao hang thanh cong!',
-        _ => 'Da cap nhat trang thai',
+        'picking_up' => 'Đang di chuyển đến quán lấy hàng',
+        'delivering' => 'Đã lấy món, đang giao cho khách',
+        'delivered' => 'Đã giao hàng thành công!',
+        _ => 'Đã cập nhật trạng thái đơn',
       };
+}
+
+// ---------------------------------------------------------------------------
+// Proof of Delivery Sheet (POD)
+// ---------------------------------------------------------------------------
+
+class _ProofOfDeliverySheet extends StatefulWidget {
+  final String orderId;
+  final Function(bool photoAttached, String note) onConfirm;
+
+  const _ProofOfDeliverySheet({
+    required this.orderId,
+    required this.onConfirm,
+  });
+
+  @override
+  State<_ProofOfDeliverySheet> createState() => _ProofOfDeliverySheetState();
+}
+
+class _ProofOfDeliverySheetState extends State<_ProofOfDeliverySheet> {
+  bool _hasPhoto = true;
+  String _selectedNote = 'Giao tận tay khách hàng';
+  final _customNoteController = TextEditingController();
+
+  final List<String> _quickNotes = [
+    'Giao tận tay khách hàng',
+    'Để trước cửa nhà / Cổng',
+    'Gửi bàn lễ tân / Bảo vệ',
+    'Người thân nhận hộ',
+  ];
+
+  @override
+  void dispose() {
+    _customNoteController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 20,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.success.withValues(alpha: 0.1),
+                  borderRadius: const BorderRadius.all(AppRadius.sm),
+                ),
+                child: const Icon(Iconsax.camera5, color: AppColors.success, size: 24),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Bằng Chứng Giao Hàng (POD)',
+                style: TextStyle(
+                  fontSize: AppFontSize.lg,
+                  fontWeight: AppFontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Photo Upload Mock
+          GestureDetector(
+            onTap: () => setState(() => _hasPhoto = !_hasPhoto),
+            child: Container(
+              width: double.infinity,
+              height: 140,
+              decoration: BoxDecoration(
+                color: _hasPhoto
+                    ? AppColors.success.withValues(alpha: 0.08)
+                    : AppColors.surfaceAltLight,
+                borderRadius: const BorderRadius.all(AppRadius.md),
+                border: Border.all(
+                  color: _hasPhoto ? AppColors.success : AppColors.dividerLight,
+                  width: _hasPhoto ? 1.5 : 1.0,
+                ),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    _hasPhoto ? Iconsax.tick_circle5 : Iconsax.camera,
+                    color: _hasPhoto ? AppColors.success : AppColors.primary,
+                    size: 36,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _hasPhoto ? 'Ảnh gói hàng đã chụp ✓' : 'Chạm để chụp ảnh minh chứng gói hàng',
+                    style: TextStyle(
+                      fontSize: AppFontSize.sm,
+                      fontWeight: _hasPhoto ? AppFontWeight.bold : AppFontWeight.medium,
+                      color: _hasPhoto ? AppColors.success : AppColors.textPrimaryLight,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _hasPhoto ? 'Chạm để chụp lại' : 'Khuyến nghị chụp rõ số nhà hoặc vị trí đặt',
+                    style: const TextStyle(fontSize: AppFontSize.xs, color: AppColors.textSecondaryLight),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          const Text(
+            'Ghi chú giao hàng',
+            style: TextStyle(fontSize: AppFontSize.sm, fontWeight: AppFontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _quickNotes.map((note) {
+              final isSelected = _selectedNote == note;
+              return ChoiceChip(
+                label: Text(note),
+                selected: isSelected,
+                selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                backgroundColor: AppColors.surfaceAltLight,
+                labelStyle: TextStyle(
+                  fontSize: AppFontSize.xs,
+                  fontWeight: isSelected ? AppFontWeight.bold : AppFontWeight.medium,
+                  color: isSelected ? AppColors.primary : AppColors.textPrimaryLight,
+                ),
+                side: BorderSide(
+                  color: isSelected ? AppColors.primary : Colors.transparent,
+                ),
+                onSelected: (_) => setState(() => _selectedNote = note),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 24),
+
+          AppButton(
+            text: 'Hoàn Thành Đơn Hàng',
+            icon: Iconsax.tick_circle,
+            onPressed: () {
+              widget.onConfirm(_hasPhoto, _selectedNote);
+            },
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -151,7 +332,7 @@ class _NavigationBody extends StatelessWidget {
                     child: _MapPin(
                       icon: Iconsax.shop,
                       color: AppColors.warning,
-                      tooltip: restaurant['name'] as String? ?? 'Quan',
+                      tooltip: restaurant['name'] as String? ?? 'Quán',
                     ),
                   ),
                   Marker(
@@ -161,7 +342,7 @@ class _NavigationBody extends StatelessWidget {
                     child: _MapPin(
                       icon: Iconsax.location5,
                       color: AppColors.success,
-                      tooltip: 'Dia chi khach',
+                      tooltip: 'Địa chỉ khách',
                     ),
                   ),
                 ],
@@ -205,8 +386,8 @@ class _NavigationBody extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     currentStatus == 'delivering'
-                        ? 'Giao den: ${order['deliveryAddress'] ?? ''}'
-                        : 'Den lay tai: ${restaurant['address'] ?? ''}',
+                        ? 'Giao đến: ${order['deliveryAddress'] ?? ''}'
+                        : 'Đến lấy tại: ${restaurant['address'] ?? ''}',
                     style: const TextStyle(
                       fontSize: AppFontSize.sm,
                       color: AppColors.textSecondaryLight,
@@ -217,20 +398,20 @@ class _NavigationBody extends StatelessWidget {
                   const SizedBox(height: 16),
                   if (currentStatus == 'confirmed' || currentStatus == 'pending')
                     AppButton(
-                      text: 'Xac Nhan Dang Den Lay Hang',
+                      text: 'Xác Nhận Đang Đến Lấy Hàng',
                       icon: Iconsax.shop,
                       onPressed: () => onStatusUpdate('picking_up'),
                     )
                   else if (currentStatus == 'picking_up')
                     AppButton(
-                      text: 'Da Lay Hang - Bat Dau Giao',
+                      text: 'Đã Lấy Hàng - Bắt Đầu Giao',
                       icon: Iconsax.truck_fast,
                       onPressed: () => onStatusUpdate('delivering'),
                     )
                   else if (currentStatus == 'delivering')
                     AppButton(
-                      text: 'Xac Nhan Da Giao Hang',
-                      icon: Iconsax.tick_circle,
+                      text: 'Xác Nhận & Chụp Ảnh Giao Hàng',
+                      icon: Iconsax.camera,
                       onPressed: () => onStatusUpdate('delivered'),
                     )
                   else
@@ -247,7 +428,7 @@ class _NavigationBody extends StatelessWidget {
                           Icon(Iconsax.tick_circle, color: AppColors.success),
                           SizedBox(width: 8),
                           Text(
-                            'Don hang da hoan thanh',
+                            'Đơn hàng đã hoàn thành',
                             style: TextStyle(
                               color: AppColors.success,
                               fontWeight: AppFontWeight.bold,
@@ -273,11 +454,11 @@ class _NavigationBody extends StatelessWidget {
       };
 
   String _statusLabel(String s) => switch (s) {
-        'confirmed' => 'Don da xac nhan - Di chuyen den quan',
-        'picking_up' => 'Dang den lay hang',
-        'delivering' => 'Dang giao hang cho khach',
-        'delivered' => 'Da giao xong',
-        _ => 'Dang xu ly...',
+        'confirmed' => 'Đơn đã xác nhận - Di chuyển đến quán',
+        'picking_up' => 'Đang đến lấy hàng tại quán',
+        'delivering' => 'Đang giao hàng cho khách',
+        'delivered' => 'Đã giao hàng thành công',
+        _ => 'Đang xử lý...',
       };
 }
 

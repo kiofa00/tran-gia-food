@@ -250,12 +250,28 @@ class _AddMenuItemSheet extends ConsumerStatefulWidget {
 class _AddMenuItemSheetState extends ConsumerState<_AddMenuItemSheet> {
   final _nameController = TextEditingController();
   final _priceController = TextEditingController();
+  final _descController = TextEditingController();
+
+  bool _hasSizes = false;
+  bool _hasToppings = false;
   bool _isSaving = false;
+
+  final List<Map<String, dynamic>> _sizes = [
+    {'name': 'Size M (Chuẩn)', 'extraPrice': 0},
+    {'name': 'Size L (Lớn)', 'extraPrice': 10000},
+  ];
+
+  final List<Map<String, dynamic>> _toppings = [
+    {'name': 'Trân châu hoàng kim', 'price': 10000, 'selected': true},
+    {'name': 'Thịt bò thêm / Trứng ốp la', 'price': 15000, 'selected': false},
+    {'name': 'Phô mai sợi / Sốt bơ', 'price': 12000, 'selected': false},
+  ];
 
   @override
   void dispose() {
     _nameController.dispose();
     _priceController.dispose();
+    _descController.dispose();
     super.dispose();
   }
 
@@ -273,6 +289,13 @@ class _AddMenuItemSheetState extends ConsumerState<_AddMenuItemSheet> {
       await api.post('/menu/items', {
         'name': _nameController.text.trim(),
         'price': double.tryParse(_priceController.text.trim()) ?? 0,
+        'description': _descController.text.trim(),
+        'options': {
+          'hasSizes': _hasSizes,
+          'sizes': _hasSizes ? _sizes : [],
+          'hasToppings': _hasToppings,
+          'toppings': _hasToppings ? _toppings.where((t) => t['selected'] == true).toList() : [],
+        },
       });
       widget.onSaved();
     } catch (e) {
@@ -295,35 +318,128 @@ class _AddMenuItemSheetState extends ConsumerState<_AddMenuItemSheet> {
         top: 20,
         bottom: MediaQuery.of(context).viewInsets.bottom + 20,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Thêm Món Mới',
-            style: TextStyle(
-              fontSize: AppFontSize.xl,
-              fontWeight: AppFontWeight.bold,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Thêm Món & Tùy Chọn Mới',
+              style: TextStyle(
+                fontSize: AppFontSize.xl,
+                fontWeight: AppFontWeight.bold,
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-          AppTextField(
-            labelText: 'Tên món',
-            hintText: 'VD: Phở bò tái',
-            controller: _nameController,
-            prefixIcon: Iconsax.cup,
-          ),
-          const SizedBox(height: 12),
-          AppTextField(
-            labelText: 'Giá (đồng)',
-            hintText: 'VD: 55000',
-            controller: _priceController,
-            prefixIcon: Iconsax.money_change,
-            keyboardType: TextInputType.number,
-          ),
-          const SizedBox(height: 24),
-          AppButton(text: 'Lưu Món', isLoading: _isSaving, onPressed: _save),
-        ],
+            const SizedBox(height: 16),
+            AppTextField(
+              labelText: 'Tên món',
+              hintText: 'VD: Phở bò tái / Trà sữa Oolong',
+              controller: _nameController,
+              prefixIcon: Iconsax.cup,
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              labelText: 'Giá cơ bản (đồng)',
+              hintText: 'VD: 55000',
+              controller: _priceController,
+              prefixIcon: Iconsax.money_change,
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 16),
+
+            // Option Group: Size
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceAltLight,
+                borderRadius: const BorderRadius.all(AppRadius.md),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Kích cỡ (Size)',
+                        style: TextStyle(fontWeight: AppFontWeight.bold, fontSize: AppFontSize.sm),
+                      ),
+                      Switch(
+                        value: _hasSizes,
+                        activeThumbColor: AppColors.primary,
+                        onChanged: (v) => setState(() => _hasSizes = v),
+                      ),
+                    ],
+                  ),
+                  if (_hasSizes) ...[
+                    const Divider(),
+                    ..._sizes.map((s) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(s['name'] as String, style: const TextStyle(fontSize: AppFontSize.xs)),
+                              Text('+${(s['extraPrice'] as num).toInt()}đ',
+                                  style: const TextStyle(
+                                      fontSize: AppFontSize.xs,
+                                      fontWeight: AppFontWeight.bold,
+                                      color: AppColors.primary)),
+                            ],
+                          ),
+                        )),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Option Group: Topping
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceAltLight,
+                borderRadius: const BorderRadius.all(AppRadius.md),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Topping / Món Thêm',
+                        style: TextStyle(fontWeight: AppFontWeight.bold, fontSize: AppFontSize.sm),
+                      ),
+                      Switch(
+                        value: _hasToppings,
+                        activeThumbColor: AppColors.primary,
+                        onChanged: (v) => setState(() => _hasToppings = v),
+                      ),
+                    ],
+                  ),
+                  if (_hasToppings) ...[
+                    const Divider(),
+                    ..._toppings.map((t) => CheckboxListTile(
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(t['name'] as String, style: const TextStyle(fontSize: AppFontSize.xs)),
+                          subtitle: Text('+${(t['price'] as num).toInt()}đ',
+                              style: const TextStyle(
+                                  fontSize: AppFontSize.xs,
+                                  color: AppColors.primary,
+                                  fontWeight: AppFontWeight.bold)),
+                          value: t['selected'] as bool,
+                          onChanged: (val) => setState(() => t['selected'] = val ?? false),
+                        )),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            AppButton(text: 'Lưu Món Ăn', isLoading: _isSaving, onPressed: _save),
+          ],
+        ),
       ),
     );
   }

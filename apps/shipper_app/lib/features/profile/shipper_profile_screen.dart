@@ -148,7 +148,7 @@ class _ProfileBody extends ConsumerWidget {
             onPressed: () async {
               final api = ref.read(apiClientProvider);
               await api.clearToken();
-              if (context.mounted) context.go('/orders');
+              if (context.mounted) context.go('/login');
             },
           ),
         ),

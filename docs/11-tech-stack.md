@@ -2,20 +2,20 @@
 
 ## Mobile Apps (3 app riêng — Android + iOS)
 
-| Layer                 | Package / Tech          | Ghi chú                     |
-| --------------------- | ----------------------- | --------------------------- |
-| **Framework**         | Flutter (Dart)          | 1 codebase → Android + iOS  |
-| **State Management**  | flutter_riverpod        | Reactive, testable          |
-| **Navigation**        | go_router               | Declarative routing         |
-| **HTTP Client**       | dio                     | Interceptors, retry         |
+| Layer                 | Package / Tech              | Ghi chú                     |
+| --------------------- | --------------------------- | --------------------------- |
+| **Framework**         | Flutter (Dart)              | 1 codebase → Android + iOS  |
+| **State Management**  | flutter_riverpod            | Reactive, testable          |
+| **Navigation**        | go_router                   | Declarative routing         |
+| **HTTP Client**       | dio                         | Interceptors, retry         |
 | **Maps**              | flutter_map (OpenStreetMap) | Không cần API key           |
-| **Realtime**          | socket_io_client        | Tracking shipper            |
-| **Push Notification** | firebase_messaging      | FCM                         |
-| **Local Storage**     | hive                    | Fast, type-safe             |
-| **Auth**              | firebase_auth           | Google/Apple/Facebook login |
-| **eKYC**              | VNPT eKYC SDK / FPT.AI  | Shipper verification        |
-| **Chat & Call**       | stringee_flutter_plugin | In-app chat + masked call   |
-| **Payments**          | momo_payment / vnpay    | MoMo, VNPay                 |
+| **Realtime**          | socket_io_client            | Tracking shipper            |
+| **Push Notification** | firebase_messaging          | FCM                         |
+| **Local Storage**     | hive                        | Fast, type-safe             |
+| **Auth**              | firebase_auth               | Google/Apple/Facebook login |
+| **eKYC**              | VNPT eKYC SDK / FPT.AI      | Shipper verification        |
+| **Chat & Call**       | stringee_flutter_plugin     | In-app chat + masked call   |
+| **Payments**          | momo_payment / vnpay        | MoMo, VNPay                 |
 
 ### Shared Packages (Monorepo)
 

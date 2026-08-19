@@ -47,7 +47,10 @@ describe('ChatService', () => {
   describe('sendMessage', () => {
     it('should send message on active order', async () => {
       mockPrismaService.order.findUnique.mockResolvedValue(mockActiveOrder);
-      mockPrismaService.chatMessage.create.mockResolvedValue({ id: 'msg-1', createdAt: new Date() });
+      mockPrismaService.chatMessage.create.mockResolvedValue({
+        id: 'msg-1',
+        createdAt: new Date(),
+      });
 
       const result = await service.sendMessage(mockSender as User, {
         orderId: 'order-1',
@@ -108,7 +111,11 @@ describe('ChatService', () => {
 
     it('should default message type to text when not provided', async () => {
       mockPrismaService.order.findUnique.mockResolvedValue(mockActiveOrder);
-      mockPrismaService.chatMessage.create.mockResolvedValue({ id: 'msg-2', type: 'text', createdAt: new Date() });
+      mockPrismaService.chatMessage.create.mockResolvedValue({
+        id: 'msg-2',
+        type: 'text',
+        createdAt: new Date(),
+      });
 
       await service.sendMessage(mockSender as User, {
         orderId: 'order-1',

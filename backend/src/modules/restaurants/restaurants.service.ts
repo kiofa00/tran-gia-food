@@ -21,7 +21,23 @@ export class RestaurantsService {
       where: { key: 'system_radius_km' },
     });
     const systemRadius = parseFloat(sysConfig?.value ?? '10');
-    const effectiveRadius = Math.min(radiusKm, systemRadius);
+
+    // Check if currently peak hour (11:00-13:00 or 17:00-19:00)
+    const now = new Date();
+    const currentHour = now.getHours();
+    const isPeakHour =
+      (currentHour >= 11 && currentHour < 13) || (currentHour >= 17 && currentHour < 19);
+
+    let maxAllowedRadius = systemRadius;
+    if (isPeakHour) {
+      const peakConfig = await this.prisma.appConfig.findUnique({
+        where: { key: 'peak_radius_km' },
+      });
+      const peakRadius = parseFloat(peakConfig?.value ?? '7');
+      maxAllowedRadius = Math.min(systemRadius, peakRadius);
+    }
+
+    const effectiveRadius = Math.min(radiusKm, maxAllowedRadius);
 
     // Using Haversine formula in raw SQL for distance filtering
     const restaurants = await this.prisma.$queryRaw<Record<string, unknown>[]>`

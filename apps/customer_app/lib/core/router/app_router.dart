@@ -9,6 +9,7 @@ import '../../features/main/main_shell.dart';
 import '../../features/notifications/notification_screen.dart';
 import '../../features/restaurant/restaurant_detail_screen.dart';
 import '../../features/review/review_screen.dart';
+import '../../features/search/search_screen.dart';
 import '../../features/tracking/order_tracking_screen.dart';
 import '../../features/voucher/voucher_screen.dart';
 import '../../features/wallet/customer_wallet_screen.dart';
@@ -28,6 +29,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/main',
       builder: (context, state) => const MainShell(),
+    ),
+    GoRoute(
+      path: '/search',
+      builder: (context, state) => const SearchScreen(),
     ),
     GoRoute(
       path: '/restaurant/:id',

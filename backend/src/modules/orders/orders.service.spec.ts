@@ -30,7 +30,10 @@ describe('OrdersService', () => {
         OrdersService,
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: EventEmitter2, useValue: mockEventEmitter },
-        { provide: DeliveryGateway, useValue: { emitOrderStatusUpdate: jest.fn(), emitNewOrderAvailable: jest.fn() } },
+        {
+          provide: DeliveryGateway,
+          useValue: { emitOrderStatusUpdate: jest.fn(), emitNewOrderAvailable: jest.fn() },
+        },
       ],
     }).compile();
 

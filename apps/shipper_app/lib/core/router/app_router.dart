@@ -3,10 +3,20 @@ import '../../features/main/shipper_shell.dart';
 import '../../features/chat/shipper_chat_screen.dart';
 import '../../features/profile/shipper_ekyc_screen.dart';
 import '../../features/profile/penalty_history_screen.dart';
+import '../../features/auth/shipper_login_screen.dart';
+import '../../features/auth/shipper_register_screen.dart';
 
 final shipperRouter = GoRouter(
   initialLocation: '/orders',
   routes: [
+    GoRoute(
+      path: '/login',
+      builder: (c, s) => const ShipperLoginScreen(),
+    ),
+    GoRoute(
+      path: '/register',
+      builder: (c, s) => const ShipperRegisterScreen(),
+    ),
     ShellRoute(
       builder: (context, state, child) => ShipperShell(child: child),
       routes: [

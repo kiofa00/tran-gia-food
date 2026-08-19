@@ -112,9 +112,7 @@ export class DeliveryGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   /** Admin dashboard joins the admin room for global broadcasts */
   @SubscribeMessage('join-admin-room')
-  async handleJoinAdminRoom(
-    @ConnectedSocket() client: Socket,
-  ): Promise<{ event: string }> {
+  async handleJoinAdminRoom(@ConnectedSocket() client: Socket): Promise<{ event: string }> {
     try {
       await client.join(ADMIN_ROOM);
     } catch (error) {
@@ -220,9 +218,7 @@ export class DeliveryGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   /** Shipper toggles online/offline -- relay to admin dashboard */
   @SubscribeMessage('shipper-status-changed')
-  handleShipperStatusChanged(
-    @MessageBody() data: { shipperId: string; isActive: boolean },
-  ): void {
+  handleShipperStatusChanged(@MessageBody() data: { shipperId: string; isActive: boolean }): void {
     this.server.to(ADMIN_ROOM).emit('shipper-online-changed', {
       shipperId: data.shipperId,
       isActive: data.isActive,

@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PaymentMethod, PaymentStatus } from '@prisma/client';
 
 import { PrismaService } from '../../prisma/prisma.service';
@@ -117,6 +117,53 @@ export class PaymentsService {
     }
 
     return { RspCode: '00', Message: 'Confirm Success' };
+  }
+
+  async refundPayment(orderId: string, reason = 'Đơn hàng bị hủy') {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) throw new NotFoundException('Đơn hàng không tồn tại');
+
+    if (order.paymentMethod === PaymentMethod.cash) {
+      return { success: true, message: 'Đơn hàng COD không cần hoàn tiền qua cổng thanh toán' };
+    }
+
+    const payment = await this.prisma.payment.findUnique({ where: { orderId } });
+    if (!payment)
+      throw new NotFoundException('Không tìm thấy thông tin thanh toán cho đơn hàng này');
+
+    if (payment.status !== PaymentStatus.paid) {
+      throw new BadRequestException(
+        'Chỉ có thể hoàn tiền cho các giao dịch đã thanh toán thành công',
+      );
+    }
+
+    this.logger.log(
+      `Processing refund for order ${orderId}, amount: ${payment.amount}, reason: ${reason}`,
+    );
+
+    const updatedPayment = await this.prisma.payment.update({
+      where: { orderId },
+      data: {
+        status: PaymentStatus.refunded,
+        gatewayResponse: {
+          refundReason: reason,
+          refundedAt: new Date().toISOString(),
+          refundAmount: payment.amount,
+        },
+      },
+    });
+
+    await this.prisma.order.update({
+      where: { id: orderId },
+      data: { paymentStatus: PaymentStatus.refunded },
+    });
+
+    return {
+      success: true,
+      message: 'Hoàn tiền thành công',
+      refundAmount: updatedPayment.amount,
+      orderId,
+    };
   }
 
   async getPaymentStatus(orderId: string) {

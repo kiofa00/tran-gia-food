@@ -72,4 +72,36 @@ describe('PaymentsService', () => {
       });
     });
   });
+
+  describe('refundPayment', () => {
+    it('should refund successfully for paid online payment', async () => {
+      mockPrismaService.order.findUnique.mockResolvedValue({
+        id: 'order-1',
+        paymentMethod: PaymentMethod.momo,
+      });
+
+      mockPrismaService.payment.findUnique.mockResolvedValue({
+        id: 'pay-1',
+        orderId: 'order-1',
+        amount: 150000,
+        status: PaymentStatus.paid,
+      });
+
+      mockPrismaService.payment.update.mockResolvedValue({
+        id: 'pay-1',
+        amount: 150000,
+        status: PaymentStatus.refunded,
+      });
+
+      const result = await service.refundPayment('order-1', 'Khách đổi ý');
+
+      expect(result.success).toBe(true);
+      expect(result.refundAmount).toBe(150000);
+      expect(mockPrismaService.payment.update).toHaveBeenCalled();
+      expect(mockPrismaService.order.update).toHaveBeenCalledWith({
+        where: { id: 'order-1' },
+        data: { paymentStatus: PaymentStatus.refunded },
+      });
+    });
+  });
 });
