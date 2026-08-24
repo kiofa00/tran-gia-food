@@ -5,7 +5,7 @@ import React from 'react';
 import { Card } from 'antd';
 
 import { DataTable } from '@/components/shared-ui/DataTable';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 import { TopRestaurantItem } from '@/types';
 
 import { useTopRestaurantsColumns } from './TopRestaurantsColumns';
@@ -19,7 +19,7 @@ export const TopRestaurantsTable: React.FC<TopRestaurantsTableProps> = ({
   topRestaurants,
   loading,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useLocale();
   const columns = useTopRestaurantsColumns();
 
   return (

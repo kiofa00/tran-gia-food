@@ -4,7 +4,7 @@ import React from 'react';
 
 import { Divider, Layout, Space, Typography } from 'antd';
 
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 import { cn } from '@/utils/cn';
 
 const { Footer: AntFooter } = Layout;
@@ -15,7 +15,7 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ className }) => {
-  const { t } = useTranslation();
+  const { t } = useLocale();
 
   return (
     <AntFooter

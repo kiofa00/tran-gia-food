@@ -4,14 +4,32 @@ import {
   formatCurrency,
   formatDate,
   formatDistance,
+  formatThousands,
   mapKycStatus,
   mapOrderStatus,
   mapShipperStatus,
   mapVehicleType,
+  parseThousands,
   truncateText,
 } from './formatters';
 
 describe('formatters utility', () => {
+  it('should format numbers with comma thousand separators safely', () => {
+    expect(formatThousands(15000)).toBe('15,000');
+    expect(formatThousands('15000')).toBe('15,000');
+    expect(formatThousands(1000000)).toBe('1,000,000');
+    expect(formatThousands(0)).toBe('0');
+    expect(formatThousands('')).toBe('');
+    expect(formatThousands(undefined)).toBe('');
+  });
+
+  it('should parse formatted string with commas back to raw string', () => {
+    expect(parseThousands('15,000')).toBe('15000');
+    expect(parseThousands('1,000,000')).toBe('1000000');
+    expect(parseThousands('')).toBe('');
+    expect(parseThousands(undefined)).toBe('');
+  });
+
   it('should format currency correctly', () => {
     const formatted = formatCurrency(50000);
 

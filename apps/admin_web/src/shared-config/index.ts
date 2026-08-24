@@ -7,5 +7,6 @@ export * from './fleet.config';
 export * from './payouts.config';
 export * from './restaurants.config';
 export * from './routes.config';
+export * from './system-settings.config';
 export * from './users.config';
 export * from './vouchers.config';

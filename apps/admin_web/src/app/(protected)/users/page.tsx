@@ -16,14 +16,13 @@ import {
   useUpdateUserStatusMutation,
   useUsersQuery,
 } from '@/components';
-import { useUserFilterOptions } from '@/hooks';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale, useUserFilterOptions } from '@/hooks';
 
 const { Text } = Typography;
 
 export default function UsersManagementPage() {
   const { message } = App.useApp();
-  const { t } = useTranslation();
+  const { t } = useLocale();
 
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL');
@@ -99,14 +98,13 @@ export default function UsersManagementPage() {
   const columns = useMemo(
     () =>
       getUserColumns({
-        t,
         onViewDetail: (record) => {
           setSelectedUser(record);
           setDetailModalOpen(true);
         },
         onToggleStatus: handleToggleStatus,
       }),
-    [t, handleToggleStatus],
+    [handleToggleStatus],
   );
 
   return (

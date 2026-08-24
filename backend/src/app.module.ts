@@ -10,6 +10,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { CmsModule } from './modules/cms/cms.module';
 import { CommissionsModule } from './modules/commissions/commissions.module';
+import { MailModule } from './modules/mail/mail.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { OrdersModule } from './modules/orders/orders.module';
@@ -53,6 +54,7 @@ import { RedisModule } from './redis/redis.module';
     VouchersModule,
     NotificationsModule,
     PayoutsModule,
+    MailModule,
     ChatModule,
     ReviewsModule,
     AdminModule,

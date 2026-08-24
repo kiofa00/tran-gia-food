@@ -140,7 +140,7 @@ class _VoucherScreenState extends ConsumerState<VoucherScreen> {
           Expanded(
             child: vouchersAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, _) => _buildFallbackList(filter),
+              error: (_, _) => _EmptyState(filter: filter),
               data: (list) {
                 final filtered = _applyFilter(list, filter);
                 if (filtered.isEmpty) {
@@ -179,67 +179,6 @@ class _VoucherScreenState extends ConsumerState<VoucherScreen> {
       };
       return matchSearch && matchFilter;
     }).toList();
-  }
-
-  // Fallback mock list khi API chÆ°a cÃ³
-  Widget _buildFallbackList(VoucherFilter filter) {
-    final mockVouchers = [
-      {
-        'code': 'SUMMER20',
-        'title': 'Giáº£m 20.000Ä‘ cho Ä‘Æ¡n tá»« 100k',
-        'discount_type': 'fixed',
-        'discount_value': 20000,
-        'min_order': 100000,
-        'type': 'platform',
-        'valid_to': '2026-12-31',
-        'used_count': 312,
-        'total_limit': 1000,
-      },
-      {
-        'code': 'FREESHIP',
-        'title': 'Miá»…n phÃ­ váº­n chuyá»ƒn (Ä‘Æ¡n tá»« 50k)',
-        'discount_type': 'free_ship',
-        'discount_value': 0,
-        'min_order': 50000,
-        'type': 'platform',
-        'valid_to': '2026-09-30',
-        'used_count': 88,
-        'total_limit': 500,
-      },
-      {
-        'code': 'PHO15',
-        'title': 'Giáº£m 15% tá»‘i Ä‘a 30k â€” Phá»Ÿ Báº¯c HÃ ',
-        'discount_type': 'percent',
-        'discount_value': 15,
-        'min_order': 80000,
-        'type': 'restaurant',
-        'valid_to': '2026-10-01',
-        'used_count': 45,
-        'total_limit': 200,
-      },
-      {
-        'code': 'NEWUSER',
-        'title': 'ChÃ o má»«ng khÃ¡ch má»›i â€” Giáº£m 30.000Ä‘',
-        'discount_type': 'fixed',
-        'discount_value': 30000,
-        'min_order': 0,
-        'type': 'platform',
-        'valid_to': '2026-08-31',
-        'used_count': 999,
-        'total_limit': 1000,
-      },
-    ];
-    final filtered = _applyFilter(mockVouchers, filter);
-    if (filtered.isEmpty) return _EmptyState(filter: filter);
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: filtered.length,
-      itemBuilder: (ctx, i) => _VoucherCard(
-        voucher: filtered[i],
-        fromCart: widget.fromCart,
-        onSelect: (code) => context.pop(code),
-      ),
-    );
   }
 
   void _applyManualCode() {

@@ -12,6 +12,8 @@ async function main() {
     'api::translation.translation.findOne',
     'api::banner.banner.find',
     'api::banner.banner.findOne',
+    'api::faq-item.faq-item.find',
+    'api::faq-item.faq-item.findOne',
   ];
 
   for (const action of actions) {

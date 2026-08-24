@@ -6,7 +6,7 @@ import { Space } from 'antd';
 
 import { DataTable } from '@/components/shared-ui/DataTable';
 import { SearchFilterBox } from '@/components/shared-ui/SearchFilterBox';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 import { CMS_FAQ_TARGET_FILTER_OPTIONS } from '@/shared-config';
 import { CmsFaqItem } from '@/types';
 
@@ -18,7 +18,7 @@ interface FaqTabProps {
 }
 
 export const FaqTab: React.FC<FaqTabProps> = ({ faqs, isLoading }) => {
-  const { t } = useTranslation();
+  const { t } = useLocale();
   const [search, setSearch] = useState('');
   const [targetFilter, setTargetFilter] = useState('ALL');
 

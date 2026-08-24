@@ -31,10 +31,12 @@ Kỹ năng đánh giá & review chất lượng mã nguồn tự động cho d�
 - 🟡 **[WARNING]** Hàm phải đặt tên theo verb + noun (vd: `fetchOrders`, `calculateTotal`, không phải `orders` hay `total`).
 - 🟢 **[NIT]** Constant global phải viết SCREAMING_SNAKE_CASE (vd: `TIMEOUT_MS`, `MAX_RETRY`).
 
-### Trục 4 — No Magic Numbers/Strings
+### Trục 4 — No Magic Numbers/Strings, Centralized Config & i18n
 
+- 🔴 **[BLOCKER]** Cấm hardcode text hiển thị trên UI: bắt buộc 100% dùng translation/i18n (`t(...)` qua `useLocale()`, `AppLocalizations`).
 - 🔴 **[BLOCKER]** Cấm số trơ không có tên trong logic: `setTimeout(fn, 3000)` → phải là `const TIMEOUT_MS = 3000`.
 - 🔴 **[BLOCKER]** Cấm string trơ trong điều kiện: `if (status === 'pending')` → phải dùng enum `OrderStatus.PENDING`.
+- 🔴 **[BLOCKER]** Cấm hardcode route URLs / inline regex: Phải đặt trong các file config tập trung (`routes.ts`, `regex.ts`, `constants.ts`).
 - 🟡 **[WARNING]** Cấm hardcode URL, port, endpoint trong source code. Phải đọc từ `process.env.*` hoặc config.
 
 ### Trục 5 — Async Safety & Error Handling
@@ -44,8 +46,9 @@ Kỹ năng đánh giá & review chất lượng mã nguồn tự động cho d�
 - 🟡 **[WARNING]** Bắt buộc xử lý đầy đủ 4 state: `loading`, `error`, `empty`, `success` cho mọi UI component có data fetching.
 - 🟡 **[WARNING]** Cấm `catch (e) {}` rỗng (swallow errors). Phải log hoặc rethrow.
 
-### Trục 6 — Architecture & Dependency Rules
+### Trục 6 — Architecture, Separation of Concerns & Dependency Rules
 
+- 🔴 **[BLOCKER]** Cấm viết business logic / fetch API / state mutation phức tạp trực tiếp trong React UI component. Bắt buộc tách ra Custom Hook (`use<Feature>.ts`).
 - 🔴 **[BLOCKER]** NestJS: Service không được import `Module` khác trực tiếp. Phải nhận dependency qua `constructor` (Dependency Injection).
 - 🔴 **[BLOCKER]** Flutter: Widget không được gọi API trực tiếp. Phải qua Repository/Provider/Riverpod.
 - 🟡 **[WARNING]** Import order phải theo thứ tự: `React/Next` → Third-party → `@trangia/*` → Relative (`./`, `../`). Prettier plugin sort-imports tự động xử lý, nhưng cần check thủ công nếu có exception.

@@ -4,7 +4,7 @@ import { ReactNode, useState } from 'react';
 
 import { Empty, Pagination, Table, TableProps } from 'antd';
 
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 import { cn } from '@/utils/cn';
 
 export interface DataTableProps<T> extends Omit<TableProps<T>, 'pagination'> {
@@ -33,7 +33,7 @@ export function DataTable<T extends object>({
   className,
   ...tableProps
 }: DataTableProps<T>) {
-  const { t } = useTranslation();
+  const { t } = useLocale();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(defaultPageSize);
 

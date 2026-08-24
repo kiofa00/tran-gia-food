@@ -10,7 +10,7 @@ import {
 } from '@ant-design/icons';
 import { Space, Switch, Tag, Typography } from 'antd';
 
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 import { formatCurrency, formatDate } from '@/utils/formatters';
 
 import type { VoucherRecord } from '../types';
@@ -22,7 +22,7 @@ interface VoucherColumnsOptions {
 }
 
 export function useVoucherColumns({ onToggleActive }: VoucherColumnsOptions) {
-  const { t } = useTranslation();
+  const { t } = useLocale();
 
   return [
     {

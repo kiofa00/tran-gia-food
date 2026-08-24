@@ -3,6 +3,13 @@ import { PaymentMethod, PaymentStatus } from '@prisma/client';
 
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreatePaymentUrlDto, MoMoWebhookDto, VNPayWebhookDto } from './dto/payment.dto';
+import {
+  MOMO_SANDBOX_CONFIG,
+  generateMoMoRequestSignature,
+  generateVNPayPaymentUrl,
+  verifyMoMoWebhookSignature,
+  verifyVNPayWebhookSignature,
+} from './utils/payment-crypto.util';
 
 @Injectable()
 export class PaymentsService {
@@ -19,7 +26,22 @@ export class PaymentsService {
     }
 
     if (order.paymentMethod === PaymentMethod.momo) {
-      const payUrl = `https://test-payment.momo.vn/v2/gateway/api/create?orderId=${order.id}&amount=${order.totalAmount}`;
+      const requestId = `MOMO_REQ_${order.id}_${Date.now()}`;
+      const signature = generateMoMoRequestSignature({
+        partnerCode: MOMO_SANDBOX_CONFIG.partnerCode,
+        accessKey: MOMO_SANDBOX_CONFIG.accessKey,
+        requestId,
+        amount: order.totalAmount,
+        orderId: order.id,
+        orderInfo: `Thanh toan don hang ${order.id} Tran Gia Food`,
+        redirectUrl: MOMO_SANDBOX_CONFIG.redirectUrl,
+        ipnUrl: MOMO_SANDBOX_CONFIG.ipnUrl,
+        requestType: 'captureWallet',
+        extraData: '',
+      });
+
+      const payUrl = `${MOMO_SANDBOX_CONFIG.endpoint}?partnerCode=${MOMO_SANDBOX_CONFIG.partnerCode}&accessKey=${MOMO_SANDBOX_CONFIG.accessKey}&requestId=${requestId}&amount=${order.totalAmount}&orderId=${order.id}&signature=${signature}`;
+
       await this.prisma.payment.upsert({
         where: { orderId: order.id },
         create: {
@@ -27,17 +49,24 @@ export class PaymentsService {
           method: PaymentMethod.momo,
           amount: order.totalAmount,
           status: PaymentStatus.pending,
+          transactionId: requestId,
         },
         update: {
           amount: order.totalAmount,
           status: PaymentStatus.pending,
+          transactionId: requestId,
         },
       });
 
-      return { payUrl, orderId: order.id, amount: order.totalAmount };
+      return { payUrl, orderId: order.id, amount: order.totalAmount, requestId, signature };
     }
 
-    const payUrl = `https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?vnp_TxnRef=${order.id}&vnp_Amount=${order.totalAmount * 100}`;
+    const payUrl = generateVNPayPaymentUrl({
+      orderId: order.id,
+      amount: order.totalAmount,
+      orderInfo: `Thanh toan don hang ${order.id} Tran Gia Food`,
+    });
+
     await this.prisma.payment.upsert({
       where: { orderId: order.id },
       create: {
@@ -57,6 +86,33 @@ export class PaymentsService {
 
   async handleMoMoWebhook(dto: MoMoWebhookDto) {
     this.logger.log(`Received MoMo Webhook for order ${dto.orderId}: resultCode=${dto.resultCode}`);
+
+    // Xác thực chữ ký số nếu có signature được truyền vào
+    if (dto.signature) {
+      const isValid = verifyMoMoWebhookSignature(
+        {
+          partnerCode: dto.partnerCode || MOMO_SANDBOX_CONFIG.partnerCode,
+          accessKey: MOMO_SANDBOX_CONFIG.accessKey,
+          requestId: dto.requestId,
+          amount: dto.amount,
+          orderId: dto.orderId,
+          orderInfo: dto.orderInfo,
+          orderType: dto.orderType,
+          transId: dto.transId,
+          resultCode: dto.resultCode,
+          message: dto.message,
+          payType: dto.payType,
+          responseTime: dto.responseTime,
+          extraData: dto.extraData ? JSON.stringify(dto.extraData) : '',
+        },
+        dto.signature,
+      );
+
+      if (!isValid) {
+        this.logger.warn(`Invalid MoMo signature for order ${dto.orderId}`);
+        throw new BadRequestException('Chữ ký MoMo không hợp lệ (Invalid Signature)');
+      }
+    }
 
     const status = dto.resultCode === '0' ? PaymentStatus.paid : PaymentStatus.failed;
 
@@ -90,6 +146,17 @@ export class PaymentsService {
     this.logger.log(
       `Received VNPay Webhook for order ${dto.vnp_TxnRef}: responseCode=${dto.vnp_ResponseCode}`,
     );
+
+    // Xác thực chữ ký số nếu có vnp_SecureHash được truyền vào
+    if (dto.vnp_SecureHash) {
+      const isValid = verifyVNPayWebhookSignature(
+        dto as Record<string, string | number | undefined>,
+      );
+      if (!isValid) {
+        this.logger.warn(`Invalid VNPay Checksum for order ${dto.vnp_TxnRef}`);
+        throw new BadRequestException('Chữ ký VNPay không hợp lệ (Invalid Checksum)');
+      }
+    }
 
     const status = dto.vnp_ResponseCode === '00' ? PaymentStatus.paid : PaymentStatus.failed;
 

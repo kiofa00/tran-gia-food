@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:shared_ui/shared_ui.dart';
+import '../../core/providers/api_client_provider.dart';
 
-class SearchScreen extends StatefulWidget {
+class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
 
   @override
-  State<SearchScreen> createState() => _SearchScreenState();
+  ConsumerState<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen> {
+class _SearchScreenState extends ConsumerState<SearchScreen> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
   String _selectedCategory = 'Tất cả';
   String _selectedDistance = 'Tất cả';
   String _selectedRating = 'Tất cả';
   String _selectedPrice = 'Tất cả';
+
+  List<Map<String, dynamic>> _restaurants = [];
+  bool _isLoading = false;
 
   final List<String> _recentSearches = [
     'Phở bò tái nạm',
@@ -34,52 +39,44 @@ class _SearchScreenState extends State<SearchScreen> {
     '🥖 Bánh Mì',
   ];
 
-  final List<Map<String, dynamic>> _mockRestaurants = [
-    {
-      'id': '1',
-      'name': 'Phở Bắc Hà — Nguyễn Trãi',
-      'address': '123 Nguyễn Trãi, Q5, TP.HCM',
-      'rating': 4.9,
-      'totalReviews': 320,
-      'distanceKm': 0.8,
-      'category': '🍜 Cơm & Phở',
-      'priceTier': '< 50k',
-      'imageUrl': 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=600',
-    },
-    {
-      'id': '2',
-      'name': 'Trà Sữa KOI Thé — Trần Hưng Đạo',
-      'address': '45 Trần Hưng Đạo, Q1, TP.HCM',
-      'rating': 4.8,
-      'totalReviews': 512,
-      'distanceKm': 1.4,
-      'category': '🧋 Trà Sữa',
-      'priceTier': '50k - 100k',
-      'imageUrl': 'https://images.unsplash.com/photo-1558857563-b371033873b8?w=600',
-    },
-    {
-      'id': '3',
-      'name': 'Cơm Tấm Sài Gòn — Cống Quỳnh',
-      'address': '88 Cống Quỳnh, Q1, TP.HCM',
-      'rating': 4.7,
-      'totalReviews': 198,
-      'distanceKm': 2.1,
-      'category': '🍜 Cơm & Phở',
-      'priceTier': '< 50k',
-      'imageUrl': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600',
-    },
-    {
-      'id': '4',
-      'name': 'Pizza 4P’s — Lê Thánh Tôn',
-      'address': '8/15 Lê Thánh Tôn, Bến Nghé, Q1',
-      'rating': 4.9,
-      'totalReviews': 890,
-      'distanceKm': 3.5,
-      'category': '🍕 Pizza & Fastfood',
-      'priceTier': '> 100k',
-      'imageUrl': 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadRestaurants();
+  }
+
+  Future<void> _loadRestaurants() async {
+    setState(() => _isLoading = true);
+    try {
+      final res = await ref.read(apiClientProvider).get('/restaurants');
+      final data = res['data'] ?? res;
+      if (data is List) {
+        setState(() {
+          _restaurants = data.map((item) {
+            final m = item as Map<String, dynamic>;
+            return {
+              'id': m['id']?.toString() ?? '',
+              'name': m['name']?.toString() ?? 'Nhà hàng',
+              'address': m['address']?.toString() ?? '',
+              'rating': (m['rating'] as num?)?.toDouble() ?? 5.0,
+              'totalReviews': (m['totalReviews'] as num?)?.toInt() ?? 0,
+              'distanceKm': (m['distanceKm'] as num?)?.toDouble() ?? 1.2,
+              'category': m['category']?.toString() ?? '🍜 Cơm & Phở',
+              'priceTier': m['priceTier']?.toString() ?? '< 50k',
+              'imageUrl': m['avatarUrl']?.toString() ??
+                  m['coverImageUrl']?.toString() ??
+                  'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=600',
+            };
+          }).toList();
+        });
+      }
+    } catch (_) {
+      // Giữ danh sách rỗng nếu lỗi kết nối
+      setState(() => _restaurants = []);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -88,7 +85,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   List<Map<String, dynamic>> get _filteredResults {
-    return _mockRestaurants.where((r) {
+    return _restaurants.where((r) {
       final matchesQuery = _searchQuery.isEmpty ||
           (r['name'] as String).toLowerCase().contains(_searchQuery.toLowerCase()) ||
           (r['address'] as String).toLowerCase().contains(_searchQuery.toLowerCase());
@@ -289,7 +286,15 @@ class _SearchScreenState extends State<SearchScreen> {
           style: TextStyle(fontWeight: AppFontWeight.bold, fontSize: AppFontSize.md),
         ),
         const SizedBox(height: 12),
-        ..._mockRestaurants.map((r) => _buildRestaurantResultTile(r)),
+        if (_isLoading)
+          const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()))
+        else if (_restaurants.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Text('Chưa có danh sách gợi ý', style: TextStyle(color: AppColors.textSecondaryLight)),
+          )
+        else
+          ..._restaurants.take(5).map((r) => _buildRestaurantResultTile(r)),
       ],
     );
   }

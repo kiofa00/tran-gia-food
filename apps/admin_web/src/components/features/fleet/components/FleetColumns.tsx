@@ -9,14 +9,14 @@ import {
 import { Tag, Typography } from 'antd';
 
 import { PlateBadge, VehicleBadge } from '@/components/shared-ui';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 import { ShipperRecord } from '@/types';
 import { mapShipperStatus } from '@/utils/formatters';
 
 const { Text } = Typography;
 
 export function useFleetColumns() {
-  const { t } = useTranslation();
+  const { t } = useLocale();
 
   return [
     {

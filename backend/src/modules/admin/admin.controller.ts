@@ -29,6 +29,14 @@ export class AdminController {
     return this.adminService.listPendingShippers(query);
   }
 
+  @Get('kyc/shippers')
+  @ApiOperation({
+    summary: '[Admin] Danh sách hồ sơ eKYC shipper (Hỗ trợ lọc status, search, pagination)',
+  })
+  getKycShippers(@Query() query: QueryOptions & { status?: string; search?: string }) {
+    return this.adminService.listKycShippers(query);
+  }
+
   @Patch('shippers/:id/kyc')
   @ApiOperation({ summary: '[Admin] Duyệt/Từ chối hồ sơ eKYC' })
   updateKycStatus(@Param('id') id: string, @Body() dto: UpdateKycStatusDto) {
@@ -117,5 +125,58 @@ export class AdminController {
   @ApiOperation({ summary: '[Admin] Kích hoạt hoặc tạm khóa tài khoản người dùng' })
   updateUserStatus(@Param('id') id: string, @Body() dto: UpdateUserStatusDto) {
     return this.adminService.updateUserStatus(id, dto);
+  }
+
+  @Public()
+  @Get('payouts')
+  @ApiOperation({
+    summary: '[Admin] Danh sách yêu cầu giải ngân đối tác nhà hàng và shipper',
+  })
+  getPayouts(@Query() query: QueryOptions) {
+    return this.adminService.getPayouts(query);
+  }
+
+  @Public()
+  @Patch('payouts/:id/process')
+  @ApiOperation({ summary: '[Admin] Phê duyệt và giải ngân yêu cầu thanh toán' })
+  processPayout(@Param('id') id: string) {
+    return this.adminService.processPayout(id);
+  }
+
+  @Public()
+  @Patch('payouts/:id/reject')
+  @ApiOperation({ summary: '[Admin] Từ chối yêu cầu giải ngân' })
+  rejectPayout(@Param('id') id: string, @Body('reason') reason?: string) {
+    return this.adminService.rejectPayout(id, reason);
+  }
+
+  @Public()
+  @Get('restaurants')
+  @ApiOperation({
+    summary: '[Admin] Danh sách nhà hàng đối tác hệ thống',
+  })
+  getRestaurants(@Query() query: QueryOptions) {
+    return this.adminService.getRestaurants(query);
+  }
+
+  @Public()
+  @Get('restaurants/:id')
+  @ApiOperation({ summary: '[Admin] Chi tiết hồ sơ nhà hàng' })
+  getRestaurantDetail(@Param('id') id: string) {
+    return this.adminService.getRestaurantDetail(id);
+  }
+
+  @Public()
+  @Patch('restaurants/:id/approve')
+  @ApiOperation({ summary: '[Admin] Duyệt mở quán nhà hàng hoạt động' })
+  approveRestaurant(@Param('id') id: string) {
+    return this.adminService.approveRestaurant(id);
+  }
+
+  @Public()
+  @Patch('restaurants/:id/suspend')
+  @ApiOperation({ summary: '[Admin] Tạm đình chỉ hoạt động nhà hàng' })
+  suspendRestaurant(@Param('id') id: string, @Body('reason') reason?: string) {
+    return this.adminService.suspendRestaurant(id, reason);
   }
 }

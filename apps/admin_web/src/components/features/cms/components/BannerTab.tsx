@@ -6,7 +6,7 @@ import { Space } from 'antd';
 
 import { DataTable } from '@/components/shared-ui/DataTable';
 import { SearchFilterBox } from '@/components/shared-ui/SearchFilterBox';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 import { CMS_BANNER_STATUS_FILTER_OPTIONS } from '@/shared-config';
 import { CmsBannerItem } from '@/types';
 
@@ -18,7 +18,7 @@ interface BannerTabProps {
 }
 
 export const BannerTab: React.FC<BannerTabProps> = ({ banners, isLoading }) => {
-  const { t } = useTranslation();
+  const { t } = useLocale();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
 

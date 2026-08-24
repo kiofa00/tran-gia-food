@@ -3,13 +3,13 @@
 import { Tag, Typography } from 'antd';
 
 import { AppTargetTag } from '@/components/shared-ui';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 import { CmsBannerItem, CmsFaqItem, CmsTranslationItem } from '@/types';
 
 const { Text } = Typography;
 
 export function useBannerColumns() {
-  const { t } = useTranslation();
+  const { t } = useLocale();
 
   return [
     {
@@ -39,6 +39,21 @@ export function useBannerColumns() {
   ];
 }
 
+const EXCLUDED_TRANSLATION_FIELDS = new Set([
+  'id',
+  'key',
+  'apptarget',
+  'targetapp',
+  'category',
+  'createdat',
+  'updatedat',
+  'publishedat',
+  'created_at',
+  'updated_at',
+  'published_at',
+  'locale',
+]);
+
 const KNOWN_LANG_NAMES: Record<string, string> = {
   vi: 'Tiếng Việt',
   en: 'Tiếng Anh',
@@ -51,21 +66,15 @@ const KNOWN_LANG_NAMES: Record<string, string> = {
 };
 
 export function useTranslationColumns(translations: CmsTranslationItem[] = []) {
-  const { t } = useTranslation();
+  const { t } = useLocale();
   const discoveredLangs = new Set<string>(['vi', 'en']);
 
   translations.forEach((item) => {
     Object.keys(item).forEach((k) => {
-      if (
-        k !== 'id' &&
-        k !== 'key' &&
-        k !== 'appTarget' &&
-        k !== 'category' &&
-        k !== 'createdAt' &&
-        k !== 'updatedAt' &&
-        typeof item[k] === 'string'
-      ) {
-        discoveredLangs.add(k.toLowerCase());
+      const lower = k.toLowerCase();
+
+      if (!EXCLUDED_TRANSLATION_FIELDS.has(lower) && typeof item[k] === 'string') {
+        discoveredLangs.add(lower);
       }
     });
   });
@@ -78,7 +87,9 @@ export function useTranslationColumns(translations: CmsTranslationItem[] = []) {
       dataIndex: langKey,
       key: langKey,
       render: (_: unknown, record: CmsTranslationItem) => {
-        const val = record[langKey];
+        // Tìm key khớp case-insensitive (ví dụ vi hoặc VI)
+        const matchKey = Object.keys(record).find((k) => k.toLowerCase() === langKey);
+        const val = matchKey ? record[matchKey] : record[langKey];
 
         return val ? (
           <Text strong={langKey === 'vi'}>{String(val)}</Text>
@@ -105,11 +116,43 @@ export function useTranslationColumns(translations: CmsTranslationItem[] = []) {
       key: 'appTarget',
       render: (target?: string) => <AppTargetTag target={target} />,
     },
+    {
+      title: t('cms.publishedAt', 'Thời Gian Xuất Bản'),
+      dataIndex: 'publishedAt',
+      key: 'publishedAt',
+      sorter: (a: CmsTranslationItem, b: CmsTranslationItem) => {
+        const dateA = String(a.publishedAt || a.updatedAt || '');
+        const dateB = String(b.publishedAt || b.updatedAt || '');
+
+        return dateA.localeCompare(dateB);
+      },
+      render: (_: unknown, record: CmsTranslationItem) => {
+        const rawDate = (record.publishedAt || record.updatedAt || record.createdAt) as
+          string | undefined;
+
+        if (!rawDate) return <Text type="secondary">—</Text>;
+
+        try {
+          const d = new Date(rawDate);
+
+          if (isNaN(d.getTime())) return <Text type="secondary">{String(rawDate)}</Text>;
+
+          return (
+            <Text type="secondary">
+              {d.toLocaleDateString('vi-VN')}{' '}
+              {d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+            </Text>
+          );
+        } catch {
+          return <Text type="secondary">{String(rawDate)}</Text>;
+        }
+      },
+    },
   ];
 }
 
 export function useFaqColumns() {
-  const { t } = useTranslation();
+  const { t } = useLocale();
 
   return [
     {

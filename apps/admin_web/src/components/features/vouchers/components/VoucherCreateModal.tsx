@@ -2,7 +2,7 @@
 
 import { DatePicker, Form, Input, InputNumber, Modal, Select, Space } from 'antd';
 
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 
 import type { CreateVoucherFormValues } from '../types';
 
@@ -22,7 +22,7 @@ export function VoucherCreateModal({
   onSubmit,
   confirmLoading,
 }: VoucherCreateModalProps) {
-  const { t } = useTranslation();
+  const { t } = useLocale();
   const [form] = Form.useForm<CreateVoucherFormValues>();
 
   const handleOk = () => form.submit();

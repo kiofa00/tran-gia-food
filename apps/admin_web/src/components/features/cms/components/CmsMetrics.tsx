@@ -6,7 +6,7 @@ import { GlobalOutlined, PictureOutlined, QuestionCircleOutlined } from '@ant-de
 import { Col, Row } from 'antd';
 
 import { MetricCard } from '@/components/shared-ui/MetricCard';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 import { adminDesignTokens } from '@/theme/tokens';
 
 interface CmsMetricsProps {
@@ -20,7 +20,7 @@ export const CmsMetrics: React.FC<CmsMetricsProps> = ({
   translationsCount,
   faqsCount,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useLocale();
 
   return (
     <Row gutter={[16, 16]}>

@@ -41,32 +41,35 @@ class PenaltyHistoryScreen extends ConsumerWidget {
       ),
       body: penaltiesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => _buildMockList(),
-        data: (list) => list.isEmpty ? _buildMockList() : _buildContent(list),
+        error: (_, _) => _buildEmpty(),
+        data: (list) => list.isEmpty ? _buildEmpty() : _buildContent(list),
       ),
     );
   }
 
-  Widget _buildMockList() {
-    final mock = [
-      {
-        'reason': 'Hủy đơn quá nhiều (tỉ lệ 15%)',
-        'level': 1,
-        'created_at': '2026-08-10',
-        'expires_at': '2026-08-24',
-        'is_active': true,
-        'order_id': '#9801',
-      },
-      {
-        'reason': 'Giao hàng trễ thường xuyên (3 lần trong tuần)',
-        'level': 0,
-        'created_at': '2026-07-28',
-        'expires_at': null,
-        'is_active': false,
-        'order_id': null,
-      },
-    ];
-    return _buildContent(mock);
+  Widget _buildEmpty() {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.verified_user_outlined, size: 64, color: AppColors.success),
+            SizedBox(height: 16),
+            Text(
+              'Không có vi phạm nào! 🏆',
+              style: TextStyle(fontWeight: AppFontWeight.bold, fontSize: AppFontSize.lg),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Tài khoản của bạn đang có lịch sử hoạt động rất tốt.',
+              style: TextStyle(color: AppColors.textSecondaryLight, fontSize: AppFontSize.body),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildContent(List<Map<String, dynamic>> penalties) {

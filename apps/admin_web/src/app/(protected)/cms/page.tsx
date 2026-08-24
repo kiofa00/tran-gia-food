@@ -12,11 +12,11 @@ import {
   PageHeader,
   useCmsQuery,
 } from '@/components';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks';
 import { CmsBannerItem, CmsFaqItem, CmsTranslationItem } from '@/types';
 
 export default function CmsManagementPage() {
-  const { t } = useTranslation();
+  const { t } = useLocale();
   const { data: cmsData, isLoading, refetch: checkCmsStatus } = useCmsQuery();
 
   let cmsStatus = 'offline';

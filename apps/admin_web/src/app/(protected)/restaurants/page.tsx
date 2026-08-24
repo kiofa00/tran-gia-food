@@ -16,12 +16,13 @@ import {
   useRestaurantsQuery,
   useSuspendRestaurantMutation,
 } from '@/components';
-import { RESTAURANT_STATUS_FILTER_OPTIONS } from '@/shared-config';
+import { useLocale } from '@/hooks';
 
 const { Text } = Typography;
 
 export default function RestaurantsManagementPage() {
   const { message } = App.useApp();
+  const { t } = useLocale();
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -54,37 +55,51 @@ export default function RestaurantsManagementPage() {
   const handleApprove = useCallback(
     (record: RestaurantRecord) => {
       Modal.confirm({
-        title: 'Duyệt nhà hàng?',
-        content: `Xác nhận duyệt "${record.name}" tham gia nền tảng?`,
-        okText: 'Duyệt',
+        title: t('restaurants.approveConfirmTitle', 'Xác nhận duyệt nhà hàng'),
+        content: t(
+          'restaurants.approveConfirmContent',
+          'Bạn có chắc muốn phê duyệt mở quán cho "{name}" không?',
+          { name: record.name },
+        ),
+        okText: t('common.confirm', 'Phê Duyệt'),
+        cancelText: t('common.cancel', 'Hủy'),
+        okButtonProps: { className: 'bg-green-600' },
         onOk: () =>
           approveMutation.mutate(record.id, {
-            onSuccess: () => message.success('Đã duyệt nhà hàng thành công!'),
-            onError: () => message.error('Thao tác thất bại.'),
+            onSuccess: () => message.success(t('common.success', 'Đã duyệt nhà hàng thành công!')),
+            onError: () => message.error(t('common.errorTryAgain', 'Thao tác thất bại.')),
           }),
       });
     },
-    [approveMutation, message],
+    [approveMutation, message, t],
   );
 
   const handleSuspend = useCallback(
     (record: RestaurantRecord) => {
       Modal.confirm({
-        title: 'Đình chỉ nhà hàng?',
-        content: `Xác nhận đình chỉ hoạt động của "${record.name}"?`,
-        okText: 'Đình Chỉ',
+        title: t('restaurants.suspendConfirmTitle', 'Đình chỉ hoạt động'),
+        content: t(
+          'restaurants.suspendConfirmContent',
+          'Bạn có chắc muốn tạm đình chỉ hoạt động quán "{name}" không?',
+          { name: record.name },
+        ),
+        okText: t('restaurants.suspend', 'Đình Chỉ Quán'),
+        cancelText: t('common.cancel', 'Hủy'),
         okButtonProps: { danger: true },
         onOk: () =>
           suspendMutation.mutate(
-            { id: record.id, reason: 'Vi phạm điều khoản sử dụng' },
             {
-              onSuccess: () => message.success('Đã đình chỉ nhà hàng.'),
-              onError: () => message.error('Thao tác thất bại.'),
+              id: record.id,
+              reason: t('restaurants.suspendReasonDefault', 'Vi phạm chính sách nền tảng'),
+            },
+            {
+              onSuccess: () => message.success(t('common.success', 'Đã đình chỉ nhà hàng.')),
+              onError: () => message.error(t('common.errorTryAgain', 'Thao tác thất bại.')),
             },
           ),
       });
     },
-    [suspendMutation, message],
+    [suspendMutation, message, t],
   );
 
   const columns = useMemo(
@@ -97,21 +112,46 @@ export default function RestaurantsManagementPage() {
     [handleApprove, handleSuspend],
   );
 
+  const filterOptions = useMemo(
+    () => [
+      { value: 'ALL', label: t('common.all', 'Tất cả') },
+      { value: 'PENDING', label: t('restaurants.pending', 'Chờ duyệt') },
+      { value: 'APPROVED', label: t('restaurants.active', 'Đang hoạt động') },
+      { value: 'SUSPENDED', label: t('restaurants.suspend', 'Bị đình chỉ') },
+    ],
+    [t],
+  );
+
   return (
     <PageContainer>
       <Space direction="vertical" size="large" className="w-full">
         <PageHeader
           icon="🍽️"
-          title="Quản Lý Nhà Hàng"
-          subtitle="Duyệt đăng ký, theo dõi và quản lý tất cả nhà hàng trên nền tảng"
+          title={t('restaurants.title', 'Quản Lý Nhà Hàng')}
+          subtitle={t(
+            'restaurants.subtitle',
+            'Duyệt đăng ký, theo dõi và quản lý tất cả nhà hàng trên nền tảng',
+          )}
         />
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4">
           {[
-            { label: 'Chờ Duyệt', value: pendingCount, color: 'text-orange-500' },
-            { label: 'Đang Hoạt Động', value: approvedCount, color: 'text-green-600' },
-            { label: 'Bị Đình Chỉ', value: suspendedCount, color: 'text-red-500' },
+            {
+              label: t('restaurants.pending', 'Chờ Duyệt'),
+              value: pendingCount,
+              color: 'text-orange-500',
+            },
+            {
+              label: t('restaurants.active', 'Đang Hoạt Động'),
+              value: approvedCount,
+              color: 'text-green-600',
+            },
+            {
+              label: t('restaurants.suspend', 'Bị Đình Chỉ'),
+              value: suspendedCount,
+              color: 'text-red-500',
+            },
           ].map((stat) => (
             <Card
               key={stat.label}
@@ -127,13 +167,13 @@ export default function RestaurantsManagementPage() {
         <Card variant="borderless" className="rounded-xl shadow-xs">
           <Space direction="vertical" className="w-full" size="middle">
             <SearchFilterBox
-              searchPlaceholder="Tìm theo tên quán, địa chỉ, chủ sở hữu..."
+              searchPlaceholder={t('common.search', 'Tìm theo tên quán, địa chỉ, chủ sở hữu...')}
               searchValue={search}
               onSearchChange={setSearch}
-              filterLabel="Lọc Trạng Thái:"
+              filterLabel={t('common.status', 'Lọc Trạng Thái:')}
               filterValue={statusFilter}
               onFilterChange={setStatusFilter}
-              filterOptions={RESTAURANT_STATUS_FILTER_OPTIONS}
+              filterOptions={filterOptions}
             />
 
             <DataTable<RestaurantRecord>
@@ -141,7 +181,7 @@ export default function RestaurantsManagementPage() {
               dataSource={restaurants}
               columns={columns}
               loading={isLoading}
-              emptyDescription="Không tìm thấy nhà hàng phù hợp"
+              emptyDescription={t('common.noData', 'Không tìm thấy nhà hàng phù hợp')}
             />
           </Space>
         </Card>

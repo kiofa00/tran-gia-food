@@ -1,8 +1,8 @@
 'use client';
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { I18nextProvider, useTranslation as useReactI18nextTranslation } from 'react-i18next';
+import { I18nextProvider } from 'react-i18next';
 
 import { useCmsQuery } from '@/components/features/cms';
 import i18n, { TranslationKey } from '@/lib/i18n';
@@ -42,7 +42,7 @@ const KNOWN_LANG_META: Record<string, { label: string; flag: string }> = {
   de: { label: 'Deutsch', flag: '🇩🇪' },
 };
 
-const LanguageContext = createContext<LanguageContextType>({
+export const LanguageContext = createContext<LanguageContextType>({
   language: 'vi',
   setLanguage: () => {},
   availableLanguages: [
@@ -132,16 +132,10 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (cmsData?.translations && Array.isArray(cmsData.translations)) {
       cmsData.translations.forEach((item) => {
         Object.keys(item).forEach((propKey) => {
-          if (
-            propKey !== 'id' &&
-            propKey !== 'key' &&
-            propKey !== 'appTarget' &&
-            propKey !== 'category' &&
-            propKey !== 'createdAt' &&
-            propKey !== 'updatedAt' &&
-            typeof item[propKey] === 'string'
-          ) {
-            langSet.add(propKey.toLowerCase());
+          const lower = propKey.toLowerCase();
+
+          if (KNOWN_LANG_META[lower] || (/^[a-z]{2}$/.test(lower) && propKey !== 'id')) {
+            langSet.add(lower);
           }
         });
       });
@@ -200,14 +194,4 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       <LanguageContext.Provider value={contextValue}>{children}</LanguageContext.Provider>
     </I18nextProvider>
   );
-};
-
-export const useTranslation = () => {
-  const context = useContext(LanguageContext);
-  const reactI18n = useReactI18nextTranslation();
-
-  return {
-    ...context,
-    i18n: reactI18n.i18n,
-  };
 };

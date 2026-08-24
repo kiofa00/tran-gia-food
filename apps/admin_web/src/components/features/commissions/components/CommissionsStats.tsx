@@ -3,7 +3,7 @@
 import { DollarOutlined, PercentageOutlined, ShoppingOutlined } from '@ant-design/icons';
 import { Card, Col, Row, Skeleton, Statistic, Typography } from 'antd';
 
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 import { adminDesignTokens } from '@/theme/tokens';
 import { formatCurrency } from '@/utils/formatters';
 
@@ -22,7 +22,7 @@ export function CommissionsStats({
   totalRestaurantRevenue,
   totalShipperDelivery,
 }: CommissionsStatsProps) {
-  const { t } = useTranslation();
+  const { t } = useLocale();
 
   return (
     <Row gutter={[16, 16]} className="mb-6">

@@ -1,15 +1,25 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+  Optional,
+} from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { PayoutStatus, User } from '@prisma/client';
 
 import { PrismaService } from '../../prisma/prisma.service';
+import { MailService } from '../mail/mail.service';
 import { RequestWithdrawalDto } from './dto/payout.dto';
 
 @Injectable()
 export class PayoutsService {
   private readonly logger = new Logger(PayoutsService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Optional() private mailService?: MailService,
+  ) {}
 
   async requestShipperWithdrawal(user: User, dto: RequestWithdrawalDto) {
     const shipper = await this.prisma.shipper.findUnique({ where: { userId: user.id } });
@@ -61,7 +71,10 @@ export class PayoutsService {
     const start = new Date();
     start.setDate(end.getDate() - 7);
 
-    const shippers = await this.prisma.shipper.findMany({ where: { isActive: true } });
+    const shippers = await this.prisma.shipper.findMany({
+      where: { isActive: true },
+      include: { user: true },
+    });
 
     for (const shipper of shippers) {
       if (shipper.walletCash > 0) {
@@ -78,6 +91,31 @@ export class PayoutsService {
         this.logger.log(
           `Auto statement generated for Shipper ${shipper.id}: ${shipper.walletCash}đ`,
         );
+
+        if (this.mailService && shipper.user?.email) {
+          try {
+            const bankAccStr =
+              typeof shipper.bankAccount === 'string' ? shipper.bankAccount : 'Đã lưu hệ thống';
+
+            await this.mailService.sendShipperWeeklyStatement(shipper.user.email, {
+              shipperName: shipper.user.name || 'Tài xế Tran Gia Food',
+              periodStart: start,
+              periodEnd: end,
+              totalTrips: 0,
+              deliveryFeesEarned: shipper.walletCash,
+              tipsEarned: 0,
+              bonusAmount: 0,
+              penaltyAmount: 0,
+              cashCollected: 0,
+              netPayoutAmount: shipper.walletCash,
+              bankAccountNumber: bankAccStr,
+            });
+          } catch (err) {
+            this.logger.warn(
+              `Failed to send email statement to shipper ${shipper.id}: ${String(err)}`,
+            );
+          }
+        }
       }
     }
   }

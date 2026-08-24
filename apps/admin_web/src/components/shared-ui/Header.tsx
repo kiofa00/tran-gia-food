@@ -17,11 +17,9 @@ import {
   GlobalOutlined,
   LogoutOutlined,
   MenuOutlined,
-  MoonOutlined,
   SafetyCertificateOutlined,
   SettingOutlined,
   ShopOutlined,
-  SunOutlined,
   TagOutlined,
   TeamOutlined,
   UserOutlined,
@@ -30,10 +28,12 @@ import {
 import { Avatar, Button, Divider, Drawer, Dropdown, Layout, Menu, Space, Typography } from 'antd';
 
 import { useAuth } from '@/hooks/useAuth';
-import { TranslationKey, useTranslation } from '@/providers/LanguageProvider';
-import { useTheme } from '@/providers/ThemeProvider';
+import { useLocale } from '@/hooks/useLocale';
 import { ADMIN_NAV_GROUPS, ADMIN_ROUTES, IconName } from '@/shared-config';
 import { cn } from '@/utils/cn';
+
+import { AdminProfileModal } from './AdminProfileModal';
+import { SystemSettingsModal } from './SystemSettingsModal';
 
 const { Header: AntHeader } = Layout;
 const { Title, Text } = Typography;
@@ -47,19 +47,26 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ userName }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const pathname = usePathname();
 
   const { logout } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
-  const { language, setLanguage, availableLanguages, t } = useTranslation();
+  const { language, setLanguage, availableLanguages, t } = useLocale();
 
   const userMenuItems = useMemo(
     () => [
-      { key: 'profile', label: t('header.profile', 'Hồ sơ cá nhân'), icon: <UserOutlined /> },
+      {
+        key: 'profile',
+        label: t('header.profile', 'Hồ sơ cá nhân'),
+        icon: <UserOutlined />,
+        onClick: () => setProfileOpen(true),
+      },
       {
         key: 'settings',
         label: t('header.settings', 'Cài đặt hệ thống'),
         icon: <SettingOutlined />,
+        onClick: () => setSettingsOpen(true),
       },
       { type: 'divider' as const },
       {
@@ -95,10 +102,10 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
         key: lang.code,
         label: (
           <Space className="w-full justify-between">
-            <span>
-              {lang.flag} {lang.label}
+            <span className={cn('text-inherit', language === lang.code && '!text-orange-500')}>
+              {lang.label}
             </span>
-            {language === lang.code && <CheckOutlined className="text-orange-500 text-xs ml-2" />}
+            {language === lang.code && <CheckOutlined className="!text-orange-500 text-xs ml-2" />}
           </Space>
         ),
         onClick: () => setLanguage(lang.code),
@@ -110,24 +117,18 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
   const navGroups = useMemo(
     () =>
       ADMIN_NAV_GROUPS.map((group) => {
-        const groupKey = `nav.${group.key}` as TranslationKey;
         const icon = group.iconName ? iconMap[group.iconName] : undefined;
 
         if (group.children) {
-          const children = group.children.map((child) => {
-            const childNavKey =
-              `nav.${child.key === '/' ? 'dashboard' : child.key.replace('/', '')}` as TranslationKey;
-
-            return {
-              key: child.key,
-              label: t(childNavKey, child.label),
-              icon: iconMap[child.iconName],
-            };
-          });
+          const children = group.children.map((child) => ({
+            key: child.key,
+            label: t(child.translationKey, child.label),
+            icon: iconMap[child.iconName],
+          }));
 
           return {
             key: group.key,
-            label: t(groupKey, group.label),
+            label: t(group.translationKey, group.label),
             icon,
             children,
           };
@@ -135,7 +136,7 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
 
         return {
           key: group.key,
-          label: t(groupKey, group.label),
+          label: t(group.translationKey, group.label),
           icon,
           href: group.href || '/',
         };
@@ -147,9 +148,9 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
     <>
       <AntHeader
         data-testid="admin-header"
-        className="!bg-orange-500 !px-4 lg:!px-8 shadow-md h-16 sticky top-0 z-50 border-b border-orange-600"
+        className="!bg-orange-500 shadow-md h-16 sticky top-0 z-50 border-b border-orange-600"
       >
-        <div className="max-w-7xl mx-auto h-full flex items-center justify-between gap-4">
+        <div className="max-w-384 mx-auto h-full flex items-center justify-between gap-4 px-4 lg:px-8">
           {/* Left: Brand Logo + Desktop Nav */}
           <div className="flex items-center gap-6 shrink-0">
             <Link
@@ -245,16 +246,6 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
           <div className="flex items-center gap-1 shrink-0">
             {/* Desktop Actions */}
             <div className="hidden lg:flex items-center gap-1">
-              <Button
-                type="text"
-                icon={isDark ? <SunOutlined /> : <MoonOutlined />}
-                onClick={toggleTheme}
-                title={t(
-                  isDark ? 'header.theme.light' : 'header.theme.dark',
-                  isDark ? 'Giao diện Sáng' : 'Giao diện Tối',
-                )}
-                className={ICON_BTN_CLS}
-              />
               <Dropdown menu={{ items: languageMenuItems }} placement="bottomRight" arrow>
                 <Button
                   type="text"
@@ -370,10 +361,26 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
 
         <div className="px-3">
           <Space direction="vertical" className="w-full" size="small">
-            <Button icon={<BellOutlined />} block className="text-left">
-              {t('header.notifications', 'Thông báo')}
+            <Button
+              icon={<UserOutlined />}
+              block
+              className="text-left"
+              onClick={() => {
+                setDrawerOpen(false);
+                setProfileOpen(true);
+              }}
+            >
+              {t('header.profile', 'Hồ sơ cá nhân')}
             </Button>
-            <Button icon={<SettingOutlined />} block className="text-left">
+            <Button
+              icon={<SettingOutlined />}
+              block
+              className="text-left"
+              onClick={() => {
+                setDrawerOpen(false);
+                setSettingsOpen(true);
+              }}
+            >
               {t('header.settings', 'Cài đặt hệ thống')}
             </Button>
             <Button danger icon={<LogoutOutlined />} block className="text-left" onClick={logout}>
@@ -382,6 +389,9 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
           </Space>
         </div>
       </Drawer>
+
+      <AdminProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} />
+      <SystemSettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </>
   );
 };

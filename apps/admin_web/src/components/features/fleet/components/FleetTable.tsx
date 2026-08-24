@@ -7,7 +7,7 @@ import { ColumnsType } from 'antd/es/table';
 
 import { DataTable } from '@/components/shared-ui/DataTable';
 import { SearchFilterBox } from '@/components/shared-ui/SearchFilterBox';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 import { FLEET_STATUS_FILTER_OPTIONS } from '@/shared-config';
 import { ShipperRecord } from '@/types';
 
@@ -38,7 +38,7 @@ export const FleetTable: React.FC<FleetTableProps> = ({
   totalItems,
   onPageChange,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useLocale();
 
   return (
     <Space direction="vertical" className="w-full" size="middle">

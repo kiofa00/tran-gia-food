@@ -1,6 +1,7 @@
 import { Button, Space, Tag, Tooltip, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 
+import { getLocale } from '@/hooks';
 import { RESTAURANT_STATUS_COLOR_MAP } from '@/shared-config';
 
 const { Text } = Typography;
@@ -26,9 +27,11 @@ export function getRestaurantColumns({
   onSuspend: (r: RestaurantRecord) => void;
   onView: (r: RestaurantRecord) => void;
 }): ColumnsType<RestaurantRecord> {
+  const { t } = getLocale();
+
   return [
     {
-      title: 'Nhà Hàng',
+      title: t('restaurants.name', 'Nhà Hàng'),
       key: 'name',
       render: (_, r) => (
         <Space direction="vertical" size={2}>
@@ -40,7 +43,7 @@ export function getRestaurantColumns({
       ),
     },
     {
-      title: 'Chủ Sở Hữu',
+      title: t('restaurants.owner', 'Chủ Sở Hữu'),
       key: 'owner',
       render: (_, r) => (
         <Space direction="vertical" size={2}>
@@ -52,53 +55,53 @@ export function getRestaurantColumns({
       ),
     },
     {
-      title: 'Trạng Thái',
+      title: t('restaurants.status', 'Trạng Thái'),
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => {
         const RESTAURANT_STATUS_LABELS: Record<string, string> = {
-          PENDING: 'Chờ duyệt',
-          APPROVED: 'Hoạt động',
+          PENDING: t('restaurants.pending', 'Chờ duyệt'),
+          APPROVED: t('restaurants.active', 'Hoạt động'),
         };
 
         return (
           <Tag color={RESTAURANT_STATUS_COLOR_MAP[status] ?? 'default'}>
-            {RESTAURANT_STATUS_LABELS[status] ?? 'Đình chỉ'}
+            {RESTAURANT_STATUS_LABELS[status] ?? t('restaurants.suspend', 'Đình chỉ')}
           </Tag>
         );
       },
     },
     {
-      title: 'Đánh Giá',
+      title: t('restaurants.rating', 'Đánh Giá'),
       dataIndex: 'avgRating',
       key: 'avgRating',
       render: (v: number) => <Text>⭐ {v.toFixed(1)}</Text>,
       sorter: (a, b) => a.avgRating - b.avgRating,
     },
     {
-      title: 'Tổng Đơn',
+      title: t('analytics.ordersCount', 'Tổng Đơn'),
       dataIndex: 'totalOrders',
       key: 'totalOrders',
       sorter: (a, b) => a.totalOrders - b.totalOrders,
     },
     {
-      title: 'Hành Động',
+      title: t('common.actions', 'Hành Động'),
       key: 'actions',
       render: (_, r) => (
         <Space>
-          <Tooltip title="Xem chi tiết">
+          <Tooltip title={t('common.details', 'Xem chi tiết')}>
             <Button size="small" onClick={() => onView(r)}>
-              Chi Tiết
+              {t('common.details', 'Chi Tiết')}
             </Button>
           </Tooltip>
           {r.status === 'PENDING' && (
             <Button size="small" type="primary" onClick={() => onApprove(r)}>
-              Duyệt
+              {t('restaurants.approve', 'Duyệt')}
             </Button>
           )}
           {r.status === 'APPROVED' && (
             <Button size="small" danger onClick={() => onSuspend(r)}>
-              Đình Chỉ
+              {t('restaurants.suspend', 'Đình Chỉ')}
             </Button>
           )}
         </Space>

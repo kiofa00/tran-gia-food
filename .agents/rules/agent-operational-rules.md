@@ -30,3 +30,25 @@
 ## 4. CODE QUALITY & LINTING
 
 - **Linting**: Run `pnpm lint` to verify code quality. `pnpm lint` automatically runs `--fix` across all subpackages. Maintain 0 errors and 0 warnings.
+
+## 5. I18N & TRANSLATION POLICY (STRICT ENFORCEMENT)
+
+- **MANDATORY TRANSLATIONS**: 100% of user-facing text (button labels, modal titles, form labels, placeholders, table headers, toast notifications, error/success messages, and empty states) MUST use translation functions (`t('key')` via `useLocale()` / `useTranslation()` in React/Next.js; localization resources in Flutter).
+- **ZERO HARDCODED UI TEXT**: NEVER hardcode raw text strings directly in JSX components, page templates, or Flutter Widget trees.
+- **LOCALE SYNCHRONIZATION**: When introducing new translation keys, ensure they are registered properly in all supported locale dictionaries (`vi.json`, `en.json`).
+
+## 6. CONFIGURATION, ROUTE & CONSTANTS CENTRALIZATION (NO MAGIC VALUES)
+
+- **CENTRALIZED CONFIG FILES**: All configuration values, app routes, regular expressions, API endpoints, timeout constants, and validation rules MUST be declared in dedicated config/constants files (e.g., `routes.ts`, `regex.ts`, `constants.ts`, `config.ts`, `app_routes.dart`, `app_constants.dart`).
+- **NO INLINE REGEX**: NEVER define complex or non-trivial regular expressions directly inside components or utility functions without exporting from a centralized `regex.ts` / constants file.
+- **NO HARDCODED ROUTES**: Route paths must be referenced through constant route definitions (e.g., `ROUTES.ORDERS`, `ROUTES.SETTINGS`), never raw string literals like `'/orders'`.
+- **NO MAGIC NUMBERS/STRINGS**: Timeouts, pagination limits, threshold values, and business constants must be named exports.
+
+## 7. SEPARATION OF CONCERNS (LOGIC SEPARATED FROM UI COMPONENTS)
+
+- **PRESENTATION-ONLY UI COMPONENTS**: React/Next.js components and Flutter Widgets must focus exclusively on layout, rendering, design tokens, and user event wiring. They must NOT contain inline data fetching, stateful business logic, or complex transformations.
+- **EXTRACT INTO CUSTOM HOOKS & SERVICES**:
+  - React/Next.js: Extract state management, API/Service calls, form submission logic, and data manipulations into dedicated custom hooks (`use<Feature>.ts` / `use<Feature>Modal.ts`).
+  - Flutter: Extract business logic, state mutations, and API requests into Controllers, Repositories, or Notifiers (`ChangeNotifier` / `Riverpod`).
+- **CONTAINER & PRESENTER ARCHITECTURE**: Components should consume clean data and action handlers returned from hooks/controllers (e.g., `const { data, loading, handleSave } = useFeatureModal(...)`).
+- **TESTABLE LOGIC**: Extracted hooks and service layers must be independently testable via unit tests without rendering complex UI trees.

@@ -23,17 +23,24 @@ export class CmsService {
     this.cmsUrl = this.config.get<string>('CMS_URL') || 'http://localhost:1337';
   }
 
-  async getBanners(): Promise<CmsBanner[]> {
+  async getBanners(bypassCache = false): Promise<CmsBanner[]> {
     const cacheKey = 'cms:banners';
-    try {
-      const cached = await this.redis.get(cacheKey);
-      if (cached) return JSON.parse(cached);
-    } catch {
-      /* Redis cache miss or connection error */
+    if (!bypassCache) {
+      try {
+        const cached = await this.redis.get(cacheKey);
+        if (cached) return JSON.parse(cached);
+      } catch {
+        /* Redis cache miss or connection error */
+      }
     }
 
     try {
-      const res = await axios.get(`${this.cmsUrl}/api/banners`, { timeout: 3000 });
+      const res = await axios.get(
+        `${this.cmsUrl}/api/banners?pagination[pageSize]=1000&populate=*`,
+        {
+          timeout: 3000,
+        },
+      );
       const banners: CmsBanner[] = (res.data?.data || []).map((item: Record<string, unknown>) => ({
         id: (item.id as string | number) || `b_${Date.now()}`,
         title:
@@ -54,30 +61,38 @@ export class CmsService {
             : item.isActive) !== false,
       }));
 
-      try {
-        await this.redis.set(cacheKey, JSON.stringify(banners), 300);
-      } catch {
-        /* Redis cache miss or connection error */
+      if (banners.length > 0) {
+        try {
+          await this.redis.set(cacheKey, JSON.stringify(banners), 300);
+        } catch {
+          /* Redis cache error */
+        }
       }
 
       return banners;
-    } catch {
-      this.logger.warn(`Strapi CMS offline at ${this.cmsUrl}. Returning empty banner list.`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.logger.warn(`Strapi CMS banners unreachable at ${this.cmsUrl}: ${msg}`);
       return [];
     }
   }
 
-  async getTranslations(): Promise<CmsTranslation[]> {
+  async getTranslations(bypassCache = false): Promise<CmsTranslation[]> {
     const cacheKey = 'cms:translations';
-    try {
-      const cached = await this.redis.get(cacheKey);
-      if (cached) return JSON.parse(cached);
-    } catch {
-      /* Redis cache miss or connection error */
+    if (!bypassCache) {
+      try {
+        const cached = await this.redis.get(cacheKey);
+        if (cached) return JSON.parse(cached);
+      } catch {
+        /* Redis cache miss or connection error */
+      }
     }
 
     try {
-      const res = await axios.get(`${this.cmsUrl}/api/translations`, { timeout: 3000 });
+      const res = await axios.get(
+        `${this.cmsUrl}/api/translations?pagination[pageSize]=1000&populate=*`,
+        { timeout: 3000 },
+      );
       const translations: CmsTranslation[] = (res.data?.data || []).map(
         (item: Record<string, unknown>) => {
           const rawAttrs = (item.attributes as Record<string, unknown>) || item;
@@ -91,22 +106,27 @@ export class CmsService {
         },
       );
 
-      try {
-        await this.redis.set(cacheKey, JSON.stringify(translations), 300);
-      } catch {
-        /* Redis cache miss or connection error */
+      if (translations.length > 0) {
+        try {
+          await this.redis.set(cacheKey, JSON.stringify(translations), 300);
+        } catch {
+          /* Redis cache error */
+        }
       }
 
       return translations;
-    } catch {
-      this.logger.warn(`Strapi CMS offline at ${this.cmsUrl}. Returning empty translation list.`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.logger.warn(`Strapi CMS translations unreachable at ${this.cmsUrl}: ${msg}`);
       return [];
     }
   }
 
   async getAnnouncements(): Promise<CmsAnnouncement[]> {
     try {
-      const res = await axios.get(`${this.cmsUrl}/api/announcements`, { timeout: 3000 });
+      const res = await axios.get(`${this.cmsUrl}/api/announcements?pagination[pageSize]=1000`, {
+        timeout: 3000,
+      });
       return (res.data?.data || []).map((item: Record<string, unknown>) => ({
         id: (item.id as string | number) || `a_${Date.now()}`,
         title: String(item.title || ''),
@@ -118,10 +138,25 @@ export class CmsService {
     }
   }
 
-  async getFaqs(): Promise<CmsFaq[]> {
+  async getFaqs(bypassCache = false): Promise<CmsFaq[]> {
+    const cacheKey = 'cms:faqs';
+    if (!bypassCache) {
+      try {
+        const cached = await this.redis.get(cacheKey);
+        if (cached) return JSON.parse(cached);
+      } catch {
+        /* Redis cache miss */
+      }
+    }
+
     try {
-      const res = await axios.get(`${this.cmsUrl}/api/faq-items`, { timeout: 3000 });
-      return (res.data?.data || []).map((item: Record<string, unknown>) => {
+      const res = await axios.get(
+        `${this.cmsUrl}/api/faq-items?pagination[pageSize]=1000&populate=*`,
+        {
+          timeout: 3000,
+        },
+      );
+      const faqs = (res.data?.data || []).map((item: Record<string, unknown>) => {
         const attrs = (item.attributes as Record<string, unknown>) || item;
         return {
           id: (item.id as string | number) || `f_${Date.now()}`,
@@ -131,7 +166,19 @@ export class CmsService {
           targetApp: String(attrs.targetApp || attrs.appTarget || 'ALL'),
         };
       });
-    } catch {
+
+      if (faqs.length > 0) {
+        try {
+          await this.redis.set(cacheKey, JSON.stringify(faqs), 300);
+        } catch {
+          /* Redis cache error */
+        }
+      }
+
+      return faqs;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.logger.warn(`Strapi CMS FAQs unreachable at ${this.cmsUrl}: ${msg}`);
       return [];
     }
   }
@@ -139,9 +186,9 @@ export class CmsService {
   async getCmsStatus(): Promise<CmsStatusResponse> {
     try {
       const [banners, translations, faqs] = await Promise.all([
-        this.getBanners(),
-        this.getTranslations(),
-        this.getFaqs(),
+        this.getBanners(true),
+        this.getTranslations(true),
+        this.getFaqs(true),
       ]);
 
       return {

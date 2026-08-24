@@ -9,6 +9,9 @@ Tệp tổng hợp và điều hướng các quy định vận hành chính th�
   - Testing Enforcement (không test UI component, chỉ test logic utils/hooks/backend).
   - Design Tokens Policy (không hardcode Hex/fontSize).
   - TailwindCSS Standard (sử dụng 100% TailwindCSS utility classes, cấm dùng inline style).
+  - i18n & Translation (bắt buộc 100% UI text dùng translation key, cấm hardcode chuỗi).
+  - Centralized Config & Constants (cấm inline regex, magic numbers/strings, raw routes; phải khai báo file config tập trung).
+  - Separation of Concerns (tách biệt 100% business logic, state, API calls ra Custom Hooks / Services; UI component thuần presentation).
   - Linting Policy (`pnpm lint` auto-fix, 0 warnings).
 - **Quy tắc Monorepo & Dependencies**: [`rules/monorepo-boundaries.md`](./rules/monorepo-boundaries.md)
   - Quản lý phụ thuộc giữa `apps/*`, `backend` và `packages/*`.

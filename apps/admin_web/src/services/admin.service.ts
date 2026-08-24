@@ -29,4 +29,21 @@ export const adminService = {
 
     return res.data;
   },
+
+  getAppConfigs: async (): Promise<
+    Array<{ id: string; key: string; value: string; description?: string }>
+  > => {
+    const res = await apiClient.get('/admin/config');
+
+    return res.data;
+  },
+
+  setAppConfig: async (
+    key: string,
+    value: string,
+  ): Promise<{ id: string; key: string; value: string; description?: string }> => {
+    const res = await apiClient.patch('/admin/config', { key, value });
+
+    return res.data;
+  },
 };

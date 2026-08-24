@@ -8,7 +8,7 @@ import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { App, Button, Card, Checkbox, Form, Input, Skeleton, Typography } from 'antd';
 
 import { useAuth } from '@/hooks/useAuth';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 import { ADMIN_ROUTES, STORAGE_KEY_REMEMBERED_EMAIL } from '@/shared-config';
 import { cn } from '@/utils/cn';
 
@@ -28,7 +28,7 @@ export function LoginForm({ className }: LoginFormProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { message } = App.useApp();
-  const { t } = useTranslation();
+  const { t } = useLocale();
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   // Khởi tạo null để phân biệt "chưa mount" vs "không có giá trị"

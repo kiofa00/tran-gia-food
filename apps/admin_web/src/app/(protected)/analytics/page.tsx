@@ -15,14 +15,14 @@ import {
   TopRestaurantsTable,
   useAnalyticsQuery,
 } from '@/components';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks';
 import { ANALYTICS_TIME_RANGE_OPTIONS } from '@/shared-config';
 import { PaymentMethodItem, RevenueTrendItem, TopRestaurantItem } from '@/types';
 
 const { Text } = Typography;
 
 export default function AnalyticsPage() {
-  const { t } = useTranslation();
+  const { t } = useLocale();
   const [timeRange, setTimeRange] = useState('7d');
   const { data, isLoading: loading } = useAnalyticsQuery(timeRange);
 
@@ -107,7 +107,7 @@ export default function AnalyticsPage() {
             <Select
               value={timeRange}
               onChange={(val) => setTimeRange(val)}
-              className="w-40"
+              className="w-32 text-left"
               options={ANALYTICS_TIME_RANGE_OPTIONS}
             />
           </Space>

@@ -93,10 +93,10 @@ describe('CmsService', () => {
       const result = await service.getBanners();
 
       expect(result).toHaveLength(2);
-      expect(result[0].id).toBe(1);
-      expect(result[0].title).toBe('Khuyến mãi tháng 8');
-      expect(result[0].imageUrl).toBe('https://cdn.test/banner_1.jpg');
-      expect(result[0].isActive).toBe(true);
+      expect(result[0]?.id).toBe(1);
+      expect(result[0]?.title).toBe('Khuyến mãi tháng 8');
+      expect(result[0]?.imageUrl).toBe('https://cdn.test/banner_1.jpg');
+      expect(result[0]?.isActive).toBe(true);
     });
 
     it('should return cached banners from Redis without hitting Strapi', async () => {
@@ -106,7 +106,7 @@ describe('CmsService', () => {
       const result = await service.getBanners();
 
       expect(result).toHaveLength(1);
-      expect(result[0].id).toBe(99);
+      expect(result[0]?.id).toBe(99);
       expect(mockedAxios.get).not.toHaveBeenCalled();
     });
 
@@ -156,9 +156,9 @@ describe('CmsService', () => {
       const result = await service.getTranslations();
 
       expect(result).toHaveLength(2);
-      expect(result[0].key).toBe('app.title');
-      expect(result[0].appTarget).toBe('ALL');
-      expect(result[0].category).toBe('GENERAL');
+      expect(result[0]?.key).toBe('app.title');
+      expect(result[0]?.appTarget).toBe('ALL');
+      expect(result[0]?.category).toBe('GENERAL');
     });
 
     it('should return cached translations without Strapi call', async () => {
@@ -167,7 +167,7 @@ describe('CmsService', () => {
 
       const result = await service.getTranslations();
 
-      expect(result[0].key).toBe('cached.key');
+      expect(result[0]?.key).toBe('cached.key');
       expect(mockedAxios.get).not.toHaveBeenCalled();
     });
 
@@ -205,8 +205,8 @@ describe('CmsService', () => {
       const result = await service.getAnnouncements();
 
       expect(result).toHaveLength(2);
-      expect(result[0].title).toBe('Bảo trì hệ thống');
-      expect(result[0].summary).toBe('Tóm tắt 1');
+      expect(result[0]?.title).toBe('Bảo trì hệ thống');
+      expect(result[0]?.summary).toBe('Tóm tắt 1');
     });
 
     it('should return [] when Strapi throws', async () => {
@@ -228,10 +228,10 @@ describe('CmsService', () => {
       const result = await service.getFaqs();
 
       expect(result).toHaveLength(2);
-      expect(result[0].question).toBe('Làm sao đặt hàng?');
-      expect(result[0].answer).toBe('Trả lời số 1');
-      expect(result[0].category).toBe('ORDER');
-      expect(result[0].targetApp).toBe('customer');
+      expect(result[0]?.question).toBe('Làm sao đặt hàng?');
+      expect(result[0]?.answer).toBe('Trả lời số 1');
+      expect(result[0]?.category).toBe('ORDER');
+      expect(result[0]?.targetApp).toBe('customer');
     });
 
     it('should return [] on Strapi error', async () => {
@@ -250,7 +250,7 @@ describe('CmsService', () => {
 
       const result = await service.getFaqs();
 
-      expect(result[0].question).toBe('Câu hỏi');
+      expect(result[0]?.question).toBe('Câu hỏi');
     });
   });
 
@@ -325,7 +325,7 @@ describe('CmsService', () => {
       const result = await service.getBanners();
 
       expect(result).toHaveLength(1);
-      expect(result[0].title).toBe('Fallback Banner');
+      expect(result[0]?.title).toBe('Fallback Banner');
     });
 
     it('should not throw when Redis.set fails after Strapi fetch', async () => {

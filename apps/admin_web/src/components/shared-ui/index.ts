@@ -9,3 +9,5 @@ export * from './PageHeader';
 export * from './PlateBadge';
 export * from './SearchFilterBox';
 export * from './VehicleBadge';
+export * from './AdminProfileModal';
+export * from './SystemSettingsModal';

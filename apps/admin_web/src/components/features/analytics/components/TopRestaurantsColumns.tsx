@@ -2,14 +2,14 @@
 
 import { Tag, Typography } from 'antd';
 
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 import { TopRestaurantItem } from '@/types';
 import { formatCurrency } from '@/utils/formatters';
 
 const { Text } = Typography;
 
 export function useTopRestaurantsColumns() {
-  const { t } = useTranslation();
+  const { t } = useLocale();
 
   return [
     {

@@ -38,7 +38,16 @@ describe('AuthService', () => {
       if (key === 'NODE_ENV') return 'test';
       if (key === 'JWT_SECRET') return 'secret';
       if (key === 'JWT_REFRESH_SECRET') return 'refresh-secret';
+      if (key === 'JWT_EXPIRES_IN') return '7d';
+      if (key === 'JWT_REFRESH_EXPIRES_IN') return '30d';
       return null;
+    }),
+    getOrThrow: jest.fn((key: string) => {
+      if (key === 'JWT_SECRET') return 'secret';
+      if (key === 'JWT_REFRESH_SECRET') return 'refresh-secret';
+      if (key === 'JWT_EXPIRES_IN') return '7d';
+      if (key === 'JWT_REFRESH_EXPIRES_IN') return '30d';
+      return 'mock-value';
     }),
   };
 

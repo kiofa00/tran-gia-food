@@ -7,6 +7,7 @@ import { JwtAuthGuard, Public } from '../../common/guards/jwt-auth.guard';
 import { AuthService } from './auth.service';
 import {
   AdminLoginDto,
+  ChangePasswordDto,
   GoogleAuthDto,
   RefreshTokenDto,
   SendOtpDto,
@@ -89,6 +90,14 @@ export class AuthController {
   @ApiOperation({ summary: 'Đăng xuất (xóa refresh token)' })
   logout(@CurrentUser() user: User) {
     return this.authService.logout(user.id);
+  }
+
+  @Post('change-password')
+  @ApiBearerAuth('access-token')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Đổi mật khẩu người dùng đang đăng nhập' })
+  changePassword(@CurrentUser() user: User, @Body() dto: ChangePasswordDto) {
+    return this.authService.changePassword(user.id, dto);
   }
 
   // ── Profile ───────────────────────────────

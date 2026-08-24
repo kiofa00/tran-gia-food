@@ -19,12 +19,12 @@ import {
   useVoucherColumns,
   useVouchersQuery,
 } from '@/components';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks';
 import { VOUCHER_STATUS_FILTER_OPTIONS } from '@/shared-config';
 
 export default function VoucherManagementPage() {
   const { message } = App.useApp();
-  const { t } = useTranslation();
+  const { t } = useLocale();
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');

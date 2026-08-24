@@ -43,3 +43,14 @@ export class AdminLoginDto {
   @MinLength(8, { message: 'Mật khẩu phải có ít nhất 8 ký tự' })
   password!: string;
 }
+
+export class ChangePasswordDto {
+  @ApiProperty({ example: 'Admin@123456', description: 'Mật khẩu hiện tại' })
+  @IsString()
+  currentPassword!: string;
+
+  @ApiProperty({ example: 'NewAdmin@123456', description: 'Mật khẩu mới (tối thiểu 6 ký tự)' })
+  @IsString()
+  @MinLength(6, { message: 'Mật khẩu mới phải có ít nhất 6 ký tự' })
+  newPassword!: string;
+}

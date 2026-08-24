@@ -6,8 +6,8 @@ import { ADMIN_ROUTES } from '@/shared-config';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 
-// 14 phút (backend accessToken hết hạn sau 15 phút, buffer 60s để refresh kịp)
-const ACCESS_TOKEN_TTL_MS = 14 * 60 * 1000;
+// 7 ngày (đồng bộ với backend JWT_EXPIRES_IN 7d)
+const ACCESS_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 async function refreshAccessToken(token: JWT): Promise<JWT> {
   try {

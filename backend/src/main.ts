@@ -13,28 +13,24 @@ async function bootstrap() {
   // Global prefix
   app.setGlobalPrefix('api/v1');
 
-  // CORS (Allow Admin Web localhost:3001, Strapi CMS localhost:1337 & mobile apps)
+  // Dynamic CORS Configuration from Environment Variables
+  const corsOrigins = process.env.CORS_ORIGINS || '*';
   app.enableCors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-      const allowedOrigins = [
-        'http://localhost:8080',
-        'http://localhost:6000',
-        'http://localhost:3001',
-        'http://localhost:3000',
-        'http://localhost:1337',
-        'http://127.0.0.1:8080',
-        'http://127.0.0.1:6000',
-        'http://127.0.0.1:3001',
-        'http://127.0.0.1:3000',
-        'http://127.0.0.1:1337',
-        ...(process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : []),
-      ];
-      if (allowedOrigins.includes(origin) || origin.startsWith('http://localhost:')) {
-        return callback(null, true);
-      }
-      return callback(null, true);
-    },
+    origin:
+      corsOrigins === '*'
+        ? true
+        : (origin, callback) => {
+            if (!origin) return callback(null, true);
+            const allowed = corsOrigins.split(',').map((s) => s.trim());
+            if (
+              allowed.includes(origin) ||
+              allowed.includes('*') ||
+              (process.env.NODE_ENV !== 'production' && origin.startsWith('http://localhost:'))
+            ) {
+              return callback(null, true);
+            }
+            return callback(new Error(`Origin ${origin} not allowed by CORS`), false);
+          },
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],

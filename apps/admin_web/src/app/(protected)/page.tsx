@@ -17,11 +17,11 @@ import {
   usePendingShippersQuery,
   useShipperKycColumns,
 } from '@/components';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks';
 
 export default function AdminDashboardPage() {
   const { message } = App.useApp();
-  const { t } = useTranslation();
+  const { t } = useLocale();
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');

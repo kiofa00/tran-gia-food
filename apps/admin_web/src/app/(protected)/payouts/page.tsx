@@ -16,13 +16,14 @@ import {
   useProcessPayoutMutation,
   useRejectPayoutMutation,
 } from '@/components';
-import { PAYOUT_STATUS_FILTER_OPTIONS } from '@/shared-config';
+import { useLocale } from '@/hooks';
 import { convertToCsv, downloadCsv } from '@/utils';
 
 const { Text } = Typography;
 
 export default function PayoutsManagementPage() {
   const { message } = App.useApp();
+  const { t } = useLocale();
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -57,42 +58,53 @@ export default function PayoutsManagementPage() {
   const handleProcess = useCallback(
     (record: PayoutRecord) => {
       Modal.confirm({
-        title: 'Xác nhận giải ngân?',
-        content: `Giải ngân ${record.amount.toLocaleString('vi-VN')}đ cho "${record.restaurantName}"?`,
-        okText: 'Giải Ngân',
+        title: t('payouts.process', 'Xác nhận giải ngân?'),
+        content: t('payouts.processConfirmContent', 'Giải ngân {amount}đ cho "{name}"?', {
+          amount: record.amount.toLocaleString('vi-VN'),
+          name: record.restaurantName,
+        }),
+        okText: t('payouts.process', 'Giải Ngân'),
+        cancelText: t('common.cancel', 'Hủy'),
         onOk: () =>
           processMutation.mutate(record.id, {
-            onSuccess: () => message.success('Đã giải ngân thành công!'),
-            onError: () => message.error('Thao tác thất bại.'),
+            onSuccess: () => message.success(t('common.success', 'Đã giải ngân thành công!')),
+            onError: () => message.error(t('common.errorTryAgain', 'Thao tác thất bại.')),
           }),
       });
     },
-    [processMutation, message],
+    [processMutation, message, t],
   );
 
   const handleReject = useCallback(
     (record: PayoutRecord) => {
       Modal.confirm({
-        title: 'Từ chối giải ngân?',
-        content: `Từ chối yêu cầu giải ngân của "${record.restaurantName}"?`,
-        okText: 'Từ Chối',
+        title: t('payouts.reject', 'Từ chối giải ngân?'),
+        content: t('payouts.rejectConfirmContent', 'Từ chối yêu cầu giải ngân của "{name}"?', {
+          name: record.restaurantName,
+        }),
+        okText: t('payouts.reject', 'Từ Chối'),
+        cancelText: t('common.cancel', 'Hủy'),
         okButtonProps: { danger: true },
         onOk: () =>
           rejectMutation.mutate(
-            { payoutId: record.id, reason: 'Thông tin không hợp lệ' },
             {
-              onSuccess: () => message.success('Đã từ chối yêu cầu giải ngân.'),
-              onError: () => message.error('Thao tác thất bại.'),
+              payoutId: record.id,
+              reason: t('payouts.invalidInfoReason', 'Thông tin không hợp lệ'),
+            },
+            {
+              onSuccess: () =>
+                message.success(t('common.success', 'Đã từ chối yêu cầu giải ngân.')),
+              onError: () => message.error(t('common.errorTryAgain', 'Thao tác thất bại.')),
             },
           ),
       });
     },
-    [rejectMutation, message],
+    [rejectMutation, message, t],
   );
 
   const handleExportCsv = useCallback(() => {
     if (payouts.length === 0) {
-      message.warning('Không có dữ liệu để xuất file');
+      message.warning(t('payouts.emptyDescription', 'Không có dữ liệu để xuất file'));
 
       return;
     }
@@ -112,12 +124,26 @@ export default function PayoutsManagementPage() {
     const filename = `sao_ke_giai_ngan_${new Date().toISOString().slice(0, 10)}.csv`;
 
     downloadCsv(csvContent, filename);
-    message.success(`Đã xuất ${payouts.length} bản ghi sao kê ra file CSV`);
-  }, [payouts, message]);
+    message.success(
+      t('payouts.exportCsvSuccess', 'Đã xuất {count} bản ghi sao kê ra file CSV', {
+        count: payouts.length,
+      }),
+    );
+  }, [payouts, message, t]);
 
   const columns = useMemo(
     () => getPayoutColumns({ onProcess: handleProcess, onReject: handleReject }),
     [handleProcess, handleReject],
+  );
+
+  const filterOptions = useMemo(
+    () => [
+      { value: 'ALL', label: t('common.all', 'Tất cả trạng thái') },
+      { value: 'PENDING', label: t('payouts.statusPending', 'Chờ giải ngân') },
+      { value: 'PROCESSED', label: t('payouts.statusCompleted', 'Đã giải ngân') },
+      { value: 'REJECTED', label: t('payouts.statusFailed', 'Bị từ chối') },
+    ],
+    [t],
   );
 
   return (
@@ -125,27 +151,27 @@ export default function PayoutsManagementPage() {
       <Space direction="vertical" size="large" className="w-full">
         <PageHeader
           icon="💰"
-          title="Quản Lý Giải Ngân"
-          subtitle="Xử lý các yêu cầu thanh toán cho nhà hàng và tài xế"
+          title={t('payouts.title', 'Quản Lý Giải Ngân')}
+          subtitle={t('payouts.subtitle', 'Xử lý các yêu cầu thanh toán cho nhà hàng và tài xế')}
         />
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4">
           {[
             {
-              label: 'Chờ Giải Ngân',
+              label: t('payouts.statusPending', 'Chờ Giải Ngân'),
               value: `${pendingAmount.toLocaleString('vi-VN')}đ`,
               color: 'text-orange-500',
               sub: `${pendingCount} yêu cầu`,
             },
             {
-              label: 'Đã Giải Ngân',
+              label: t('payouts.statusCompleted', 'Đã Giải Ngân'),
               value: processedCount,
               color: 'text-green-600',
               sub: 'trong kỳ này',
             },
             {
-              label: 'Tổng Yêu Cầu',
+              label: t('payouts.title', 'Tổng Yêu Cầu'),
               value: payouts.length,
               color: 'text-blue-600',
               sub: 'tất cả thời gian',
@@ -166,15 +192,15 @@ export default function PayoutsManagementPage() {
         <Card variant="borderless" className="rounded-xl shadow-xs">
           <Space direction="vertical" className="w-full" size="middle">
             <div className="flex flex-wrap justify-between items-center gap-4">
-              <div className="flex-1 min-w-[300px]">
+              <div className="flex-1 min-w-75">
                 <SearchFilterBox
-                  searchPlaceholder="Tìm theo tên nhà hàng..."
+                  searchPlaceholder={t('common.search', 'Tìm theo tên nhà hàng...')}
                   searchValue={search}
                   onSearchChange={setSearch}
-                  filterLabel="Lọc Trạng Thái:"
+                  filterLabel={t('common.status', 'Lọc Trạng Thái:')}
                   filterValue={statusFilter}
                   onFilterChange={setStatusFilter}
-                  filterOptions={PAYOUT_STATUS_FILTER_OPTIONS}
+                  filterOptions={filterOptions}
                 />
               </div>
               <Button
@@ -190,7 +216,10 @@ export default function PayoutsManagementPage() {
               dataSource={payouts}
               columns={columns}
               loading={isLoading}
-              emptyDescription="Không tìm thấy yêu cầu giải ngân phù hợp"
+              emptyDescription={t(
+                'payouts.emptyDescription',
+                'Không tìm thấy yêu cầu giải ngân phù hợp',
+              )}
             />
           </Space>
         </Card>

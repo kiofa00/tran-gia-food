@@ -14,12 +14,12 @@ import {
   useCommissionsColumns,
   useCommissionsQuery,
 } from '@/components';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks';
 import { CommissionRecord } from '@/types';
 
 export default function CommissionsPage() {
   const { message } = App.useApp();
-  const { t } = useTranslation();
+  const { t } = useLocale();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [page, setPage] = useState(1);

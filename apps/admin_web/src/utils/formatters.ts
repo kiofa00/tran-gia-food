@@ -8,6 +8,19 @@ export function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
+/** Format a number with comma thousand separators safely using Intl.NumberFormat without regex backtracking */
+export function formatThousands(value: number | string | undefined): string {
+  if (value === undefined || value === null || value === '') return '';
+  const num = Number(value);
+  if (Number.isNaN(num)) return String(value);
+  return new Intl.NumberFormat('en-US').format(num);
+}
+
+/** Parse string with commas back to clean numeric string for InputNumber */
+export function parseThousands(value: string | undefined): string {
+  return value ? value.replace(/,/g, '') : '';
+}
+
 /** Format distance in kilometers (e.g. 2.456 -> 2.5 km) */
 export function formatDistance(distanceKm: number): string {
   return `${distanceKm.toFixed(1)} km`;

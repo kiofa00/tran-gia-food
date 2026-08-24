@@ -3,11 +3,11 @@ import React from 'react';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import '@ant-design/v5-patch-for-react-19';
 
+import { AppInitializer } from '@/components';
 import { AntdThemeConfig } from '@/providers/AntdThemeConfig';
 import { LanguageProvider } from '@/providers/LanguageProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { SessionProvider } from '@/providers/SessionProvider';
-import { ThemeProvider } from '@/providers/ThemeProvider';
 
 import './globals.css';
 
@@ -34,16 +34,15 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi" suppressHydrationWarning>
-      <body className="m-0 p-0 font-sans dark:bg-slate-900 dark:text-slate-100 transition-colors duration-200">
+      <body className="m-0 p-0 font-sans bg-gray-50 text-gray-900">
         <SessionProvider>
           <QueryProvider>
-            <ThemeProvider>
-              <LanguageProvider>
-                <AntdRegistry>
-                  <AntdThemeConfig>{children}</AntdThemeConfig>
-                </AntdRegistry>
-              </LanguageProvider>
-            </ThemeProvider>
+            <LanguageProvider>
+              <AppInitializer />
+              <AntdRegistry>
+                <AntdThemeConfig>{children}</AntdThemeConfig>
+              </AntdRegistry>
+            </LanguageProvider>
           </QueryProvider>
         </SessionProvider>
       </body>

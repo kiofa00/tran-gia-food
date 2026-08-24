@@ -36,6 +36,16 @@ describe('AdminService', () => {
     shipper: {
       count: jest.fn().mockResolvedValue(30),
       findUnique: jest.fn(),
+      findMany: jest.fn().mockResolvedValue([
+        {
+          id: 'shipper-1',
+          vehicleType: 'motorbike',
+          vehiclePlate: '59A-12345',
+          ekycStatus: KycStatus.pending,
+          createdAt: new Date('2024-01-01'),
+          user: { id: 'u-1', name: 'Nguyễn Văn Shipper', phone: '0901112222', email: 's@test.com' },
+        },
+      ]),
       update: jest.fn(),
     },
     order: { count: jest.fn().mockResolvedValue(500) },
@@ -85,6 +95,27 @@ describe('AdminService', () => {
     });
   });
 
+  describe('listKycShippers', () => {
+    it('should return KYC shipper applications list', async () => {
+      const result = await service.listKycShippers({ status: 'ALL' });
+      expect(result).toBeDefined();
+
+      const data = Array.isArray(result) ? result : (result as { data: unknown[] }).data;
+      expect(Array.isArray(data)).toBe(true);
+
+      const first = (data as { id: string; name: string; status: string }[])[0];
+      expect(first).toBeDefined();
+      expect(first?.id).toBe('shipper-1');
+      expect(first?.name).toBe('Nguyễn Văn Shipper');
+    });
+
+    it('should filter by specific status', async () => {
+      const result = await service.listKycShippers({ status: 'PENDING' });
+      expect(mockPrismaService.shipper.findMany).toHaveBeenCalled();
+      expect(result).toBeDefined();
+    });
+  });
+
   describe('getUsersList', () => {
     it('should return paginated user list with correct structure', async () => {
       const result = await service.getUsersList({ role: 'ALL' });
@@ -94,9 +125,10 @@ describe('AdminService', () => {
       expect(Array.isArray(data)).toBe(true);
 
       const first = (data as { id: string; role: string; status: string }[])[0];
-      expect(first.id).toBe('user-1');
-      expect(first.role).toBe('CUSTOMER'); // uppercased
-      expect(first.status).toBe('ACTIVE'); // default
+      expect(first).toBeDefined();
+      expect(first?.id).toBe('user-1');
+      expect(first?.role).toBe('CUSTOMER'); // uppercased
+      expect(first?.status).toBe('ACTIVE'); // default
     });
 
     it('should filter by role when specified', async () => {
@@ -116,7 +148,9 @@ describe('AdminService', () => {
         .fn()
         .mockResolvedValue({ id: 'user-1', status: 'SUSPENDED' });
 
-      const result = await service.updateUserStatus('user-1', { status: 'SUSPENDED' });
+      const result = (await service.updateUserStatus('user-1', { status: 'SUSPENDED' })) as {
+        status?: string;
+      };
       expect(result.status).toBe('SUSPENDED');
     });
   });

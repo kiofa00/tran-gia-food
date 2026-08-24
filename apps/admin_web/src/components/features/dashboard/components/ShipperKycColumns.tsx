@@ -4,7 +4,7 @@ import { CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined } from '@
 import { App, Button, Space, Tag, Typography } from 'antd';
 
 import { PlateBadge, VehicleBadge } from '@/components/shared-ui';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 import { mapKycStatus } from '@/utils/formatters';
 
 import { useVerifyShipperKycMutation } from '../hooks/useAdmin';
@@ -14,7 +14,7 @@ const { Text } = Typography;
 
 export function useShipperKycColumns() {
   const { message } = App.useApp();
-  const { t } = useTranslation();
+  const { t } = useLocale();
   const verifyKycMutation = useVerifyShipperKycMutation();
 
   const handleApproveKyc = (id: string, name: string) => {

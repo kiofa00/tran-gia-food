@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 import { getRoleFilterOptions, getStatusFilterOptions } from '@/utils';
 
 export const useUserFilterOptions = () => {
-  const { t } = useTranslation();
+  const { t } = useLocale();
 
   const roleFilterOptions = useMemo(() => getRoleFilterOptions(t), [t]);
   const statusFilterOptions = useMemo(() => getStatusFilterOptions(t), [t]);

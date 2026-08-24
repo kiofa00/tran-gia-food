@@ -89,4 +89,25 @@ describe('PayoutsService', () => {
       await expect(service.getShipperPayoutHistory(mockUser)).rejects.toThrow(NotFoundException);
     });
   });
+
+  describe('generateWeeklyStatements', () => {
+    it('should create statement payout for active shippers with balance', async () => {
+      mockPrismaService.shipper.findMany.mockResolvedValue([
+        { id: 'ship-1', walletCash: 500000, isActive: true, user: { email: 'shipper@test.com' } },
+      ]);
+      mockPrismaService.shipperPayout.create.mockResolvedValue({});
+
+      await service.generateWeeklyStatements();
+
+      expect(mockPrismaService.shipperPayout.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            shipperId: 'ship-1',
+            amount: 500000,
+            status: PayoutStatus.completed,
+          }),
+        }),
+      );
+    });
+  });
 });

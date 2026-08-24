@@ -6,7 +6,7 @@ import { CarOutlined, ShopOutlined, TeamOutlined, UserOutlined } from '@ant-desi
 import { Col, Row } from 'antd';
 
 import { MetricCard } from '@/components/shared-ui/MetricCard';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 import { adminDesignTokens } from '@/theme/tokens';
 
 interface UserMetricsProps {
@@ -22,7 +22,7 @@ export const UserMetrics: React.FC<UserMetricsProps> = ({
   restaurantsCount,
   shippersCount,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useLocale();
 
   return (
     <Row gutter={[16, 16]}>

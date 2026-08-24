@@ -4,7 +4,7 @@ import React from 'react';
 
 import { Badge, Button, Descriptions, Modal, Tag } from 'antd';
 
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 
 import { UserRecord } from '../types';
 
@@ -15,7 +15,7 @@ interface UserDetailModalProps {
 }
 
 export const UserDetailModal: React.FC<UserDetailModalProps> = ({ open, user, onClose }) => {
-  const { t } = useTranslation();
+  const { t } = useLocale();
 
   return (
     <Modal

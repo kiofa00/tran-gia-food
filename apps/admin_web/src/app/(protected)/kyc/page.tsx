@@ -32,6 +32,7 @@ import {
 } from 'antd';
 
 import { DataTable, PageContainer, PageHeader, SearchFilterBox } from '@/components';
+import { useLocale } from '@/hooks';
 import { apiClient } from '@/services/apiClient';
 
 const { Text, Title } = Typography;
@@ -39,6 +40,8 @@ const { Text, Title } = Typography;
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+
+export type KycStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 interface KycRecord {
   key: string;
@@ -48,7 +51,7 @@ interface KycRecord {
   cccd: string;
   vehicleType: string;
   submittedAt: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  status: KycStatus;
   cccdFrontUrl?: string;
   cccdBackUrl?: string;
   driverLicenseUrl?: string;
@@ -58,25 +61,13 @@ interface KycRecord {
 }
 
 // ---------------------------------------------------------------------------
-// Query Keys & Service
+// Query Keys & API fetcher
 // ---------------------------------------------------------------------------
 
 const KYC_QUERY_KEYS = {
-  all: ['admin', 'kyc'],
-  list: (params?: object) => [...KYC_QUERY_KEYS.all, 'list', params],
-};
-
-const KYC_STATUS_FILTER_OPTIONS = [
-  { value: 'ALL', label: 'Tất cả' },
-  { value: 'PENDING', label: '⏳ Chờ duyệt' },
-  { value: 'APPROVED', label: '✅ Đã duyệt' },
-  { value: 'REJECTED', label: '❌ Từ chối' },
-];
-
-const VEHICLE_LABELS: Record<string, string> = {
-  motorbike: '🛵 Xe máy',
-  bicycle: '🚲 Xe đạp',
-  car: '🚗 Ô tô',
+  all: ['admin', 'kyc'] as const,
+  list: (params?: { search?: string; status?: string }) =>
+    [...KYC_QUERY_KEYS.all, 'list', params] as const,
 };
 
 async function fetchKycApplications(params?: {
@@ -84,81 +75,51 @@ async function fetchKycApplications(params?: {
   status?: string;
 }): Promise<KycRecord[]> {
   try {
-    const res = await apiClient.get('/admin/shippers/kyc', { params });
-    const raw: Record<string, unknown>[] = Array.isArray(res.data)
-      ? res.data
-      : ((res.data as { data?: Record<string, unknown>[] })?.data ?? []);
+    const res = await apiClient.get<unknown>('/admin/kyc/shippers', {
+      params,
+    });
+    const data = res.data;
+    let raw: Record<string, unknown>[] = [];
 
-    return raw.map((item, idx) => ({
-      key: String(item.id ?? idx),
-      id: String(item.id ?? idx),
-      name: String(item.name ?? item.fullName ?? 'N/A'),
-      phone: String(item.phone ?? ''),
-      cccd: String(item.cccd ?? item.cccdNumber ?? ''),
-      vehicleType: String(item.vehicleType ?? 'motorbike'),
-      submittedAt: String(item.submittedAt ?? item.createdAt ?? ''),
-      status: (item.kycStatus as KycRecord['status']) ?? 'PENDING',
-      cccdFrontUrl: item.cccdFrontUrl as string | undefined,
-      cccdBackUrl: item.cccdBackUrl as string | undefined,
-      driverLicenseUrl: item.driverLicenseUrl as string | undefined,
-      vehicleRegUrl: item.vehicleRegUrl as string | undefined,
-      selfieUrl: item.selfieUrl as string | undefined,
-      rejectReason: item.rejectReason as string | undefined,
-    }));
+    if (Array.isArray(data)) {
+      raw = data as Record<string, unknown>[];
+    } else if (
+      data !== null &&
+      typeof data === 'object' &&
+      Array.isArray((data as { data?: unknown }).data)
+    ) {
+      raw = (data as { data: Record<string, unknown>[] }).data;
+    }
+
+    return raw.map((item, idx) => {
+      const user = (item.user as Record<string, unknown>) || {};
+      const statusRaw = String(
+        item.ekycStatus ?? item.kycStatus ?? item.status ?? 'PENDING',
+      ).toUpperCase();
+      const normalizedStatus: KycRecord['status'] =
+        statusRaw === 'VERIFIED' ? 'APPROVED' : (statusRaw as KycRecord['status']);
+
+      return {
+        key: String(item.id ?? idx),
+        id: String(item.id ?? idx),
+        name: String(user.name ?? item.name ?? item.fullName ?? 'Chưa cập nhật'),
+        phone: String(user.phone ?? item.phone ?? ''),
+        cccd: String(item.cccd ?? item.cccdNumber ?? ''),
+        vehicleType: String(item.vehicleType ?? 'motorbike'),
+        submittedAt: String(item.submittedAt ?? item.createdAt ?? ''),
+        status: normalizedStatus || 'PENDING',
+        cccdFrontUrl: item.cccdFrontUrl as string | undefined,
+        cccdBackUrl: item.cccdBackUrl as string | undefined,
+        driverLicenseUrl: item.driverLicenseUrl as string | undefined,
+        vehicleRegUrl: item.vehicleRegUrl as string | undefined,
+        selfieUrl: item.selfieUrl as string | undefined,
+        rejectReason: item.rejectReason as string | undefined,
+      };
+    });
   } catch {
-    // Fallback mock data for development
-    return _mockKycData;
+    return [];
   }
 }
-
-const _mockKycData: KycRecord[] = [
-  {
-    key: '1',
-    id: '1',
-    name: 'Nguyễn Văn Tài',
-    phone: '0901234567',
-    cccd: '079201012345',
-    vehicleType: 'motorbike',
-    submittedAt: '2026-08-14 15:30',
-    status: 'PENDING',
-    cccdFrontUrl: undefined,
-    cccdBackUrl: undefined,
-    driverLicenseUrl: undefined,
-    vehicleRegUrl: undefined,
-    selfieUrl: undefined,
-  },
-  {
-    key: '2',
-    id: '2',
-    name: 'Trần Thị Minh',
-    phone: '0912345678',
-    cccd: '079203098765',
-    vehicleType: 'bicycle',
-    submittedAt: '2026-08-14 10:12',
-    status: 'PENDING',
-  },
-  {
-    key: '3',
-    id: '3',
-    name: 'Lê Hoàng Nam',
-    phone: '0987654321',
-    cccd: '079199001234',
-    vehicleType: 'motorbike',
-    submittedAt: '2026-08-13 09:45',
-    status: 'APPROVED',
-  },
-  {
-    key: '4',
-    id: '4',
-    name: 'Phạm Quốc Bảo',
-    phone: '0976543210',
-    cccd: '079200055678',
-    vehicleType: 'car',
-    submittedAt: '2026-08-12 14:00',
-    status: 'REJECTED',
-    rejectReason: 'Ảnh CCCD mờ, không đọc được số',
-  },
-];
 
 // ---------------------------------------------------------------------------
 // Page
@@ -166,6 +127,7 @@ const _mockKycData: KycRecord[] = [
 
 export default function KycReviewPage() {
   const { message } = App.useApp();
+  const { t } = useLocale();
   const queryClient = useQueryClient();
 
   const [search, setSearch] = useState('');
@@ -174,6 +136,30 @@ export default function KycReviewPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [showRejectInput, setShowRejectInput] = useState(false);
+
+  const getVehicleLabel = useCallback(
+    (type: string) => {
+      const labels: Record<string, string> = {
+        motorbike: t('vehicles.motorbike', 'Xe máy'),
+        car: t('vehicles.car', 'Ô tô'),
+        truck: t('vehicles.truck', 'Xe tải'),
+        bicycle: t('vehicles.bicycle', 'Xe đạp'),
+      };
+
+      return labels[type] || type;
+    },
+    [t],
+  );
+
+  const statusFilterOptions = useMemo(
+    () => [
+      { label: t('kyc.all', 'Tất cả'), value: 'ALL' },
+      { label: t('kyc.tabPending', 'Chờ duyệt'), value: 'PENDING' },
+      { label: t('kyc.tabVerified', 'Đã duyệt'), value: 'APPROVED' },
+      { label: t('kyc.tabRejected', 'Từ chối'), value: 'REJECTED' },
+    ],
+    [t],
+  );
 
   const queryParams = useMemo(
     () => ({
@@ -189,25 +175,22 @@ export default function KycReviewPage() {
     refetchInterval: 30000,
   });
 
-  // Stats
   const pending = records.filter((r) => r.status === 'PENDING').length;
   const approved = records.filter((r) => r.status === 'APPROVED').length;
   const rejected = records.filter((r) => r.status === 'REJECTED').length;
 
-  // Approve mutation
   const approveMutation = useMutation({
     mutationFn: async (id: string) => {
       await apiClient.patch(`/admin/shippers/${id}/kyc`, { status: 'VERIFIED' });
     },
     onSuccess: () => {
-      message.success('✅ Đã duyệt hồ sơ KYC!');
+      message.success(t('kyc.approveSuccess', '✅ Đã duyệt hồ sơ KYC!'));
       queryClient.invalidateQueries({ queryKey: KYC_QUERY_KEYS.all });
       setDrawerOpen(false);
     },
-    onError: () => message.error('Có lỗi xảy ra, thử lại!'),
+    onError: () => message.error(t('kyc.errorOccurred', 'Có lỗi xảy ra, thử lại!')),
   });
 
-  // Reject mutation
   const rejectMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
       await apiClient.patch(`/admin/shippers/${id}/kyc`, {
@@ -216,13 +199,13 @@ export default function KycReviewPage() {
       });
     },
     onSuccess: () => {
-      message.success('Đã từ chối hồ sơ!');
+      message.success(t('kyc.rejectSuccess', 'Đã từ chối hồ sơ!'));
       queryClient.invalidateQueries({ queryKey: KYC_QUERY_KEYS.all });
       setDrawerOpen(false);
       setShowRejectInput(false);
       setRejectReason('');
     },
-    onError: () => message.error('Có lỗi xảy ra!'),
+    onError: () => message.error(t('kyc.errorOccurred', 'Có lỗi xảy ra!')),
   });
 
   const openDrawer = useCallback((record: KycRecord) => {
@@ -235,80 +218,88 @@ export default function KycReviewPage() {
   const handleApprove = () => {
     if (!selectedRecord) return;
     Modal.confirm({
-      title: 'Xác nhận duyệt hồ sơ KYC?',
-      content: `Tài khoản shipper "${selectedRecord.name}" sẽ được kích hoạt.`,
-      okText: 'Duyệt ngay',
+      title: t('kyc.approveConfirmTitle', 'Xác nhận duyệt hồ sơ KYC?'),
+      content: t(
+        'kyc.approveConfirmContent',
+        `Tài khoản shipper "${selectedRecord.name}" sẽ được kích hoạt.`,
+        { name: selectedRecord.name },
+      ),
+      okText: t('kyc.approveNow', 'Duyệt ngay'),
+      cancelText: t('common.cancel', 'Hủy'),
       okButtonProps: { style: { backgroundColor: '#52c41a', borderColor: '#52c41a' } },
-      cancelText: 'Hủy',
       onOk: () => approveMutation.mutate(selectedRecord.id),
     });
   };
 
   const handleReject = () => {
-    if (!selectedRecord || !rejectReason.trim()) {
-      message.warning('Vui lòng nhập lý do từ chối!');
+    if (!selectedRecord) return;
+    if (!rejectReason.trim()) {
+      message.warning(t('kyc.rejectReasonRequired', 'Vui lòng nhập lý do từ chối!'));
 
       return;
     }
     rejectMutation.mutate({ id: selectedRecord.id, reason: rejectReason.trim() });
   };
 
-  // Table columns
   const columns = useMemo(
     () => [
       {
-        title: 'Shipper',
-        key: 'shipper',
-        render: (_: unknown, rec: KycRecord) => (
+        title: t('kyc.driver', 'Tài xế'),
+        dataIndex: 'name',
+        key: 'name',
+        render: (name: string, rec: KycRecord) => (
           <Space>
-            <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#f97316' }} />
-            <Space direction="vertical" size={0}>
-              <Text strong>{rec.name}</Text>
-              <Text type="secondary" style={{ fontSize: 12 }}>
+            <Avatar icon={<UserOutlined />} className="bg-orange-500" />
+            <div>
+              <Text strong className="block">
+                {name}
+              </Text>
+              <Text type="secondary" className="text-xs">
                 {rec.phone}
               </Text>
-            </Space>
+            </div>
           </Space>
         ),
       },
       {
-        title: 'CCCD',
+        title: t('kyc.cccd', 'Số CCCD'),
         dataIndex: 'cccd',
         key: 'cccd',
-        render: (v: string) => <Text code>{v}</Text>,
+        render: (cccd: string) => <Text code>{cccd || 'N/A'}</Text>,
       },
       {
-        title: 'Phương tiện',
+        title: t('kyc.vehicle', 'Phương tiện'),
         dataIndex: 'vehicleType',
         key: 'vehicleType',
-        render: (v: string) => VEHICLE_LABELS[v] ?? v,
+        render: (v: string) => getVehicleLabel(v),
       },
       {
-        title: 'Ngày nộp',
+        title: t('kyc.submittedAt', 'Ngày nộp'),
         dataIndex: 'submittedAt',
         key: 'submittedAt',
-        render: (v: string) => <Text type="secondary">{v}</Text>,
+        render: (dt: string) => <Text className="text-xs text-gray-500">{dt}</Text>,
       },
       {
-        title: 'Trạng thái',
+        title: t('kyc.status', 'Trạng thái'),
+        dataIndex: 'status',
         key: 'status',
-        render: (_: unknown, rec: KycRecord) => <KycStatusBadge status={rec.status} />,
+        render: (s: KycStatus) => <KycStatusBadge status={s} />,
       },
       {
-        title: 'Hành động',
-        key: 'actions',
+        title: t('kyc.actions', 'Hành động'),
+        key: 'action',
         render: (_: unknown, rec: KycRecord) => (
           <Button
             icon={<EyeOutlined />}
             onClick={() => openDrawer(rec)}
             disabled={rec.status !== 'PENDING'}
           >
-            {rec.status === 'PENDING' ? 'Xem xét' : 'Đã xử lý'}
+            {rec.status === 'PENDING' ? t('kyc.review', 'Xem xét') : t('kyc.processed', 'Đã xử lý')}
           </Button>
         ),
       },
     ],
-    [openDrawer],
+    [getVehicleLabel, openDrawer, t],
   );
 
   const filteredRecords = useMemo(() => {
@@ -327,8 +318,11 @@ export default function KycReviewPage() {
     <PageContainer>
       <PageHeader
         icon="🪪"
-        title="Duyệt Hồ Sơ KYC Shipper"
-        subtitle="Xem xét và phê duyệt hồ sơ xác minh danh tính của các shipper đăng ký mới"
+        title={t('kyc.title', 'Duyệt Hồ Sơ KYC Shipper')}
+        subtitle={t(
+          'kyc.subtitle',
+          'Xem xét và phê duyệt hồ sơ xác minh danh tính của các shipper đăng ký mới',
+        )}
       />
 
       {/* Stats row */}
@@ -336,7 +330,7 @@ export default function KycReviewPage() {
         <Col span={8}>
           <Card variant="borderless" className="rounded-xl shadow-sm">
             <Statistic
-              title="⏳ Chờ duyệt"
+              title={`⏳ ${t('kyc.tabPending', 'Chờ duyệt')}`}
               value={pending}
               valueStyle={{ color: '#fa8c16' }}
               prefix={<SafetyCertificateOutlined />}
@@ -346,7 +340,7 @@ export default function KycReviewPage() {
         <Col span={8}>
           <Card variant="borderless" className="rounded-xl shadow-sm">
             <Statistic
-              title="✅ Đã duyệt"
+              title={`✅ ${t('kyc.tabVerified', 'Đã duyệt')}`}
               value={approved}
               valueStyle={{ color: '#52c41a' }}
               prefix={<CheckCircleOutlined />}
@@ -356,7 +350,7 @@ export default function KycReviewPage() {
         <Col span={8}>
           <Card variant="borderless" className="rounded-xl shadow-sm">
             <Statistic
-              title="❌ Từ chối"
+              title={`❌ ${t('kyc.tabRejected', 'Từ chối')}`}
               value={rejected}
               valueStyle={{ color: '#ff4d4f' }}
               prefix={<CloseCircleOutlined />}
@@ -369,21 +363,21 @@ export default function KycReviewPage() {
       <Card variant="borderless" className="rounded-xl shadow-sm">
         <Space direction="vertical" className="w-full" size="middle">
           <SearchFilterBox
-            searchPlaceholder="Tìm theo tên, SĐT, số CCCD..."
+            searchPlaceholder={t('kyc.searchPlaceholder', 'Tìm theo tên, SĐT, số CCCD...')}
             searchValue={search}
             onSearchChange={(v) => setSearch(v)}
-            filterLabel="Trạng thái:"
+            filterLabel={t('common.status', 'Trạng thái:')}
             filterValue={statusFilter}
             onFilterChange={(v) => setStatusFilter(v)}
-            filterOptions={KYC_STATUS_FILTER_OPTIONS}
+            filterOptions={statusFilterOptions}
           />
           <div className="flex justify-end">
-            <Tooltip title="Làm mới danh sách">
+            <Tooltip title={t('kyc.refreshTooltip', 'Làm mới danh sách')}>
               <Button
                 icon={<ReloadOutlined />}
                 onClick={() => queryClient.invalidateQueries({ queryKey: KYC_QUERY_KEYS.all })}
               >
-                Làm mới
+                {t('dashboard.refreshBtn', 'Làm mới')}
               </Button>
             </Tooltip>
           </div>
@@ -393,7 +387,7 @@ export default function KycReviewPage() {
             dataSource={filteredRecords}
             loading={isLoading}
             scroll={{ x: 900 }}
-            emptyDescription="Không có hồ sơ KYC nào"
+            emptyDescription={t('kyc.emptyDescription', 'Không có hồ sơ nào trong mục này')}
           />
         </Space>
       </Card>
@@ -403,7 +397,9 @@ export default function KycReviewPage() {
         title={
           <Space>
             <IdcardOutlined />
-            <span>Hồ Sơ KYC — {selectedRecord?.name}</span>
+            <span>
+              {t('kyc.detailTitle', 'Hồ Sơ KYC')} — {selectedRecord?.name}
+            </span>
             {selectedRecord && <KycStatusBadge status={selectedRecord.status} />}
           </Space>
         }
@@ -418,7 +414,7 @@ export default function KycReviewPage() {
                   <textarea
                     className="border rounded px-3 py-2 w-64 text-sm resize-none"
                     rows={2}
-                    placeholder="Nhập lý do từ chối..."
+                    placeholder={t('kyc.rejectPlaceholder', 'Nhập lý do từ chối...')}
                     value={rejectReason}
                     onChange={(e) => setRejectReason(e.target.value)}
                   />
@@ -428,9 +424,11 @@ export default function KycReviewPage() {
                     loading={rejectMutation.isPending}
                     icon={<CloseCircleOutlined />}
                   >
-                    Xác nhận từ chối
+                    {t('kyc.confirmReject', 'Xác nhận từ chối')}
                   </Button>
-                  <Button onClick={() => setShowRejectInput(false)}>Hủy</Button>
+                  <Button onClick={() => setShowRejectInput(false)}>
+                    {t('common.cancel', 'Hủy')}
+                  </Button>
                 </>
               ) : (
                 <>
@@ -439,7 +437,7 @@ export default function KycReviewPage() {
                     onClick={() => setShowRejectInput(true)}
                     icon={<CloseCircleOutlined />}
                   >
-                    Từ chối
+                    {t('kyc.rejectBtn', 'Từ chối')}
                   </Button>
                   <Button
                     type="primary"
@@ -448,7 +446,7 @@ export default function KycReviewPage() {
                     loading={approveMutation.isPending}
                     icon={<CheckCircleOutlined />}
                   >
-                    Duyệt KYC
+                    {t('kyc.approveBtn', 'Duyệt KYC')}
                   </Button>
                 </>
               )}
@@ -459,22 +457,29 @@ export default function KycReviewPage() {
         {selectedRecord && (
           <Space direction="vertical" className="w-full" size="large">
             {/* Personal info */}
-            <Descriptions title="Thông tin cá nhân" bordered size="small" column={1}>
-              <Descriptions.Item label="Họ và tên">
+            <Descriptions
+              title={t('kyc.personalInfoTitle', 'Thông tin cá nhân')}
+              bordered
+              size="small"
+              column={1}
+            >
+              <Descriptions.Item label={t('users.fullName', 'Họ và tên')}>
                 <Text strong>{selectedRecord.name}</Text>
               </Descriptions.Item>
-              <Descriptions.Item label="Số điện thoại">{selectedRecord.phone}</Descriptions.Item>
-              <Descriptions.Item label="Số CCCD">
+              <Descriptions.Item label={t('kyc.phone', 'Số điện thoại')}>
+                {selectedRecord.phone}
+              </Descriptions.Item>
+              <Descriptions.Item label={t('kyc.cccd', 'Số CCCD')}>
                 <Text code>{selectedRecord.cccd}</Text>
               </Descriptions.Item>
-              <Descriptions.Item label="Phương tiện">
-                {VEHICLE_LABELS[selectedRecord.vehicleType] ?? selectedRecord.vehicleType}
+              <Descriptions.Item label={t('kyc.vehicle', 'Phương tiện')}>
+                {getVehicleLabel(selectedRecord.vehicleType)}
               </Descriptions.Item>
-              <Descriptions.Item label="Ngày nộp hồ sơ">
+              <Descriptions.Item label={t('kyc.submittedDate', 'Ngày nộp hồ sơ')}>
                 {selectedRecord.submittedAt}
               </Descriptions.Item>
               {selectedRecord.rejectReason && (
-                <Descriptions.Item label="Lý do từ chối">
+                <Descriptions.Item label={t('kyc.rejectReasonLabel', 'Lý do từ chối')}>
                   <Text type="danger">{selectedRecord.rejectReason}</Text>
                 </Descriptions.Item>
               )}
@@ -484,14 +489,26 @@ export default function KycReviewPage() {
             <div>
               <Title level={5} className="mb-3">
                 <FileImageOutlined className="mr-2" />
-                Ảnh giấy tờ
+                {t('kyc.documentsTitle', 'Ảnh giấy tờ')}
               </Title>
               <Row gutter={[12, 12]}>
                 {[
-                  { label: 'CCCD mặt trước', url: selectedRecord.cccdFrontUrl },
-                  { label: 'CCCD mặt sau', url: selectedRecord.cccdBackUrl },
-                  { label: 'Bằng lái xe', url: selectedRecord.driverLicenseUrl },
-                  { label: 'Đăng ký xe', url: selectedRecord.vehicleRegUrl },
+                  {
+                    label: t('kyc.cccdFront', 'CCCD mặt trước'),
+                    url: selectedRecord.cccdFrontUrl,
+                  },
+                  {
+                    label: t('kyc.cccdBack', 'CCCD mặt sau'),
+                    url: selectedRecord.cccdBackUrl,
+                  },
+                  {
+                    label: t('kyc.driverLicense', 'Bằng lái xe'),
+                    url: selectedRecord.driverLicenseUrl,
+                  },
+                  {
+                    label: t('kyc.vehicleReg', 'Đăng ký xe'),
+                    url: selectedRecord.vehicleRegUrl,
+                  },
                 ].map((doc) => (
                   <Col span={12} key={doc.label}>
                     <div className="border rounded-lg overflow-hidden">
@@ -508,7 +525,7 @@ export default function KycReviewPage() {
                           style={{ height: 140 }}
                         >
                           <FileImageOutlined style={{ fontSize: 32 }} />
-                          <div className="text-xs mt-2">Chưa có ảnh</div>
+                          <div className="text-xs mt-2">{t('kyc.noImage', 'Chưa có ảnh')}</div>
                         </div>
                       )}
                       <div className="text-xs text-center py-2 text-gray-500 bg-gray-50 border-t">
@@ -524,7 +541,7 @@ export default function KycReviewPage() {
             <div>
               <Title level={5} className="mb-3">
                 <UserOutlined className="mr-2" />
-                Ảnh selfie xác minh
+                {t('kyc.selfie', 'Ảnh selfie xác minh')}
               </Title>
               {selectedRecord.selfieUrl ? (
                 <Image
@@ -538,7 +555,7 @@ export default function KycReviewPage() {
                   style={{ width: 160, height: 160 }}
                 >
                   <UserOutlined style={{ fontSize: 40 }} />
-                  <div className="text-xs mt-2">Chưa có selfie</div>
+                  <div className="text-xs mt-2">{t('kyc.noSelfie', 'Chưa có selfie')}</div>
                 </div>
               )}
             </div>
@@ -553,12 +570,14 @@ export default function KycReviewPage() {
 // Sub-components
 // ---------------------------------------------------------------------------
 
-function KycStatusBadge({ status }: { status: KycRecord['status'] }) {
-  const config = {
-    PENDING: { color: 'orange', label: '⏳ Chờ duyệt' },
-    APPROVED: { color: 'green', label: '✅ Đã duyệt' },
-    REJECTED: { color: 'red', label: '❌ Từ chối' },
-  }[status];
+function KycStatusBadge({ status }: { status: KycStatus }) {
+  const { t } = useLocale();
+  const configMap: Record<KycStatus, { color: string; label: string }> = {
+    PENDING: { color: 'orange', label: `⏳ ${t('kyc.tabPending', 'Chờ duyệt')}` },
+    APPROVED: { color: 'green', label: `✅ ${t('kyc.tabVerified', 'Đã duyệt')}` },
+    REJECTED: { color: 'red', label: `❌ ${t('kyc.tabRejected', 'Từ chối')}` },
+  };
+  const config = configMap[status] ?? configMap.PENDING;
 
   return <Tag color={config.color}>{config.label}</Tag>;
 }

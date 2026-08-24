@@ -3,14 +3,14 @@
 import { CheckCircleOutlined, SyncOutlined } from '@ant-design/icons';
 import { Tag, Typography } from 'antd';
 
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 import { CommissionRecord } from '@/types';
 import { formatCurrency } from '@/utils/formatters';
 
 const { Text } = Typography;
 
 export function useCommissionsColumns() {
-  const { t } = useTranslation();
+  const { t } = useLocale();
 
   return [
     {

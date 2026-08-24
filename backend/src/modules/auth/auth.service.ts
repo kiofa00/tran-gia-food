@@ -7,7 +7,13 @@ import * as crypto from 'crypto';
 
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
-import { AdminLoginDto, GoogleAuthDto, SendOtpDto, VerifyOtpDto } from './dto/auth.dto';
+import {
+  AdminLoginDto,
+  ChangePasswordDto,
+  GoogleAuthDto,
+  SendOtpDto,
+  VerifyOtpDto,
+} from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -157,7 +163,7 @@ export class AuthService {
   ): Promise<{ accessToken: string; refreshToken: string }> {
     try {
       const payload = this.jwt.verify(refreshToken, {
-        secret: this.config.get<string>('JWT_REFRESH_SECRET'),
+        secret: this.config.getOrThrow<string>('JWT_REFRESH_SECRET'),
       });
 
       const stored = await this.redis.getRefreshToken(payload.sub);
@@ -178,6 +184,26 @@ export class AuthService {
     await this.redis.deleteRefreshToken(userId);
   }
 
+  async changePassword(userId: string, dto: ChangePasswordDto) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !user.passwordHash) {
+      throw new BadRequestException('Không thể đổi mật khẩu cho tài khoản này');
+    }
+
+    const isMatch = await bcrypt.compare(dto.currentPassword, user.passwordHash);
+    if (!isMatch) {
+      throw new BadRequestException('Mật khẩu hiện tại không chính xác');
+    }
+
+    const newHash = await bcrypt.hash(dto.newPassword, 10);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash: newHash },
+    });
+
+    return { success: true, message: 'Đổi mật khẩu thành công' };
+  }
+
   // ──────────────────────────────────────────
   // Private Helpers
   // ──────────────────────────────────────────
@@ -186,19 +212,19 @@ export class AuthService {
     const payload = { sub: user.id, phone: user.phone, role: user.role };
 
     const accessToken = this.jwt.sign(payload, {
-      secret: this.config.get<string>('JWT_SECRET'),
-      expiresIn: this.config.get<string>('JWT_EXPIRES_IN') ?? '15m',
+      secret: this.config.getOrThrow<string>('JWT_SECRET'),
+      expiresIn: this.config.getOrThrow<string>('JWT_EXPIRES_IN'),
     });
 
     const refreshToken = this.jwt.sign(payload, {
-      secret: this.config.get<string>('JWT_REFRESH_SECRET'),
-      expiresIn: this.config.get<string>('JWT_REFRESH_EXPIRES_IN') ?? '7d',
+      secret: this.config.getOrThrow<string>('JWT_REFRESH_SECRET'),
+      expiresIn: this.config.getOrThrow<string>('JWT_REFRESH_EXPIRES_IN'),
     });
 
     // Store refresh token in Redis — tách riêng try/catch để lỗi Redis
     // không bị nhầm thành lỗi xác thực (credentials)
     try {
-      await this.redis.setRefreshToken(user.id, refreshToken, 7 * 24 * 3600);
+      await this.redis.setRefreshToken(user.id, refreshToken, 30 * 24 * 3600);
     } catch (err) {
       this.logger.error(`Failed to store refresh token in Redis for user ${user.id}`, err);
       // Không throw ở đây — vẫn trả token về để login thành công.

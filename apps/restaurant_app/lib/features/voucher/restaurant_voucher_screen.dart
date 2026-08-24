@@ -50,39 +50,47 @@ class RestaurantVoucherScreen extends ConsumerWidget {
       ),
       body: vouchersAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => _buildMockList(context, ref),
+        error: (_, _) => _buildEmpty(context, ref),
         data: (list) =>
-            list.isEmpty ? _buildMockList(context, ref) : _buildList(context, ref, list),
+            list.isEmpty ? _buildEmpty(context, ref) : _buildList(context, ref, list),
       ),
     );
   }
 
-  Widget _buildMockList(BuildContext context, WidgetRef ref) {
-    final mock = [
-      {
-        'code': 'PHO10',
-        'title': 'Giảm 10% khi đặt phở',
-        'discount_type': 'percent',
-        'discount_value': 10,
-        'min_order': 60000,
-        'valid_to': '2026-09-30',
-        'total_limit': 100,
-        'used_count': 34,
-        'is_active': true,
-      },
-      {
-        'code': 'WEEKEND',
-        'title': 'Cuối tuần giảm 20k',
-        'discount_type': 'fixed',
-        'discount_value': 20000,
-        'min_order': 80000,
-        'valid_to': '2026-12-31',
-        'total_limit': 200,
-        'used_count': 12,
-        'is_active': false,
-      },
-    ];
-    return _buildList(context, ref, mock);
+  Widget _buildEmpty(BuildContext context, WidgetRef ref) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.discount_outlined, size: 64, color: AppColors.textHintLight),
+            const SizedBox(height: 16),
+            const Text(
+              'Quán chưa tạo mã giảm giá nào',
+              style: TextStyle(fontWeight: AppFontWeight.bold, fontSize: AppFontSize.lg),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Tạo chương trình ưu đãi để thu hút thêm nhiều khách hàng đặt món.',
+              style: TextStyle(color: AppColors.textSecondaryLight, fontSize: AppFontSize.body),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () => _showCreateSheet(context, ref),
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: const Text('Tạo Mã Đầu Tiên', style: TextStyle(color: Colors.white, fontWeight: AppFontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(AppRadius.md)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildList(

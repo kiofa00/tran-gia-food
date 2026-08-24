@@ -3,7 +3,8 @@ import React from 'react';
 import { FilterOutlined, SearchOutlined } from '@ant-design/icons';
 import { Card, Col, Input, Row, Select, Typography } from 'antd';
 
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
+import type { TranslationKey } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 
 const { Text } = Typography;
@@ -11,7 +12,9 @@ const { Option } = Select;
 
 export interface SelectOptionItem {
   value: string;
-  label: string;
+  label?: string;
+  i18nKey?: TranslationKey;
+  defaultLabel?: string;
 }
 
 interface SearchFilterBoxProps {
@@ -37,7 +40,7 @@ export const SearchFilterBox: React.FC<SearchFilterBoxProps> = ({
   extraAction,
   className,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useLocale();
 
   const resolvedPlaceholder = searchPlaceholder || t('common.search', 'Tìm kiếm...');
   const resolvedFilterLabel = filterLabel || t('common.filter', 'Lọc:');
@@ -67,11 +70,17 @@ export const SearchFilterBox: React.FC<SearchFilterBoxProps> = ({
                   onChange={onFilterChange}
                   className="flex-1 sm:flex-none sm:min-w-40"
                 >
-                  {filterOptions.map((opt) => (
-                    <Option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </Option>
-                  ))}
+                  {filterOptions.map((opt) => {
+                    const displayLabel = opt.i18nKey
+                      ? t(opt.i18nKey, opt.defaultLabel || opt.label || opt.value)
+                      : opt.label || opt.value;
+
+                    return (
+                      <Option key={opt.value} value={opt.value}>
+                        {displayLabel}
+                      </Option>
+                    );
+                  })}
                 </Select>
               </>
             )}

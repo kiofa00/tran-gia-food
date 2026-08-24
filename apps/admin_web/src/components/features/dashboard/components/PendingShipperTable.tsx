@@ -7,7 +7,7 @@ import { ColumnsType } from 'antd/es/table';
 
 import { DataTable } from '@/components/shared-ui/DataTable';
 import { SearchFilterBox } from '@/components/shared-ui/SearchFilterBox';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 import { DASHBOARD_SHIPPER_FILTER_OPTIONS } from '@/shared-config';
 
 import { PendingShipperRecord } from '../types';
@@ -39,7 +39,7 @@ export const PendingShipperTable: React.FC<PendingShipperTableProps> = ({
   totalItems,
   onPageChange,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useLocale();
 
   return (
     <Space direction="vertical" className="w-full" size="middle">

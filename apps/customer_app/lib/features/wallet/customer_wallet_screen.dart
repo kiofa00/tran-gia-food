@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
@@ -541,7 +541,7 @@ class _BankCard extends StatelessWidget {
                 borderRadius: const BorderRadius.all(AppRadius.full),
               ),
               child: const Text(
-                'Máº·c Ä‘á»‹nh',
+                'Mặc định',
                 style: TextStyle(
                   color: AppColors.primary,
                   fontSize: AppFontSize.xs,
@@ -568,19 +568,33 @@ class _TransactionHistoryTab extends ConsumerWidget {
 
     return txAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, _) => _buildMockList(),
-      data: (list) => list.isEmpty ? _buildMockList() : _buildList(list),
+      error: (_, _) => _buildEmpty(),
+      data: (list) => list.isEmpty ? _buildEmpty() : _buildList(list),
     );
   }
 
-  Widget _buildMockList() {
-    final mock = [
-      {'type': 'refund', 'amount': 126000, 'desc': 'HoÃ n tiá»n Ä‘Æ¡n #9821', 'date': '14/08/2026'},
-      {'type': 'payment', 'amount': -85000, 'desc': 'Thanh toÃ¡n Ä‘Æ¡n #9820', 'date': '13/08/2026'},
-      {'type': 'topup', 'amount': 200000, 'desc': 'Náº¡p tiá»n tá»« Vietcombank', 'date': '12/08/2026'},
-      {'type': 'payment', 'amount': -62000, 'desc': 'Thanh toÃ¡n Ä‘Æ¡n #9811', 'date': '11/08/2026'},
-    ];
-    return _buildList(mock);
+  Widget _buildEmpty() {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.receipt_long_outlined, size: 56, color: AppColors.textHintLight),
+            SizedBox(height: 12),
+            Text(
+              'Chưa có giao dịch nào',
+              style: TextStyle(fontWeight: AppFontWeight.bold, fontSize: AppFontSize.md),
+            ),
+            SizedBox(height: 6),
+            Text(
+              'Lịch sử nạp tiền, rút tiền và thanh toán sẽ hiển thị tại đây',
+              style: TextStyle(color: AppColors.textSecondaryLight, fontSize: AppFontSize.sm),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildList(List<Map<String, dynamic>> list) {

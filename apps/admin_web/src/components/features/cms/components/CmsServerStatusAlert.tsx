@@ -5,7 +5,7 @@ import React from 'react';
 import { CheckCircleOutlined, ExportOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Alert, Button, Space, Tag, Typography } from 'antd';
 
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 
 const { Text } = Typography;
 
@@ -18,7 +18,7 @@ export const CmsServerStatusAlert: React.FC<CmsServerStatusAlertProps> = ({
   cmsStatus,
   onRefresh,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useLocale();
 
   return (
     <Alert

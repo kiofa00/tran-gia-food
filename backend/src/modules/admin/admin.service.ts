@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { KycStatus, Prisma, VoucherType } from '@prisma/client';
+import { KycStatus, PayoutStatus, Prisma, VoucherType } from '@prisma/client';
 
 import { PrismaService } from '../../prisma/prisma.service';
 import {
@@ -60,13 +60,16 @@ function processPaginatedList<T extends object>(items: T[], query?: QueryOptions
     );
   }
 
-  if (query.status) {
+  if (query.status && query.status.toUpperCase() !== 'ALL') {
     const st = String(query.status).toLowerCase();
     list = list.filter((item) => {
       const statusVal = String(item['status'] ?? item['isActive']).toLowerCase();
 
       return (
         statusVal === st ||
+        (st === 'pending' && (statusVal === 'pending' || statusVal === 'none')) ||
+        (st === 'approved' && statusVal === 'verified') ||
+        (st === 'verified' && statusVal === 'verified') ||
         (st === 'active' && item['isActive'] === true) ||
         (st === 'inactive' && item['isActive'] === false)
       );
@@ -188,6 +191,62 @@ export class AdminService {
       status: s.ekycStatus,
       ekycStatus: s.ekycStatus,
     }));
+    return processPaginatedList(mapped, query);
+  }
+
+  async listKycShippers(query?: QueryOptions & { status?: string; search?: string }) {
+    const where: Prisma.ShipperWhereInput = {};
+
+    if (query?.status && query.status !== 'ALL') {
+      const statusMap: Record<string, KycStatus> = {
+        PENDING: KycStatus.pending,
+        APPROVED: KycStatus.verified,
+        VERIFIED: KycStatus.verified,
+        REJECTED: KycStatus.rejected,
+        NONE: KycStatus.none,
+      };
+      const mappedStatus = statusMap[query.status.toUpperCase()];
+      if (mappedStatus) {
+        where.ekycStatus = mappedStatus;
+      }
+    }
+
+    if (query?.search) {
+      where.OR = [
+        { user: { name: { contains: query.search, mode: 'insensitive' } } },
+        { user: { phone: { contains: query.search, mode: 'insensitive' } } },
+        { vehiclePlate: { contains: query.search, mode: 'insensitive' } },
+      ];
+    }
+
+    const list = await this.prisma.shipper.findMany({
+      where,
+      include: { user: true },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const mapped = list.map((s) => ({
+      id: s.id,
+      key: s.id,
+      name: s.user?.name || '',
+      phone: s.user?.phone || '',
+      vehicle: s.vehicleType,
+      vehicleType: s.vehicleType,
+      plate: s.vehiclePlate || '',
+      status: s.ekycStatus,
+      ekycStatus: s.ekycStatus,
+      submittedAt: s.createdAt.toISOString(),
+      createdAt: s.createdAt.toISOString(),
+      user: s.user
+        ? {
+            id: s.user.id,
+            name: s.user.name,
+            phone: s.user.phone,
+            email: s.user.email,
+          }
+        : undefined,
+    }));
+
     return processPaginatedList(mapped, query);
   }
 
@@ -527,6 +586,191 @@ export class AdminService {
     return this.prisma.user.update({
       where: { id },
       data: { status: dto.status } as Prisma.UserUpdateInput,
+    });
+  }
+
+  async getPayouts(query?: QueryOptions) {
+    const [restaurantPayouts, shipperPayouts] = await Promise.all([
+      this.prisma.restaurantPayout.findMany({
+        include: { restaurant: { include: { owner: true } } },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.shipperPayout.findMany({
+        include: { shipper: { include: { user: true } } },
+        orderBy: { createdAt: 'desc' },
+      }),
+    ]);
+
+    const mapped = [
+      ...restaurantPayouts.map((p) => {
+        let status = 'PENDING';
+        if (p.status === PayoutStatus.completed) status = 'PROCESSED';
+        else if (p.status === PayoutStatus.failed) status = 'REJECTED';
+
+        const bankAcc =
+          typeof p.restaurant?.bankAccount === 'string'
+            ? p.restaurant.bankAccount
+            : '9704-2202-8888-1234';
+
+        return {
+          id: p.id,
+          key: p.id,
+          recipientType: 'RESTAURANT',
+          restaurantId: p.restaurantId,
+          restaurantName: p.restaurant?.name || 'Nhà hàng',
+          restaurant: {
+            id: p.restaurant?.id,
+            name: p.restaurant?.name,
+            phone: p.restaurant?.phone || p.restaurant?.owner?.phone,
+            bankAccount: { accountNumber: bankAcc },
+          },
+          amount: p.amount,
+          status,
+          period: `${p.periodStart.toISOString().slice(0, 10)} - ${p.periodEnd.toISOString().slice(0, 10)}`,
+          bankAccount: bankAcc,
+          createdAt: p.createdAt,
+        };
+      }),
+      ...shipperPayouts.map((p) => {
+        let status = 'PENDING';
+        if (p.status === PayoutStatus.completed) status = 'PROCESSED';
+        else if (p.status === PayoutStatus.failed) status = 'REJECTED';
+
+        const bankAcc =
+          typeof p.shipper?.bankAccount === 'string'
+            ? p.shipper.bankAccount
+            : '9704-1900-5555-5678';
+
+        return {
+          id: p.id,
+          key: p.id,
+          recipientType: 'SHIPPER',
+          restaurantId: p.shipperId,
+          restaurantName: p.shipper?.user?.name
+            ? `Tài xế: ${p.shipper.user.name}`
+            : 'Tài xế Tran Gia',
+          restaurant: {
+            id: p.shipper?.id,
+            name: p.shipper?.user?.name,
+            phone: p.shipper?.user?.phone,
+            bankAccount: { accountNumber: bankAcc },
+          },
+          amount: p.amount,
+          status,
+          period: `${p.periodStart.toISOString().slice(0, 10)} - ${p.periodEnd.toISOString().slice(0, 10)}`,
+          bankAccount: bankAcc,
+          createdAt: p.createdAt,
+        };
+      }),
+    ];
+
+    return processPaginatedList(mapped, query);
+  }
+
+  async processPayout(id: string) {
+    const restPayout = await this.prisma.restaurantPayout.findUnique({ where: { id } });
+    if (restPayout) {
+      return this.prisma.restaurantPayout.update({
+        where: { id },
+        data: { status: PayoutStatus.completed, processedAt: new Date() },
+      });
+    }
+
+    const shipPayout = await this.prisma.shipperPayout.findUnique({ where: { id } });
+    if (shipPayout) {
+      return this.prisma.shipperPayout.update({
+        where: { id },
+        data: { status: PayoutStatus.completed, processedAt: new Date() },
+      });
+    }
+
+    throw new NotFoundException('Không tìm thấy yêu cầu giải ngân');
+  }
+
+  async rejectPayout(id: string, _reason?: string) {
+    const restPayout = await this.prisma.restaurantPayout.findUnique({ where: { id } });
+    if (restPayout) {
+      return this.prisma.restaurantPayout.update({
+        where: { id },
+        data: { status: PayoutStatus.failed },
+      });
+    }
+
+    const shipPayout = await this.prisma.shipperPayout.findUnique({ where: { id } });
+    if (shipPayout) {
+      return this.prisma.shipperPayout.update({
+        where: { id },
+        data: { status: PayoutStatus.failed },
+      });
+    }
+
+    throw new NotFoundException('Không tìm thấy yêu cầu giải ngân');
+  }
+
+  async getRestaurants(query?: QueryOptions) {
+    const list = await this.prisma.restaurant.findMany({
+      include: {
+        owner: true,
+        orders: { select: { id: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const mapped = list.map((r) => ({
+      id: r.id,
+      key: r.id,
+      name: r.name,
+      address: r.address,
+      phone: r.phone || r.owner?.phone || '',
+      ownerName: r.owner?.name || 'Chủ quán',
+      owner: {
+        id: r.owner?.id,
+        name: r.owner?.name,
+        phone: r.owner?.phone,
+        email: r.owner?.email,
+      },
+      status: r.isOpen ? 'APPROVED' : 'PENDING',
+      avgRating: r.avgRating ?? 5.0,
+      totalOrders: r.orders?.length ?? 0,
+      createdAt: r.createdAt,
+    }));
+
+    return processPaginatedList(mapped, query);
+  }
+
+  async getRestaurantDetail(id: string) {
+    const restaurant = await this.prisma.restaurant.findUnique({
+      where: { id },
+      include: {
+        owner: true,
+        categories: {
+          include: { items: true },
+        },
+      },
+    });
+
+    if (!restaurant) throw new NotFoundException('Không tìm thấy nhà hàng');
+
+    return restaurant;
+  }
+
+  async approveRestaurant(id: string) {
+    const restaurant = await this.prisma.restaurant.findUnique({ where: { id } });
+    if (!restaurant) throw new NotFoundException('Không tìm thấy nhà hàng');
+
+    return this.prisma.restaurant.update({
+      where: { id },
+      data: { isOpen: true },
+    });
+  }
+
+  async suspendRestaurant(id: string, _reason?: string) {
+    const restaurant = await this.prisma.restaurant.findUnique({ where: { id } });
+    if (!restaurant) throw new NotFoundException('Không tìm thấy nhà hàng');
+
+    return this.prisma.restaurant.update({
+      where: { id },
+      data: { isOpen: false },
     });
   }
 }

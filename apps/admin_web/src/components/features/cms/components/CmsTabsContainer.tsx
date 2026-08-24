@@ -5,7 +5,7 @@ import React from 'react';
 import { GlobalOutlined, PictureOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { Card, Tabs } from 'antd';
 
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 import { CmsBannerItem, CmsFaqItem, CmsTranslationItem } from '@/types';
 
 import { BannerTab } from './BannerTab';
@@ -25,21 +25,12 @@ export const CmsTabsContainer: React.FC<CmsTabsContainerProps> = ({
   faqs,
   isLoading,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useLocale();
 
   return (
     <Card variant="borderless" className="rounded-xl shadow-xs">
       <Tabs
         items={[
-          {
-            key: 'banners',
-            label: (
-              <span>
-                <PictureOutlined /> {t('cms.tabBanners', 'Banners Quảng Cáo')} ({banners.length})
-              </span>
-            ),
-            children: <BannerTab banners={banners} isLoading={isLoading} />,
-          },
           {
             key: 'translations',
             label: (
@@ -49,6 +40,15 @@ export const CmsTabsContainer: React.FC<CmsTabsContainerProps> = ({
               </span>
             ),
             children: <TranslationTab translations={translations} isLoading={isLoading} />,
+          },
+          {
+            key: 'banners',
+            label: (
+              <span>
+                <PictureOutlined /> {t('cms.tabBanners', 'Banners Quảng Cáo')} ({banners.length})
+              </span>
+            ),
+            children: <BannerTab banners={banners} isLoading={isLoading} />,
           },
           {
             key: 'faqs',

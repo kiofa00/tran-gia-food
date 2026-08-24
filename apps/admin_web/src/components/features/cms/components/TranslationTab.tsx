@@ -6,7 +6,7 @@ import { Space } from 'antd';
 
 import { DataTable } from '@/components/shared-ui/DataTable';
 import { SearchFilterBox } from '@/components/shared-ui/SearchFilterBox';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks/useLocale';
 import { CMS_APP_TARGET_FILTER_OPTIONS } from '@/shared-config';
 import { CmsTranslationItem } from '@/types';
 
@@ -18,7 +18,7 @@ interface TranslationTabProps {
 }
 
 export const TranslationTab: React.FC<TranslationTabProps> = ({ translations, isLoading }) => {
-  const { t } = useTranslation();
+  const { t } = useLocale();
   const [search, setSearch] = useState('');
   const [appTargetFilter, setAppTargetFilter] = useState('ALL');
 

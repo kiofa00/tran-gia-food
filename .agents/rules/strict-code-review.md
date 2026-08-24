@@ -10,3 +10,6 @@
 
 - **Workspace Reuse**: Always check `packages/shared_ui` and `packages/shared_models` before creating custom helpers or widgets.
 - **Dead Code Cleanup**: Remove all unused imports, debug `print()` or `console.log()` statements before finalizing a feature.
+- **Mandatory i18n & Translation**: Zero hardcoded strings in UI. All labels, messages, and titles must use translation hooks / localization.
+- **Centralized Config & Constants**: Zero hardcoded magic strings/numbers, raw route paths, or inline regex. All must be declared in config/constants files.
+- **Separation of Concerns**: Cấm viết business logic / fetch API trực tiếp trong UI component. Phải tách ra Custom Hooks / Services.

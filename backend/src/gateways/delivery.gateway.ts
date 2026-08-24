@@ -238,4 +238,76 @@ export class DeliveryGateway implements OnGatewayConnection, OnGatewayDisconnect
       timestamp: new Date().toISOString(),
     });
   }
+
+  // --- Route Polyline Tracking ---------------------------------------------
+
+  /** Shipper broadcasts active navigation polyline coordinates */
+  @SubscribeMessage('update-route-polyline')
+  handleUpdateRoutePolyline(
+    @MessageBody()
+    data: {
+      orderId: string;
+      shipperId: string;
+      polyline: Array<{ lat: number; lng: number }>;
+    },
+  ): void {
+    const payload = {
+      orderId: data.orderId,
+      shipperId: data.shipperId,
+      polyline: data.polyline,
+      timestamp: new Date().toISOString(),
+    };
+
+    this.server.to(`${ORDER_ROOM_PREFIX}${data.orderId}`).emit('route-polyline-changed', payload);
+    this.server.to(ADMIN_ROOM).emit('route-polyline-changed', payload);
+    this.logger.verbose(
+      `Route polyline updated for order ${data.orderId} (${data.polyline.length} points)`,
+    );
+  }
+
+  // --- Kitchen Live Status -------------------------------------------------
+
+  /** Restaurant updates cooking step progress */
+  @SubscribeMessage('update-kitchen-status')
+  handleKitchenStatusUpdate(
+    @MessageBody()
+    data: {
+      orderId: string;
+      restaurantId: string;
+      step: 'received' | 'cooking' | 'packing' | 'ready';
+      estimatedMinutes?: number;
+    },
+  ): void {
+    const payload = {
+      orderId: data.orderId,
+      restaurantId: data.restaurantId,
+      step: data.step,
+      estimatedMinutes: data.estimatedMinutes,
+      timestamp: new Date().toISOString(),
+    };
+
+    this.server.to(`${ORDER_ROOM_PREFIX}${data.orderId}`).emit('kitchen-status-changed', payload);
+    this.server.to(ADMIN_ROOM).emit('kitchen-status-changed', payload);
+    this.logger.log(`Kitchen status for order ${data.orderId} -> ${data.step}`);
+  }
+
+  // --- Connection Heartbeat ------------------------------------------------
+
+  /** Mobile clients send heartbeat ping with network / battery metadata */
+  @SubscribeMessage('connection-heartbeat')
+  handleConnectionHeartbeat(
+    @MessageBody()
+    data: {
+      userId?: string;
+      role?: string;
+      batteryLevel?: number;
+      networkType?: string;
+    },
+  ): { status: string; serverTime: string; receivedMeta: typeof data } {
+    return {
+      status: 'pong',
+      serverTime: new Date().toISOString(),
+      receivedMeta: data,
+    };
+  }
 }

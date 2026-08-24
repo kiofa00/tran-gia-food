@@ -1,6 +1,7 @@
 import { Button, Space, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 
+import { getLocale } from '@/hooks';
 import { PAYOUT_STATUS_COLOR_MAP } from '@/shared-config';
 
 const { Text } = Typography;
@@ -27,59 +28,61 @@ export function getPayoutColumns({
   onProcess: (r: PayoutRecord) => void;
   onReject: (r: PayoutRecord) => void;
 }): ColumnsType<PayoutRecord> {
+  const { t } = getLocale();
+
   return [
     {
-      title: 'Nhà Hàng',
+      title: t('restaurants.name', 'Nhà Hàng'),
       dataIndex: 'restaurantName',
       key: 'restaurantName',
       render: (v: string) => <Text strong>{v}</Text>,
     },
     {
-      title: 'Kỳ Thanh Toán',
+      title: t('payouts.requestedAt', 'Kỳ Thanh Toán'),
       dataIndex: 'period',
       key: 'period',
     },
     {
-      title: 'Số Tiền',
+      title: t('payouts.amount', 'Số Tiền'),
       dataIndex: 'amount',
       key: 'amount',
       render: (v: number) => <Text className="font-bold text-green-600">{formatCurrency(v)}</Text>,
       sorter: (a, b) => a.amount - b.amount,
     },
     {
-      title: 'Tài Khoản NH',
+      title: t('payouts.accountNumber', 'Tài Khoản NH'),
       dataIndex: 'bankAccount',
       key: 'bankAccount',
       render: (v: string) => <Text copyable>{v}</Text>,
     },
     {
-      title: 'Trạng Thái',
+      title: t('payouts.status', 'Trạng Thái'),
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => {
         const PAYOUT_STATUS_LABELS: Record<string, string> = {
-          PENDING: 'Chờ giải ngân',
-          PROCESSED: 'Đã giải ngân',
+          PENDING: t('payouts.statusPending', 'Chờ giải ngân'),
+          PROCESSED: t('payouts.statusCompleted', 'Đã giải ngân'),
         };
 
         return (
           <Tag color={PAYOUT_STATUS_COLOR_MAP[status] ?? 'default'}>
-            {PAYOUT_STATUS_LABELS[status] ?? 'Bị từ chối'}
+            {PAYOUT_STATUS_LABELS[status] ?? t('payouts.statusFailed', 'Bị từ chối')}
           </Tag>
         );
       },
     },
     {
-      title: 'Hành Động',
+      title: t('common.actions', 'Hành Động'),
       key: 'actions',
       render: (_, r) =>
         r.status !== 'PENDING' ? null : (
           <Space>
             <Button size="small" type="primary" onClick={() => onProcess(r)}>
-              Giải Ngân
+              {t('payouts.process', 'Giải Ngân')}
             </Button>
             <Button size="small" danger onClick={() => onReject(r)}>
-              Từ Chối
+              {t('payouts.reject', 'Từ Chối')}
             </Button>
           </Space>
         ),

@@ -13,11 +13,11 @@ import {
   useFleetColumns,
   useFleetQuery,
 } from '@/components';
-import { useTranslation } from '@/providers/LanguageProvider';
+import { useLocale } from '@/hooks';
 import { ShipperRecord } from '@/types';
 
 export default function LiveFleetMonitorPage() {
-  const { t } = useTranslation();
+  const { t } = useLocale();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [page, setPage] = useState(1);
