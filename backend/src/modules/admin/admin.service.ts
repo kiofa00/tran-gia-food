@@ -139,10 +139,31 @@ export class AdminService {
     const shipper = await this.prisma.shipper.findUnique({ where: { id: shipperId } });
     if (!shipper) throw new NotFoundException('Shipper không tồn tại');
 
-    return this.prisma.shipper.update({
+    let kycStatus = dto.status;
+    if (typeof kycStatus === 'string') {
+      const lower = (kycStatus as string).toLowerCase().trim();
+      if (lower === 'approved') {
+        kycStatus = KycStatus.verified;
+      } else if (Object.values(KycStatus).includes(lower as KycStatus)) {
+        kycStatus = lower as KycStatus;
+      }
+    }
+
+    const updated = await this.prisma.shipper.update({
       where: { id: shipperId },
-      data: { ekycStatus: dto.status as KycStatus },
+      data: { ekycStatus: kycStatus },
     });
+
+    if (shipper.userId) {
+      await this.prisma.user
+        .update({
+          where: { id: shipper.userId },
+          data: { kycStatus },
+        })
+        .catch(() => null);
+    }
+
+    return updated;
   }
 
   async setAppConfig(dto: UpdateAppConfigDto) {
@@ -174,24 +195,6 @@ export class AdminService {
       where: { id: shipperId },
       data: { penaltyLevel: dto.level },
     });
-  }
-
-  async listPendingShippers(query?: QueryOptions) {
-    const list = await this.prisma.shipper.findMany({
-      where: { ekycStatus: KycStatus.pending },
-      include: { user: true },
-    });
-    const mapped = list.map((s) => ({
-      id: s.id,
-      key: s.id,
-      name: s.user?.name || '',
-      phone: s.user?.phone || '',
-      vehicle: s.vehicleType,
-      plate: s.vehiclePlate || '',
-      status: s.ekycStatus,
-      ekycStatus: s.ekycStatus,
-    }));
-    return processPaginatedList(mapped, query);
   }
 
   async listKycShippers(query?: QueryOptions & { status?: string; search?: string }) {
@@ -254,7 +257,13 @@ export class AdminService {
     const vouchers = await this.prisma.voucher.findMany({
       orderBy: { createdAt: 'desc' },
     });
-    const list: VoucherRow[] = vouchers.map((v) => ({ ...v, key: v.id }));
+    const now = new Date();
+    const list: VoucherRow[] = vouchers.map((v) => ({
+      ...v,
+      key: v.id,
+      isActive: new Date(v.validTo) > now && new Date(v.validFrom) <= now,
+    }));
+
     return processPaginatedList(list, query);
   }
 
@@ -280,21 +289,62 @@ export class AdminService {
       issuedById: adminUser.id,
     };
     const dbCreated = await this.prisma.voucher.create({ data: voucherData });
-    return { ...dbCreated, key: dbCreated.id };
+
+    return { ...dbCreated, key: dbCreated.id, isActive: true };
   }
 
   async toggleVoucherStatus(id: string, isActive: boolean) {
+    const voucher = await this.prisma.voucher.findUnique({ where: { id } });
+
+    if (!voucher) {
+      throw new NotFoundException('Không tìm thấy mã giảm giá');
+    }
+
+    const now = new Date();
+
+    if (!isActive) {
+      return this.prisma.voucher.update({
+        where: { id },
+        data: {
+          validTo: new Date(now.getTime() - 1000),
+        },
+      });
+    }
+
+    const validFrom = new Date(voucher.validFrom) > now ? now : voucher.validFrom;
+    const validTo =
+      new Date(voucher.validTo) < now
+        ? new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+        : voucher.validTo;
+
     return this.prisma.voucher.update({
       where: { id },
-      data: { isActive } as Prisma.VoucherUpdateInput,
+      data: {
+        validFrom,
+        validTo,
+      },
     });
   }
 
   async getCommissionsBreakdown(query?: QueryOptions) {
     const dbCommissions = await this.prisma.commission.findMany({
+      include: {
+        order: {
+          include: {
+            restaurant: true,
+          },
+        },
+      },
       orderBy: { id: 'desc' },
     });
-    const commissions: CommissionRow[] = dbCommissions.map((c) => ({ ...c, key: c.id }));
+    const commissions: CommissionRow[] = dbCommissions.map((c) => ({
+      ...c,
+      key: c.id,
+      status: c.processedAt ? 'PROCESSED' : 'PENDING',
+      restaurantName: c.order?.restaurant?.name || 'Quán ăn',
+      createdAt: (c.processedAt || new Date()).toISOString(),
+    }));
+
     return processPaginatedList(commissions, query);
   }
 
@@ -550,6 +600,7 @@ export class AdminService {
         phone: true,
         email: true,
         role: true,
+        isActive: true,
         createdAt: true,
       },
     });
@@ -562,14 +613,21 @@ export class AdminService {
         phone: u.phone || '',
         email: u.email,
         role: String(u.role).toUpperCase(),
-        status: 'ACTIVE', // Default — status field managed separately via updateUserStatus
+        status: u.isActive !== false ? 'ACTIVE' : 'SUSPENDED',
         createdAt: u.createdAt,
       };
     });
 
     if (query?.role && query.role !== 'ALL') {
       const r = query.role.toUpperCase();
-      users = users.filter((u) => u.role === r);
+      users = users.filter((u) => {
+        const uRole = u.role.toUpperCase();
+        if (r === 'RESTAURANT' || r === 'RESTAURANT_OWNER') {
+          return uRole === 'RESTAURANT' || uRole === 'RESTAURANT_OWNER';
+        }
+
+        return uRole === r;
+      });
     }
     if (query?.userStatus && query.userStatus !== 'ALL') {
       const st = query.userStatus.toUpperCase();
@@ -583,10 +641,18 @@ export class AdminService {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new NotFoundException('Người dùng không tồn tại');
 
-    return this.prisma.user.update({
+    const isActive = String(dto.status).toUpperCase() === 'ACTIVE';
+
+    const updatedUser = await this.prisma.user.update({
       where: { id },
-      data: { status: dto.status } as Prisma.UserUpdateInput,
+      data: { isActive },
     });
+
+    return {
+      id: updatedUser.id,
+      status: updatedUser.isActive ? 'ACTIVE' : 'SUSPENDED',
+      isActive: updatedUser.isActive,
+    };
   }
 
   async getPayouts(query?: QueryOptions) {
@@ -716,24 +782,33 @@ export class AdminService {
       orderBy: { createdAt: 'desc' },
     });
 
-    const mapped = list.map((r) => ({
-      id: r.id,
-      key: r.id,
-      name: r.name,
-      address: r.address,
-      phone: r.phone || r.owner?.phone || '',
-      ownerName: r.owner?.name || 'Chủ quán',
-      owner: {
-        id: r.owner?.id,
-        name: r.owner?.name,
-        phone: r.owner?.phone,
-        email: r.owner?.email,
-      },
-      status: r.isOpen ? 'APPROVED' : 'PENDING',
-      avgRating: r.avgRating ?? 5.0,
-      totalOrders: r.orders?.length ?? 0,
-      createdAt: r.createdAt,
-    }));
+    const mapped = list.map((r) => {
+      let status = 'PENDING';
+      if (r.owner?.isActive === false || r.isManualOverride) {
+        status = 'SUSPENDED';
+      } else if (r.isOpen) {
+        status = 'APPROVED';
+      }
+
+      return {
+        id: r.id,
+        key: r.id,
+        name: r.name,
+        address: r.address,
+        phone: r.phone || r.owner?.phone || '',
+        ownerName: r.owner?.name || 'Chủ quán',
+        owner: {
+          id: r.owner?.id,
+          name: r.owner?.name,
+          phone: r.owner?.phone,
+          email: r.owner?.email,
+        },
+        status,
+        avgRating: r.avgRating ?? 5.0,
+        totalOrders: r.orders?.length ?? 0,
+        createdAt: r.createdAt,
+      };
+    });
 
     return processPaginatedList(mapped, query);
   }
@@ -755,22 +830,44 @@ export class AdminService {
   }
 
   async approveRestaurant(id: string) {
-    const restaurant = await this.prisma.restaurant.findUnique({ where: { id } });
+    const restaurant = await this.prisma.restaurant.findUnique({
+      where: { id },
+      include: { owner: true },
+    });
+
     if (!restaurant) throw new NotFoundException('Không tìm thấy nhà hàng');
+
+    if (restaurant.ownerId) {
+      await this.prisma.user.update({
+        where: { id: restaurant.ownerId },
+        data: { isActive: true },
+      });
+    }
 
     return this.prisma.restaurant.update({
       where: { id },
-      data: { isOpen: true },
+      data: { isOpen: true, isManualOverride: false },
     });
   }
 
   async suspendRestaurant(id: string, _reason?: string) {
-    const restaurant = await this.prisma.restaurant.findUnique({ where: { id } });
+    const restaurant = await this.prisma.restaurant.findUnique({
+      where: { id },
+      include: { owner: true },
+    });
+
     if (!restaurant) throw new NotFoundException('Không tìm thấy nhà hàng');
+
+    if (restaurant.ownerId) {
+      await this.prisma.user.update({
+        where: { id: restaurant.ownerId },
+        data: { isActive: false },
+      });
+    }
 
     return this.prisma.restaurant.update({
       where: { id },
-      data: { isOpen: false },
+      data: { isOpen: false, isManualOverride: true },
     });
   }
 }

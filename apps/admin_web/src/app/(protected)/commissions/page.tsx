@@ -2,8 +2,11 @@
 
 import { useMemo, useState } from 'react';
 
-import { BankOutlined } from '@ant-design/icons';
-import { App, Button } from 'antd';
+import Link from 'next/link';
+
+import { BankOutlined, ReloadOutlined } from '@ant-design/icons';
+import { useQueryClient } from '@tanstack/react-query';
+import { App, Button, Space } from 'antd';
 
 import {
   CommissionsStats,
@@ -15,11 +18,14 @@ import {
   useCommissionsQuery,
 } from '@/components';
 import { useLocale } from '@/hooks';
+import { ADMIN_ROUTES, COMMISSION_QUERY_KEYS } from '@/shared-config';
 import { CommissionRecord } from '@/types';
 
 export default function CommissionsPage() {
   const { message } = App.useApp();
   const { t } = useLocale();
+  const queryClient = useQueryClient();
+
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [page, setPage] = useState(1);
@@ -55,6 +61,12 @@ export default function CommissionsPage() {
     [rawList],
   );
 
+  const filteredCommissions = useMemo(() => {
+    if (statusFilter === 'ALL') return commissions;
+
+    return commissions.filter((c) => c.status === statusFilter);
+  }, [commissions, statusFilter]);
+
   const handleSearchChange = (val: string) => {
     setSearch(val);
     setPage(1);
@@ -77,8 +89,9 @@ export default function CommissionsPage() {
     [commissions],
   );
 
-  const handleProcessPayout = () => {
-    message.success(t('vouchers.toggleActiveSuccess', 'Đã quyết toán ví đối tác thành công!'));
+  const handleRefresh = async () => {
+    await queryClient.invalidateQueries({ queryKey: COMMISSION_QUERY_KEYS.all });
+    message.success(t('dashboard.refreshedSuccess', 'Đã cập nhật số liệu mới nhất!'));
   };
 
   const columns = useCommissionsColumns();
@@ -93,15 +106,26 @@ export default function CommissionsPage() {
           'Theo dõi tỷ lệ chiết khấu sàn, số dư ví tài xế và đối soát doanh thu nhà hàng',
         )}
         action={
-          <Button
-            type="primary"
-            icon={<BankOutlined />}
-            size="large"
-            onClick={handleProcessPayout}
-            className="bg-green-600 font-semibold border-none"
-          >
-            {t('common.confirm', 'Duyệt Quyết Toán Ví')}
-          </Button>
+          <Space>
+            <Button
+              type="default"
+              icon={<ReloadOutlined />}
+              onClick={handleRefresh}
+              loading={loading}
+              className="font-semibold"
+            >
+              {t('dashboard.refreshBtn', 'Làm mới số liệu')}
+            </Button>
+            <Link href={ADMIN_ROUTES.PAYOUTS} passHref>
+              <Button
+                type="primary"
+                icon={<BankOutlined />}
+                className="bg-green-600 font-semibold border-none"
+              >
+                {t('commissions.goToPayouts', 'Quản Lý Giải Ngân')}
+              </Button>
+            </Link>
+          </Space>
         }
       />
 
@@ -117,7 +141,7 @@ export default function CommissionsPage() {
         onSearchChange={handleSearchChange}
         statusFilter={statusFilter}
         onStatusFilterChange={handleFilterChange}
-        commissions={commissions}
+        commissions={filteredCommissions}
         columns={columns}
         loading={loading}
         page={page}

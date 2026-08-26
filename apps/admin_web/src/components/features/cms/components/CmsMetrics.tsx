@@ -26,14 +26,6 @@ export const CmsMetrics: React.FC<CmsMetricsProps> = ({
     <Row gutter={[16, 16]}>
       <Col xs={24} sm={8}>
         <MetricCard
-          icon={<PictureOutlined />}
-          label={t('cms.bannerTitle', 'Banner Đang Chạy')}
-          value={`${bannersCount} Banner`}
-          iconColor={adminDesignTokens.colors.primary}
-        />
-      </Col>
-      <Col xs={24} sm={8}>
-        <MetricCard
           icon={<GlobalOutlined />}
           label={t('cms.tabTranslations', 'Từ Điển i18n & Text Động')}
           value={`${translationsCount} Keys`}
@@ -42,9 +34,17 @@ export const CmsMetrics: React.FC<CmsMetricsProps> = ({
       </Col>
       <Col xs={24} sm={8}>
         <MetricCard
+          icon={<PictureOutlined />}
+          label={t('cms.bannerTitle', 'Banner Đang Chạy')}
+          value={`${bannersCount} Banner`}
+          iconColor={adminDesignTokens.colors.primary}
+        />
+      </Col>
+      <Col xs={24} sm={8}>
+        <MetricCard
           icon={<QuestionCircleOutlined />}
           label={t('cms.tabFaqs', 'Bài Viết Trợ Giúp FAQ')}
-          value={`${faqsCount} Câu Hỏi`}
+          value={`${faqsCount} ${t('cms.questionsUnit', 'Câu Hỏi')}`}
           iconColor={adminDesignTokens.colors.statusPending}
         />
       </Col>

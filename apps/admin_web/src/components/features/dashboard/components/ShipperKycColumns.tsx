@@ -8,7 +8,7 @@ import { useLocale } from '@/hooks/useLocale';
 import { mapKycStatus } from '@/utils/formatters';
 
 import { useVerifyShipperKycMutation } from '../hooks/useAdmin';
-import { PendingShipperRecord } from '../types';
+import { ShipperKycRecord } from '../types';
 
 const { Text } = Typography;
 
@@ -51,7 +51,7 @@ export function useShipperKycColumns() {
       dataIndex: 'id',
       key: 'id',
       width: 120,
-      sorter: (a: PendingShipperRecord, b: PendingShipperRecord) => a.id.localeCompare(b.id),
+      sorter: (a: ShipperKycRecord, b: ShipperKycRecord) => a.id.localeCompare(b.id),
       render: (id: string) => (
         <Text strong className="text-orange-500 whitespace-nowrap">
           {id}
@@ -63,7 +63,7 @@ export function useShipperKycColumns() {
       dataIndex: 'name',
       key: 'name',
       width: 180,
-      sorter: (a: PendingShipperRecord, b: PendingShipperRecord) => a.name.localeCompare(b.name),
+      sorter: (a: ShipperKycRecord, b: ShipperKycRecord) => a.name.localeCompare(b.name),
       render: (name: string) => (
         <Text strong className="whitespace-nowrap">
           {name}
@@ -82,8 +82,7 @@ export function useShipperKycColumns() {
       dataIndex: 'vehicle',
       key: 'vehicle',
       width: 180,
-      sorter: (a: PendingShipperRecord, b: PendingShipperRecord) =>
-        a.vehicle.localeCompare(b.vehicle),
+      sorter: (a: ShipperKycRecord, b: ShipperKycRecord) => a.vehicle.localeCompare(b.vehicle),
       render: (text: string) => <VehicleBadge vehicle={text} />,
     },
     {
@@ -98,14 +97,20 @@ export function useShipperKycColumns() {
       dataIndex: 'status',
       key: 'status',
       width: 170,
-      sorter: (a: PendingShipperRecord, b: PendingShipperRecord) =>
-        a.status.localeCompare(b.status),
+      sorter: (a: ShipperKycRecord, b: ShipperKycRecord) => a.status.localeCompare(b.status),
       render: (status: string) => {
         const meta = mapKycStatus(status);
+        let StatusIcon = ClockCircleOutlined;
+
+        if (status === 'APPROVED' || status === 'VERIFIED') {
+          StatusIcon = CheckCircleOutlined;
+        } else if (status === 'REJECTED') {
+          StatusIcon = CloseCircleOutlined;
+        }
 
         return (
           <Tag
-            icon={<ClockCircleOutlined />}
+            icon={<StatusIcon />}
             color={meta.tagColor}
             className="text-xs px-2.5 py-0.5 whitespace-nowrap"
           >
@@ -117,26 +122,60 @@ export function useShipperKycColumns() {
     {
       title: t('common.actions', 'Hành Động'),
       key: 'action',
-      width: 260,
-      render: (record: PendingShipperRecord) => (
-        <Space size="small" className="whitespace-nowrap">
-          <Button
-            type="primary"
-            icon={<CheckCircleOutlined />}
-            className="bg-green-600 hover:bg-green-500 border-none"
-            onClick={() => handleApproveKyc(record.id, record.name)}
-          >
-            {t('dashboard.approveKyc', 'Duyệt eKYC')}
-          </Button>
-          <Button
-            danger
-            icon={<CloseCircleOutlined />}
-            onClick={() => handleRejectKyc(record.id, record.name)}
-          >
-            {t('dashboard.rejectKyc', 'Từ Chối')}
-          </Button>
-        </Space>
-      ),
+      width: 220,
+      render: (record: ShipperKycRecord) => {
+        const isApproved = record.status === 'APPROVED' || record.status === 'VERIFIED';
+        const isRejected = record.status === 'REJECTED';
+
+        if (isApproved) {
+          return (
+            <Button
+              danger
+              size="small"
+              icon={<CloseCircleOutlined />}
+              onClick={() => handleRejectKyc(record.id, record.name)}
+            >
+              {t('dashboard.rejectKyc', 'Từ Chối')}
+            </Button>
+          );
+        }
+
+        if (isRejected) {
+          return (
+            <Button
+              type="primary"
+              size="small"
+              icon={<CheckCircleOutlined />}
+              className="bg-green-600 hover:bg-green-500 border-none"
+              onClick={() => handleApproveKyc(record.id, record.name)}
+            >
+              {t('dashboard.approveKyc', 'Duyệt eKYC')}
+            </Button>
+          );
+        }
+
+        return (
+          <Space size="small" className="whitespace-nowrap">
+            <Button
+              type="primary"
+              size="small"
+              icon={<CheckCircleOutlined />}
+              className="bg-green-600 hover:bg-green-500 border-none"
+              onClick={() => handleApproveKyc(record.id, record.name)}
+            >
+              {t('dashboard.approveKyc', 'Duyệt eKYC')}
+            </Button>
+            <Button
+              danger
+              size="small"
+              icon={<CloseCircleOutlined />}
+              onClick={() => handleRejectKyc(record.id, record.name)}
+            >
+              {t('dashboard.rejectKyc', 'Từ Chối')}
+            </Button>
+          </Space>
+        );
+      },
     },
   ];
 }

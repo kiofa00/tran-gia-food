@@ -2,12 +2,13 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
-import { App, Card, Modal, Space, Typography } from 'antd';
+import { App, Card, Space, Typography } from 'antd';
 
 import {
   DataTable,
   PageContainer,
   PageHeader,
+  RestaurantDetailModal,
   RestaurantRecord,
   SearchFilterBox,
   getRestaurantColumns,
@@ -21,11 +22,13 @@ import { useLocale } from '@/hooks';
 const { Text } = Typography;
 
 export default function RestaurantsManagementPage() {
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
   const { t } = useLocale();
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [selectedRestaurant, setSelectedRestaurant] = useState<RestaurantRecord | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   const { data: rawData, isLoading } = useRestaurantsQuery({
     search: search || undefined,
@@ -54,7 +57,7 @@ export default function RestaurantsManagementPage() {
 
   const handleApprove = useCallback(
     (record: RestaurantRecord) => {
-      Modal.confirm({
+      modal.confirm({
         title: t('restaurants.approveConfirmTitle', 'Xác nhận duyệt nhà hàng'),
         content: t(
           'restaurants.approveConfirmContent',
@@ -64,19 +67,22 @@ export default function RestaurantsManagementPage() {
         okText: t('common.confirm', 'Phê Duyệt'),
         cancelText: t('common.cancel', 'Hủy'),
         okButtonProps: { className: 'bg-green-600' },
-        onOk: () =>
-          approveMutation.mutate(record.id, {
-            onSuccess: () => message.success(t('common.success', 'Đã duyệt nhà hàng thành công!')),
-            onError: () => message.error(t('common.errorTryAgain', 'Thao tác thất bại.')),
-          }),
+        onOk: async () => {
+          try {
+            await approveMutation.mutateAsync(record.id);
+            message.success(t('common.success', 'Đã duyệt nhà hàng thành công!'));
+          } catch {
+            message.error(t('common.errorTryAgain', 'Thao tác thất bại.'));
+          }
+        },
       });
     },
-    [approveMutation, message, t],
+    [approveMutation, message, modal, t],
   );
 
   const handleSuspend = useCallback(
     (record: RestaurantRecord) => {
-      Modal.confirm({
+      modal.confirm({
         title: t('restaurants.suspendConfirmTitle', 'Đình chỉ hoạt động'),
         content: t(
           'restaurants.suspendConfirmContent',
@@ -86,30 +92,35 @@ export default function RestaurantsManagementPage() {
         okText: t('restaurants.suspend', 'Đình Chỉ Quán'),
         cancelText: t('common.cancel', 'Hủy'),
         okButtonProps: { danger: true },
-        onOk: () =>
-          suspendMutation.mutate(
-            {
+        onOk: async () => {
+          try {
+            await suspendMutation.mutateAsync({
               id: record.id,
               reason: t('restaurants.suspendReasonDefault', 'Vi phạm chính sách nền tảng'),
-            },
-            {
-              onSuccess: () => message.success(t('common.success', 'Đã đình chỉ nhà hàng.')),
-              onError: () => message.error(t('common.errorTryAgain', 'Thao tác thất bại.')),
-            },
-          ),
+            });
+            message.success(t('common.success', 'Đã đình chỉ nhà hàng.'));
+          } catch {
+            message.error(t('common.errorTryAgain', 'Thao tác thất bại.'));
+          }
+        },
       });
     },
-    [suspendMutation, message, t],
+    [suspendMutation, message, modal, t],
   );
+
+  const handleViewDetail = useCallback((record: RestaurantRecord) => {
+    setSelectedRestaurant(record);
+    setIsDetailModalOpen(true);
+  }, []);
 
   const columns = useMemo(
     () =>
       getRestaurantColumns({
         onApprove: handleApprove,
         onSuspend: handleSuspend,
-        onView: (_r) => undefined,
+        onView: handleViewDetail,
       }),
-    [handleApprove, handleSuspend],
+    [handleApprove, handleSuspend, handleViewDetail],
   );
 
   const filterOptions = useMemo(
@@ -167,7 +178,10 @@ export default function RestaurantsManagementPage() {
         <Card variant="borderless" className="rounded-xl shadow-xs">
           <Space direction="vertical" className="w-full" size="middle">
             <SearchFilterBox
-              searchPlaceholder={t('common.search', 'Tìm theo tên quán, địa chỉ, chủ sở hữu...')}
+              searchPlaceholder={t(
+                'restaurants.searchPlaceholder',
+                'Tìm theo tên quán, địa chỉ, chủ sở hữu...',
+              )}
               searchValue={search}
               onSearchChange={setSearch}
               filterLabel={t('common.status', 'Lọc Trạng Thái:')}
@@ -181,11 +195,22 @@ export default function RestaurantsManagementPage() {
               dataSource={restaurants}
               columns={columns}
               loading={isLoading}
-              emptyDescription={t('common.noData', 'Không tìm thấy nhà hàng phù hợp')}
+              emptyDescription={t(
+                'restaurants.emptyDescription',
+                'Không tìm thấy nhà hàng phù hợp',
+              )}
             />
           </Space>
         </Card>
       </Space>
+
+      <RestaurantDetailModal
+        open={isDetailModalOpen}
+        restaurant={selectedRestaurant}
+        onClose={() => setIsDetailModalOpen(false)}
+        onApprove={handleApprove}
+        onSuspend={handleSuspend}
+      />
     </PageContainer>
   );
 }

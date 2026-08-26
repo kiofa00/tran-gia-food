@@ -5,23 +5,61 @@ import { Avatar, Badge, Button, Space, Tag, Typography } from 'antd';
 
 import { getLocale } from '@/hooks';
 import { adminDesignTokens } from '@/theme/tokens';
+import { formatDate } from '@/utils/formatters';
 
 import { UserRecord } from '../types';
 
 const { Text } = Typography;
 
+export interface RoleTagInfo {
+  color: string;
+  label: string;
+}
+
+export const getRoleTagProps = (role: string): RoleTagInfo => {
+  const { t } = getLocale();
+  const normalized = (role || '').toUpperCase();
+
+  if (normalized === 'RESTAURANT' || normalized === 'RESTAURANT_OWNER') {
+    return {
+      color: 'orange',
+      label: t('users.restaurants', 'Đối Tác Quán'),
+    };
+  }
+  if (normalized === 'SHIPPER') {
+    return {
+      color: 'green',
+      label: t('users.shippers', 'Shipper'),
+    };
+  }
+  if (normalized === 'ADMIN') {
+    return {
+      color: 'purple',
+      label: t('users.admin', 'Quản Trị Viên'),
+    };
+  }
+
+  return {
+    color: 'blue',
+    label: t('users.customers', 'Khách Hàng'),
+  };
+};
+
+export const getAvatarBgColor = (role: string) => {
+  const normalized = (role || '').toUpperCase();
+
+  if (normalized === 'ADMIN') return adminDesignTokens.colors.statPurple;
+  if (normalized === 'SHIPPER') return adminDesignTokens.colors.statusApproved;
+  if (normalized === 'RESTAURANT' || normalized === 'RESTAURANT_OWNER')
+    return adminDesignTokens.colors.statOrange;
+
+  return adminDesignTokens.colors.statBlue;
+};
+
 interface GetUserColumnsParams {
   onViewDetail: (record: UserRecord) => void;
   onToggleStatus: (record: UserRecord) => void;
 }
-
-const getAvatarBgColor = (role: string) => {
-  if (role === 'ADMIN') return adminDesignTokens.colors.statPurple;
-  if (role === 'SHIPPER') return adminDesignTokens.colors.statusApproved;
-  if (role === 'RESTAURANT_OWNER') return adminDesignTokens.colors.statOrange;
-
-  return adminDesignTokens.colors.statBlue;
-};
 
 export const getUserColumns = ({ onViewDetail, onToggleStatus }: GetUserColumnsParams) => {
   const { t } = getLocale();
@@ -68,19 +106,7 @@ export const getUserColumns = ({ onViewDetail, onToggleStatus }: GetUserColumnsP
       dataIndex: 'role',
       key: 'role',
       render: (role: string) => {
-        let color = 'blue';
-        let label = t('users.customers', 'Khách Hàng');
-
-        if (role === 'RESTAURANT_OWNER') {
-          color = 'orange';
-          label = t('users.restaurants', 'Đối Tác Quán');
-        } else if (role === 'SHIPPER') {
-          color = 'green';
-          label = t('users.shippers', 'Shipper');
-        } else if (role === 'ADMIN') {
-          color = 'purple';
-          label = t('users.admin', 'Quản Trị Viên');
-        }
+        const { color, label } = getRoleTagProps(role);
 
         return <Tag color={color}>{label}</Tag>;
       },
@@ -102,7 +128,7 @@ export const getUserColumns = ({ onViewDetail, onToggleStatus }: GetUserColumnsP
       title: t('users.createdAt', 'Ngày Tạo'),
       dataIndex: 'createdAt',
       key: 'createdAt',
-      render: (val: string) => (val ? new Date(val).toLocaleDateString('vi-VN') : '—'),
+      render: (val: string) => formatDate(val),
     },
     {
       title: t('users.actions', 'Thao Tác'),

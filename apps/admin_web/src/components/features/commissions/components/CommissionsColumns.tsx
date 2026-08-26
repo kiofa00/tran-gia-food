@@ -5,7 +5,7 @@ import { Tag, Typography } from 'antd';
 
 import { useLocale } from '@/hooks/useLocale';
 import { CommissionRecord } from '@/types';
-import { formatCurrency } from '@/utils/formatters';
+import { formatCurrency, formatDateTime } from '@/utils/formatters';
 
 const { Text } = Typography;
 
@@ -96,11 +96,11 @@ export function useCommissionsColumns() {
         <Tag
           color={status === 'PROCESSED' ? 'success' : 'warning'}
           icon={status === 'PROCESSED' ? <CheckCircleOutlined /> : <SyncOutlined spin />}
-          className="whitespace-nowrap"
+          className="whitespace-nowrap font-medium"
         >
           {status === 'PROCESSED'
-            ? t('users.active', 'Đã Giải Ngân')
-            : t('users.suspended', 'Chờ Quyết Toán')}
+            ? t('commissions.statusSettled', 'Đã Đối Soát')
+            : t('commissions.statusPending', 'Chờ Quyết Toán')}
         </Tag>
       ),
     },
@@ -112,7 +112,7 @@ export function useCommissionsColumns() {
       sorter: (a: CommissionRecord, b: CommissionRecord) => a.createdAt.localeCompare(b.createdAt),
       render: (date: string) => (
         <Text type="secondary" className="whitespace-nowrap">
-          {date}
+          {formatDateTime(date)}
         </Text>
       ),
     },

@@ -5,6 +5,7 @@ import React from 'react';
 import { Card, Empty, Space, Spin, Typography } from 'antd';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 
+import { useLocale } from '@/hooks/useLocale';
 import { PaymentMethodItem } from '@/types';
 
 const { Text } = Typography;
@@ -15,9 +16,11 @@ interface PaymentSplitChartProps {
 }
 
 export const PaymentSplitChart: React.FC<PaymentSplitChartProps> = ({ paymentData, loading }) => {
+  const { t } = useLocale();
+
   return (
     <Card
-      title="💳 Phân Bố Phương Thức Thanh Toán"
+      title={t('analytics.paymentSplitTitle', '💳 Phân Bố Phương Thức Thanh Toán')}
       variant="borderless"
       className="rounded-xl shadow-xs"
     >
@@ -25,11 +28,14 @@ export const PaymentSplitChart: React.FC<PaymentSplitChartProps> = ({ paymentDat
         {loading && (
           <Space direction="vertical" align="center">
             <Spin size="large" />
-            <Text type="secondary">Đang tải dữ liệu...</Text>
+            <Text type="secondary">{t('common.loading', 'Đang tải dữ liệu...')}</Text>
           </Space>
         )}
         {!loading && paymentData.length === 0 && (
-          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Chưa có dữ liệu thanh toán" />
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description={t('analytics.noPaymentData', 'Chưa có dữ liệu thanh toán')}
+          />
         )}
         {!loading && paymentData.length > 0 && (
           <ResponsiveContainer width="100%" height="100%">
@@ -48,7 +54,13 @@ export const PaymentSplitChart: React.FC<PaymentSplitChartProps> = ({ paymentDat
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip formatter={(val: number) => `${val}% tổng đơn`} />
+              <Tooltip
+                formatter={(val: number) =>
+                  t('analytics.totalOrdersPercent', '{percent}% tổng đơn', {
+                    percent: val,
+                  })
+                }
+              />
             </PieChart>
           </ResponsiveContainer>
         )}

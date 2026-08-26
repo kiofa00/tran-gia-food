@@ -1,4 +1,4 @@
-export interface PendingShipperRecord {
+export interface ShipperKycRecord {
   key: string;
   id: string;
   name: string;

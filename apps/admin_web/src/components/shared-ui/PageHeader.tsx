@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Col, Row, Space, Typography } from 'antd';
+import { Space, Typography } from 'antd';
 
 import { cn } from '@/utils/cn';
 
@@ -22,27 +22,31 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   className,
 }) => {
   return (
-    <div className={cn('mb-6', className)}>
-      <Row justify="space-between" align="middle" gutter={[16, 16]}>
-        <Col xs={24} sm={16} md={18}>
-          <Space align="center" size="small">
-            {typeof icon === 'string' ? <span className="text-2xl">{icon}</span> : icon}
-            <Title level={2} className="m-0 text-orange-500">
-              {title}
-            </Title>
-          </Space>
-          {subtitle && (
-            <div className="mt-1">
-              <Text type="secondary">{subtitle}</Text>
-            </div>
-          )}
-        </Col>
-        {action && (
-          <Col xs={24} sm={8} md={6} className="text-right">
-            {action}
-          </Col>
+    <div
+      className={cn(
+        'mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4',
+        className,
+      )}
+    >
+      <div className="min-w-0">
+        <Space align="center" size="small">
+          {typeof icon === 'string' ? <span className="text-2xl">{icon}</span> : icon}
+          <Title level={2} className="!m-0 text-orange-500 text-xl sm:text-2xl">
+            {title}
+          </Title>
+        </Space>
+        {subtitle && (
+          <div className="mt-1">
+            <Text type="secondary" className="text-xs sm:text-sm text-slate-500">
+              {subtitle}
+            </Text>
+          </div>
         )}
-      </Row>
+      </div>
+
+      {action && (
+        <div className="shrink-0 flex items-center gap-2 self-start md:self-auto">{action}</div>
+      )}
     </div>
   );
 };

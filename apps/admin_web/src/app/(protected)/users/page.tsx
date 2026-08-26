@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
-import { App, Card, Modal, Select, Space, Typography } from 'antd';
+import { App, Card, Select, Space, Typography } from 'antd';
 
 import {
   DataTable,
@@ -21,7 +21,7 @@ import { useLocale, useUserFilterOptions } from '@/hooks';
 const { Text } = Typography;
 
 export default function UsersManagementPage() {
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
   const { t } = useLocale();
 
   const [search, setSearch] = useState('');
@@ -33,7 +33,7 @@ export default function UsersManagementPage() {
   const { data: rawData, isLoading } = useUsersQuery({
     search: search || undefined,
     role: roleFilter !== 'ALL' ? roleFilter : undefined,
-    userStatus: statusFilter !== 'ALL' ? statusFilter : undefined,
+    status: statusFilter !== 'ALL' ? statusFilter : undefined,
   });
 
   const updateStatusMutation = useUpdateUserStatusMutation();
@@ -50,7 +50,9 @@ export default function UsersManagementPage() {
 
   const totalUsersCount = userList.length;
   const customersCount = userList.filter((u) => u.role === 'CUSTOMER').length;
-  const restaurantsCount = userList.filter((u) => u.role === 'RESTAURANT_OWNER').length;
+  const restaurantsCount = userList.filter(
+    (u) => u.role === 'RESTAURANT' || u.role === 'RESTAURANT_OWNER',
+  ).length;
   const shippersCount = userList.filter((u) => u.role === 'SHIPPER').length;
 
   const handleToggleStatus = useCallback(
@@ -59,7 +61,7 @@ export default function UsersManagementPage() {
       const actionText =
         nextStatus === 'SUSPENDED' ? t('users.lock', 'khóa') : t('users.unlock', 'mở khóa');
 
-      Modal.confirm({
+      modal.confirm({
         title: t('users.confirmToggleTitle', 'Xác nhận {action} tài khoản?', {
           action: actionText,
         }),
@@ -71,26 +73,21 @@ export default function UsersManagementPage() {
         okText: t('common.confirm', 'Xác nhận'),
         cancelText: t('common.cancel', 'Hủy'),
         okButtonProps: { danger: nextStatus === 'SUSPENDED' },
-        onOk: () => {
-          updateStatusMutation.mutate(
-            { id: record.id, status: nextStatus },
-            {
-              onSuccess: () => {
-                message.success(
-                  t('users.actionSuccess', 'Đã {action} tài khoản thành công!', {
-                    action: actionText,
-                  }),
-                );
-              },
-              onError: () => {
-                message.error(t('common.errorTryAgain', 'Thao tác thất bại, vui lòng thử lại.'));
-              },
-            },
-          );
+        onOk: async () => {
+          try {
+            await updateStatusMutation.mutateAsync({ id: record.id, status: nextStatus });
+            message.success(
+              t('users.actionSuccess', 'Đã {action} tài khoản thành công!', {
+                action: actionText,
+              }),
+            );
+          } catch {
+            message.error(t('common.errorTryAgain', 'Thao tác thất bại, vui lòng thử lại.'));
+          }
         },
       });
     },
-    [message, t, updateStatusMutation],
+    [message, modal, t, updateStatusMutation],
   );
 
   const { roleFilterOptions, statusFilterOptions } = useUserFilterOptions();

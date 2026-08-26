@@ -113,17 +113,31 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
     [availableLanguages, language, setLanguage],
   );
 
+  interface ProcessedNavChild {
+    key: string;
+    label: string;
+    icon?: React.ReactNode;
+  }
+
+  interface ProcessedNavGroup {
+    key: string;
+    label: string;
+    icon?: React.ReactNode;
+    href?: string;
+    children?: ProcessedNavChild[];
+  }
+
   // Grouped Navigation with i18n
-  const navGroups = useMemo(
+  const navGroups: ProcessedNavGroup[] = useMemo(
     () =>
       ADMIN_NAV_GROUPS.map((group) => {
         const icon = group.iconName ? iconMap[group.iconName] : undefined;
 
-        if (group.children) {
-          const children = group.children.map((child) => ({
+        if ('children' in group && group.children) {
+          const children: ProcessedNavChild[] = group.children.map((child) => ({
             key: child.key,
             label: t(child.translationKey, child.label),
-            icon: iconMap[child.iconName],
+            icon: child.iconName ? iconMap[child.iconName] : undefined,
           }));
 
           return {
@@ -138,7 +152,7 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
           key: group.key,
           label: t(group.translationKey, group.label),
           icon,
-          href: group.href || '/',
+          href: 'href' in group && group.href ? group.href : '/',
         };
       }),
     [t, iconMap],
@@ -163,7 +177,7 @@ export const Header: React.FC<HeaderProps> = ({ userName }) => {
                 level={4}
                 className="!m-0 !text-white font-black tracking-tight whitespace-nowrap select-none hover:opacity-90 transition-opacity"
               >
-                🍜 Tran Gia Food
+                🍜 {t('header.title', 'Tran Gia Food')}
               </Title>
             </Link>
 

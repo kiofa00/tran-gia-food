@@ -6,69 +6,69 @@ class AppColors {
   AppColors._();
 
   // Primary
-  static const primary      = Color(0xFFFF6635);
+  static const primary = Color(0xFFFF6635);
   static const primaryLight = Color(0xFFFF8C69);
-  static const primaryDark  = Color(0xFFE04A1E);
+  static const primaryDark = Color(0xFFE04A1E);
 
   // Secondary
   static const secondary = Color(0xFFFFD93D);
 
   // Light Theme
   static const backgroundLight = Color(0xFFFFF8F2);
-  static const surfaceLight     = Color(0xFFFFFFFF);
-  static const surfaceAltLight  = Color(0xFFF5EDE3);
+  static const surfaceLight = Color(0xFFFFFFFF);
+  static const surfaceAltLight = Color(0xFFF5EDE3);
   static const textPrimaryLight = Color(0xFF2D1B00);
   static const textSecondaryLight = Color(0xFF7C6E5C);
-  static const textHintLight    = Color(0xFFB5A898);
-  static const dividerLight     = Color(0xFFEDE4D8);
+  static const textHintLight = Color(0xFFB5A898);
+  static const dividerLight = Color(0xFFEDE4D8);
 
   // Dark Theme
   static const backgroundDark = Color(0xFF1A1209);
-  static const surfaceDark    = Color(0xFF2A1F12);
+  static const surfaceDark = Color(0xFF2A1F12);
   static const surfaceAltDark = Color(0xFF352817);
   static const textPrimaryDark = Color(0xFFFFF0E0);
   static const textSecondaryDark = Color(0xFFC4A882);
-  static const dividerDark    = Color(0xFF3D2E1E);
+  static const dividerDark = Color(0xFF3D2E1E);
 
   // Status Colors
   static const success = Color(0xFF2E7D32);
   static const warning = Color(0xFFED6C02);
-  static const error   = Color(0xFFD32F2F);
-  static const info    = Color(0xFF0288D1);
+  static const error = Color(0xFFD32F2F);
+  static const info = Color(0xFF0288D1);
 }
 
 /// Typography tokens for Tran Gia Food Design System
 class AppFontSize {
   AppFontSize._();
-  static const double xs    = 11.0;
-  static const double sm    = 12.0;
-  static const double body  = 13.0;
-  static const double md    = 14.0;
-  static const double base  = 15.0;
+  static const double xs = 11.0;
+  static const double sm = 12.0;
+  static const double body = 13.0;
+  static const double md = 14.0;
+  static const double base = 15.0;
   static const double title = 16.0;
-  static const double lg    = 18.0;
-  static const double xl    = 22.0;
-  static const double h1    = 24.0;
-  static const double h2    = 28.0;
+  static const double lg = 18.0;
+  static const double xl = 22.0;
+  static const double h1 = 24.0;
+  static const double h2 = 28.0;
 }
 
 class AppFontWeight {
   AppFontWeight._();
-  static const regular   = FontWeight.w400;
-  static const medium    = FontWeight.w500;
-  static const semiBold  = FontWeight.w600;
-  static const bold      = FontWeight.w700;
+  static const regular = FontWeight.w400;
+  static const medium = FontWeight.w500;
+  static const semiBold = FontWeight.w600;
+  static const bold = FontWeight.w700;
   static const extraBold = FontWeight.w800;
 }
 
 /// Border radius constants
 class AppRadius {
   AppRadius._();
-  static const xs   = Radius.circular(6);
-  static const sm   = Radius.circular(10);
-  static const md   = Radius.circular(16);
-  static const lg   = Radius.circular(20);
-  static const xl   = Radius.circular(28);
+  static const xs = Radius.circular(6);
+  static const sm = Radius.circular(10);
+  static const md = Radius.circular(16);
+  static const lg = Radius.circular(20);
+  static const xl = Radius.circular(28);
   static const full = Radius.circular(999);
 }
 
@@ -77,27 +77,15 @@ class AppShadows {
   AppShadows._();
 
   static const sm = [
-    BoxShadow(
-      color: Color(0x14FF6635),
-      blurRadius: 8,
-      offset: Offset(0, 2),
-    ),
+    BoxShadow(color: Color(0x14FF6635), blurRadius: 8, offset: Offset(0, 2)),
   ];
 
   static const md = [
-    BoxShadow(
-      color: Color(0x1FFF6635),
-      blurRadius: 16,
-      offset: Offset(0, 4),
-    ),
+    BoxShadow(color: Color(0x1FFF6635), blurRadius: 16, offset: Offset(0, 4)),
   ];
 
   static const lg = [
-    BoxShadow(
-      color: Color(0x29FF6635),
-      blurRadius: 32,
-      offset: Offset(0, 8),
-    ),
+    BoxShadow(color: Color(0x29FF6635), blurRadius: 32, offset: Offset(0, 8)),
   ];
 }
 
@@ -143,20 +131,17 @@ class AppTheme {
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(AppRadius.sm),
         ),
-        minimumSize: const Size(double.infinity, 52),
-        textStyle: GoogleFonts.inter(
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-        ),
+        minimumSize: const Size(64, 48),
+        textStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: AppColors.surfaceAltLight,
-      border: OutlineInputBorder(
+      border: const OutlineInputBorder(
         borderRadius: BorderRadius.all(AppRadius.sm),
         borderSide: BorderSide.none,
       ),
@@ -169,7 +154,7 @@ class AppTheme {
 
   static ThemeData get dark => ThemeData(
     useMaterial3: true,
-    colorScheme: ColorScheme.dark(
+    colorScheme: const ColorScheme.dark(
       primary: AppColors.primary,
       onPrimary: Colors.white,
       secondary: AppColors.secondary,
@@ -182,7 +167,7 @@ class AppTheme {
     dividerColor: AppColors.dividerDark,
     fontFamily: GoogleFonts.nunito().fontFamily,
     textTheme: _textTheme(AppColors.textPrimaryDark),
-    appBarTheme: AppBarTheme(
+    appBarTheme: const AppBarTheme(
       backgroundColor: AppColors.backgroundDark,
       foregroundColor: AppColors.textPrimaryDark,
       elevation: 0,
@@ -192,10 +177,10 @@ class AppTheme {
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(AppRadius.sm),
         ),
-        minimumSize: const Size(double.infinity, 52),
+        minimumSize: const Size(64, 48),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
@@ -213,13 +198,45 @@ class AppTheme {
   );
 
   static TextTheme _textTheme(Color primary) => TextTheme(
-    displayLarge:  GoogleFonts.nunito(fontSize: 28, fontWeight: FontWeight.w700, color: primary),
-    displayMedium: GoogleFonts.nunito(fontSize: 22, fontWeight: FontWeight.w700, color: primary),
-    displaySmall:  GoogleFonts.nunito(fontSize: 18, fontWeight: FontWeight.w600, color: primary),
-    headlineMedium:GoogleFonts.nunito(fontSize: 16, fontWeight: FontWeight.w600, color: primary),
-    bodyLarge:     GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w400, color: primary),
-    bodyMedium:    GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w400, color: primary),
-    bodySmall:     GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w400, color: primary),
-    labelLarge:    GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: primary),
+    displayLarge: GoogleFonts.nunito(
+      fontSize: 28,
+      fontWeight: FontWeight.w700,
+      color: primary,
+    ),
+    displayMedium: GoogleFonts.nunito(
+      fontSize: 22,
+      fontWeight: FontWeight.w700,
+      color: primary,
+    ),
+    displaySmall: GoogleFonts.nunito(
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+      color: primary,
+    ),
+    headlineMedium: GoogleFonts.nunito(
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      color: primary,
+    ),
+    bodyLarge: GoogleFonts.inter(
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      color: primary,
+    ),
+    bodyMedium: GoogleFonts.inter(
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      color: primary,
+    ),
+    bodySmall: GoogleFonts.inter(
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      color: primary,
+    ),
+    labelLarge: GoogleFonts.inter(
+      fontSize: 13,
+      fontWeight: FontWeight.w500,
+      color: primary,
+    ),
   );
 }

@@ -1,4 +1,4 @@
-import { DashboardOverviewStats, PendingShipperItem } from '@/types';
+import { DashboardOverviewStats, ShipperKycItem } from '@/types';
 
 import { apiClient } from './apiClient';
 
@@ -9,10 +9,10 @@ export const adminService = {
     return res.data;
   },
 
-  getPendingShippers: async (
+  getShipperKycList: async (
     params?: import('./apiClient').QueryParams,
-  ): Promise<PendingShipperItem[] | Record<string, unknown>> => {
-    const res = await apiClient.get('/admin/shippers/pending-kyc', { params });
+  ): Promise<ShipperKycItem[] | Record<string, unknown>> => {
+    const res = await apiClient.get('/admin/kyc/shippers', { params });
 
     return res.data;
   },

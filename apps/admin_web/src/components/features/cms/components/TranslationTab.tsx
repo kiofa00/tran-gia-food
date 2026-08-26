@@ -47,7 +47,10 @@ export const TranslationTab: React.FC<TranslationTabProps> = ({ translations, is
   return (
     <Space direction="vertical" className="w-full" size="middle">
       <SearchFilterBox
-        searchPlaceholder={t('common.search', 'Tìm kiếm theo Key, Tiếng Việt hoặc Tiếng Anh...')}
+        searchPlaceholder={t(
+          'cms.translationSearchPlaceholder',
+          'Tìm kiếm theo Key, Tiếng Việt hoặc Tiếng Anh...',
+        )}
         searchValue={search}
         onSearchChange={setSearch}
         filterLabel={t('users.role', 'Ứng Dụng:')}
@@ -60,7 +63,7 @@ export const TranslationTab: React.FC<TranslationTabProps> = ({ translations, is
         dataSource={filteredTranslations}
         columns={columns}
         loading={isLoading}
-        emptyDescription={t('common.noData', 'Không tìm thấy bản dịch phù hợp')}
+        emptyDescription={t('cms.translationEmpty', 'Không tìm thấy bản dịch')}
       />
     </Space>
   );

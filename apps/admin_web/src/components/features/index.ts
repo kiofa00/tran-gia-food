@@ -8,3 +8,4 @@ export * from './payouts';
 export * from './restaurants';
 export * from './vouchers';
 export * from './users';
+export * from './kyc';

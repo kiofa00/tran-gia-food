@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { cookies } from 'next/headers';
+
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import '@ant-design/v5-patch-for-react-19';
 
@@ -8,6 +10,7 @@ import { AntdThemeConfig } from '@/providers/AntdThemeConfig';
 import { LanguageProvider } from '@/providers/LanguageProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { SessionProvider } from '@/providers/SessionProvider';
+import { COOKIE_KEY_ADMIN_LANG, DEFAULT_LOCALE } from '@/shared-config';
 
 import './globals.css';
 
@@ -31,13 +34,16 @@ export const metadata = {
   description: 'Admin portal for Tran Gia Food delivery platform',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
+  const initialLocale = cookieStore.get(COOKIE_KEY_ADMIN_LANG)?.value || DEFAULT_LOCALE;
+
   return (
-    <html lang="vi" suppressHydrationWarning>
+    <html lang={initialLocale} suppressHydrationWarning>
       <body className="m-0 p-0 font-sans bg-gray-50 text-gray-900">
         <SessionProvider>
           <QueryProvider>
-            <LanguageProvider>
+            <LanguageProvider initialLocale={initialLocale}>
               <AppInitializer />
               <AntdRegistry>
                 <AntdThemeConfig>{children}</AntdThemeConfig>

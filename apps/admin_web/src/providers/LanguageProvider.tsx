@@ -4,17 +4,26 @@ import React, { createContext, useCallback, useEffect, useMemo, useState } from 
 
 import { I18nextProvider } from 'react-i18next';
 
-import { useCmsQuery } from '@/components/features/cms';
+import { useCmsQuery } from '@/components/features/cms/hooks/useCms';
 import i18n, { TranslationKey } from '@/lib/i18n';
+import {
+  COOKIE_KEY_ADMIN_LANG,
+  COOKIE_MAX_AGE_SECONDS,
+  DEFAULT_LOCALE,
+  STORAGE_KEY_ADMIN_LANG,
+} from '@/shared-config';
 
 import viFallback from '../locales/vi.json';
-
-const STORAGE_KEY_ADMIN_LANG = 'admin_lang';
 
 export interface LanguageOption {
   code: string;
   label: string;
   flag: string;
+}
+
+export interface LanguageProviderProps {
+  children: React.ReactNode;
+  initialLocale?: string;
 }
 
 export type { TranslationKey };
@@ -42,8 +51,23 @@ const KNOWN_LANG_META: Record<string, { label: string; flag: string }> = {
   de: { label: 'Deutsch', flag: '🇩🇪' },
 };
 
+function interpolateParams(text: string, params?: TranslationParams): string {
+  if (!params || typeof text !== 'string') return text;
+
+  let result = text;
+
+  Object.entries(params).forEach(([key, val]) => {
+    // Replace {key} and {{key}}
+    result = result
+      .replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), String(val))
+      .replace(new RegExp(`\\{${key}\\}`, 'g'), String(val));
+  });
+
+  return result;
+}
+
 export const LanguageContext = createContext<LanguageContextType>({
-  language: 'vi',
+  language: DEFAULT_LOCALE,
   setLanguage: () => {},
   availableLanguages: [
     { code: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' },
@@ -53,70 +77,74 @@ export const LanguageContext = createContext<LanguageContextType>({
     const interpolations = typeof defaultTextOrParams === 'object' ? defaultTextOrParams : params;
     const defaultText = typeof defaultTextOrParams === 'string' ? defaultTextOrParams : undefined;
 
-    return i18n.t(key, {
-      defaultValue: defaultText || viFallback[key] || key,
+    const raw = i18n.t(key, {
+      defaultValue: defaultText || (viFallback as Record<string, string>)[key] || key,
       ...(interpolations || {}),
     });
+
+    return interpolateParams(raw, interpolations);
   },
 });
 
-export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguageState] = useState<string>('vi');
+export const LanguageProvider: React.FC<LanguageProviderProps> = ({
+  children,
+  initialLocale = DEFAULT_LOCALE,
+}) => {
+  const [language, setLanguageState] = useState<string>(initialLocale);
   const { data: cmsData } = useCmsQuery();
+
+  if (i18n.language !== language) {
+    i18n.changeLanguage(language);
+  }
+
+  const setLanguage = useCallback((nextLang: string) => {
+    setLanguageState(nextLang);
+    i18n.changeLanguage(nextLang);
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = nextLang;
+      try {
+        localStorage.setItem(STORAGE_KEY_ADMIN_LANG, nextLang);
+        document.cookie = `${COOKIE_KEY_ADMIN_LANG}=${encodeURIComponent(nextLang)}; path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
+      } catch {
+        // Ignore storage error
+      }
+    }
+  }, []);
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_ADMIN_LANG);
 
-      if (saved) {
-        setLanguageState(saved);
-        i18n.changeLanguage(saved);
-        document.documentElement.lang = saved;
-      } else {
-        document.documentElement.lang = 'vi';
+      if (saved && saved !== language) {
+        setLanguage(saved);
+      } else if (!saved) {
+        localStorage.setItem(STORAGE_KEY_ADMIN_LANG, language);
+        document.cookie = `${COOKIE_KEY_ADMIN_LANG}=${encodeURIComponent(language)}; path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
       }
     } catch {
-      document.documentElement.lang = 'vi';
+      // Ignore localStorage unavailable in strict sandboxes
     }
-  }, []);
+  }, [language, setLanguage]);
 
-  const setLanguage = useCallback((lang: string) => {
-    setLanguageState(lang);
-    i18n.changeLanguage(lang);
-    try {
-      localStorage.setItem(STORAGE_KEY_ADMIN_LANG, lang);
-    } catch {
-      // Safe fallback if localStorage access is restricted
-    }
-    document.documentElement.lang = lang;
-  }, []);
-
-  /** Dynamically inject CMS translations into i18next resource bundles */
+  /** Dynamically ingest CMS translations into i18next runtime cache */
   useEffect(() => {
     if (cmsData?.translations && Array.isArray(cmsData.translations)) {
       const cmsResources: Record<string, Record<string, string>> = {};
 
       cmsData.translations.forEach((item) => {
-        if (item.key) {
-          Object.keys(item).forEach((propKey) => {
-            if (
-              propKey !== 'id' &&
-              propKey !== 'key' &&
-              propKey !== 'appTarget' &&
-              propKey !== 'category' &&
-              propKey !== 'createdAt' &&
-              propKey !== 'updatedAt' &&
-              typeof item[propKey] === 'string'
-            ) {
-              const langCode = propKey.toLowerCase();
+        const key = item.key;
 
-              if (!cmsResources[langCode]) {
-                cmsResources[langCode] = {};
-              }
-              cmsResources[langCode][item.key] = item[propKey] as string;
-            }
-          });
-        }
+        if (!key) return;
+
+        Object.entries(item).forEach(([propKey, propVal]) => {
+          if (propKey === 'id' || propKey === 'key' || typeof propVal !== 'string') return;
+          const langCode = propKey.toLowerCase();
+
+          if (!cmsResources[langCode]) {
+            cmsResources[langCode] = {};
+          }
+          cmsResources[langCode][key] = propVal;
+        });
       });
 
       Object.entries(cmsResources).forEach(([langCode, bundle]) => {
@@ -171,12 +199,15 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         interpolations = params;
       }
 
-      return i18n.t(key, {
-        defaultValue: defaultText || viFallback[key] || key,
+      const raw = i18n.t(key, {
+        lng: language,
+        defaultValue: defaultText || (viFallback as Record<string, string>)[key] || key,
         ...(interpolations || {}),
       });
+
+      return interpolateParams(raw, interpolations);
     },
-    [],
+    [language],
   );
 
   const contextValue = useMemo(

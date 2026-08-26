@@ -11,10 +11,10 @@ const { Text } = Typography;
 const { Option } = Select;
 
 export interface SelectOptionItem {
-  value: string;
-  label?: string;
-  i18nKey?: TranslationKey;
-  defaultLabel?: string;
+  readonly value: string;
+  readonly label?: string;
+  readonly i18nKey?: TranslationKey;
+  readonly defaultLabel?: string;
 }
 
 interface SearchFilterBoxProps {
@@ -24,7 +24,7 @@ interface SearchFilterBoxProps {
   filterLabel?: string;
   filterValue?: string;
   onFilterChange?: (value: string) => void;
-  filterOptions?: SelectOptionItem[];
+  filterOptions?: readonly SelectOptionItem[];
   extraAction?: React.ReactNode;
   className?: string;
 }

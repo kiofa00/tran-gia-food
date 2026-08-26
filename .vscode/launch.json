@@ -1,0 +1,59 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Customer App",
+      "request": "launch",
+      "type": "dart",
+      "program": "apps/customer_app/lib/main.dart",
+      "cwd": "apps/customer_app",
+      "args": ["--dart-define-from-file=.env"]
+    },
+    {
+      "name": "Restaurant App",
+      "request": "launch",
+      "type": "dart",
+      "program": "apps/restaurant_app/lib/main.dart",
+      "cwd": "apps/restaurant_app",
+      "args": ["--dart-define-from-file=.env"]
+    },
+    {
+      "name": "Shipper App",
+      "request": "launch",
+      "type": "dart",
+      "program": "apps/shipper_app/lib/main.dart",
+      "cwd": "apps/shipper_app",
+      "args": ["--dart-define-from-file=.env"]
+    },
+    {
+      "name": "Customer App (Web - Chrome)",
+      "request": "launch",
+      "type": "dart",
+      "program": "apps/customer_app/lib/main.dart",
+      "cwd": "apps/customer_app",
+      "args": ["-d", "chrome", "--dart-define-from-file=.env"]
+    },
+    {
+      "name": "Restaurant App (Web - Chrome)",
+      "request": "launch",
+      "type": "dart",
+      "program": "apps/restaurant_app/lib/main.dart",
+      "cwd": "apps/restaurant_app",
+      "args": ["-d", "chrome", "--dart-define-from-file=.env"]
+    },
+    {
+      "name": "Shipper App (Web - Chrome)",
+      "request": "launch",
+      "type": "dart",
+      "program": "apps/shipper_app/lib/main.dart",
+      "cwd": "apps/shipper_app",
+      "args": ["-d", "chrome", "--dart-define-from-file=.env"]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "All 3 Flutter Apps (Customer + Restaurant + Shipper)",
+      "configurations": ["Customer App", "Restaurant App", "Shipper App"]
+    }
+  ]
+}

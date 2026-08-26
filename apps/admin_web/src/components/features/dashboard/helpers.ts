@@ -1,8 +1,8 @@
 import { mapVehicleType } from '@/utils/formatters';
 
-import { PendingShipperRecord } from './types';
+import { ShipperKycRecord } from './types';
 
-export function mapPendingShipperRecord(item: unknown, idx: number): PendingShipperRecord {
+export function mapShipperKycRecord(item: unknown, idx: number): ShipperKycRecord {
   const s = item as Record<string, unknown>;
   const rawStatus = (s.ekycStatus || s.kycStatus || s.status || 'PENDING').toString().toUpperCase();
   const normalizedStatus =

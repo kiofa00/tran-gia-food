@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   formatCurrency,
   formatDate,
+  formatDateTime,
   formatDistance,
   formatThousands,
   mapKycStatus,
@@ -50,6 +51,16 @@ describe('formatters utility', () => {
   it('should format ISO date strings to DD/MM/YYYY', () => {
     expect(formatDate('2026-08-01T00:00:00.000Z')).toBe('01/08/2026');
     expect(formatDate('2026-08-31')).toBe('31/08/2026');
+    expect(formatDate(null)).toBe('N/A');
+    expect(formatDate(undefined)).toBe('N/A');
+    expect(formatDate('invalid-date')).toBe('invalid-date');
+  });
+
+  it('should format ISO date strings to DD/MM/YYYY HH:mm', () => {
+    expect(formatDateTime('2026-08-19T08:58:46.220Z')).toMatch(/\d{2}\/08\/2026 \d{2}:\d{2}/);
+    expect(formatDateTime(null)).toBe('N/A');
+    expect(formatDateTime(undefined)).toBe('N/A');
+    expect(formatDateTime('invalid-date')).toBe('invalid-date');
   });
 
   it('should map eKYC status to semantic Vietnamese text and badge color', () => {
@@ -72,10 +83,11 @@ describe('formatters utility', () => {
     expect(mapOrderStatus('COMPLETED').label).toBe('Hoàn thành');
   });
 
-  it('should map vehicle type keys to friendly Vietnamese semantic text', () => {
-    expect(mapVehicleType('MOTORBIKE')).toBe('Xe Máy');
-    expect(mapVehicleType('ELECTRIC_BIKE')).toBe('Xe Máy Điện');
-    expect(mapVehicleType('MOTORBIKE_50CC')).toBe('Xe Máy 50cc');
-    expect(mapVehicleType('CAR')).toBe('Ô Tô');
+  it('should map vehicle type keys to friendly semantic text', () => {
+    expect(mapVehicleType('MOTORBIKE')).toBe('Xe máy');
+    expect(mapVehicleType('ELECTRIC_BIKE')).toBe('Xe máy điện');
+    expect(mapVehicleType('MOTORBIKE_50CC')).toBe('Xe máy 50cc');
+    expect(mapVehicleType('CAR')).toBe('Ô tô');
+    expect(mapVehicleType('BICYCLE')).toBe('Xe đạp');
   });
 });

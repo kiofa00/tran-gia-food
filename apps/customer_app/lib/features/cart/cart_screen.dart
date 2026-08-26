@@ -31,11 +31,16 @@ class _CartScreenState extends State<CartScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Giỏ Hàng Của Bạn 🛒', style: TextStyle(fontWeight: FontWeight.bold)),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new),
-          onPressed: () => context.pop(),
+        title: const Text(
+          'Giỏ Hàng Của Bạn 🛒',
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
+        leading: context.canPop()
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new),
+                onPressed: () => context.pop(),
+              )
+            : null,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(18),
@@ -53,7 +58,13 @@ class _CartScreenState extends State<CartScreen> {
                 children: [
                   Icon(Iconsax.shop, color: AppColors.primary),
                   SizedBox(width: 10),
-                  Text('Phở Bắc Hà — Nguyễn Trãi', style: TextStyle(fontWeight: AppFontWeight.bold, fontSize: AppFontSize.base)),
+                  Text(
+                    'Phở Bắc Hà — Nguyễn Trãi',
+                    style: TextStyle(
+                      fontWeight: AppFontWeight.bold,
+                      fontSize: AppFontSize.base,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -78,32 +89,58 @@ class _CartScreenState extends State<CartScreen> {
                   onPressed: _applyVoucher,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(AppRadius.sm)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(AppRadius.sm),
+                    ),
                   ),
-                  child: const Text('Áp Dụng', style: TextStyle(color: Colors.white, fontWeight: AppFontWeight.bold)),
+                  child: const Text(
+                    'Áp Dụng',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: AppFontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 28),
 
             // Order Summary
-            const Text('Chi Tiết Thanh Toán', style: TextStyle(fontSize: AppFontSize.title, fontWeight: AppFontWeight.bold)),
+            const Text(
+              'Chi Tiết Thanh Toán',
+              style: TextStyle(
+                fontSize: AppFontSize.title,
+                fontWeight: AppFontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 12),
             _buildSummaryRow('Tiền đồ ăn', '130.000đ'),
             const SizedBox(height: 8),
             _buildSummaryRow('Phí giao hàng (1.8 km)', '16.000đ'),
             if (_discount > 0) ...[
               const SizedBox(height: 8),
-              _buildSummaryRow('Giảm giá Voucher', '-20.000đ', color: AppColors.success),
+              _buildSummaryRow(
+                'Giảm giá Voucher',
+                '-20.000đ',
+                color: AppColors.success,
+              ),
             ],
             const Divider(height: 24),
-            _buildSummaryRow('Tổng cộng', '${total.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}đ', isBold: true),
+            _buildSummaryRow(
+              'Tổng cộng',
+              '${total.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}đ',
+              isBold: true,
+            ),
             const SizedBox(height: 40),
 
             // Checkout Button
             AppButton(
-              text: 'Đặt Đơn Hàng ngay (${total.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}đ)',
+              text:
+                  'Đặt Đơn Hàng ngay (${total.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}đ)',
               onPressed: () => context.push('/checkout'),
             ),
           ],
@@ -115,20 +152,59 @@ class _CartScreenState extends State<CartScreen> {
   Widget _buildCartRow(String name, int qty, int price) {
     return Row(
       children: [
-        Text('${qty}x', style: const TextStyle(fontWeight: AppFontWeight.bold, color: AppColors.primary, fontSize: AppFontSize.title)),
+        Text(
+          '${qty}x',
+          style: const TextStyle(
+            fontWeight: AppFontWeight.bold,
+            color: AppColors.primary,
+            fontSize: AppFontSize.title,
+          ),
+        ),
         const SizedBox(width: 12),
-        Expanded(child: Text(name, style: const TextStyle(fontWeight: AppFontWeight.semiBold, fontSize: AppFontSize.base))),
-        Text('${price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}đ', style: const TextStyle(fontWeight: AppFontWeight.bold, fontSize: AppFontSize.base)),
+        Expanded(
+          child: Text(
+            name,
+            style: const TextStyle(
+              fontWeight: AppFontWeight.semiBold,
+              fontSize: AppFontSize.base,
+            ),
+          ),
+        ),
+        Text(
+          '${price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}đ',
+          style: const TextStyle(
+            fontWeight: AppFontWeight.bold,
+            fontSize: AppFontSize.base,
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildSummaryRow(String label, String value, {bool isBold = false, Color? color}) {
+  Widget _buildSummaryRow(
+    String label,
+    String value, {
+    bool isBold = false,
+    Color? color,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: TextStyle(fontSize: isBold ? AppFontSize.title : AppFontSize.md, fontWeight: isBold ? AppFontWeight.bold : AppFontWeight.regular)),
-        Text(value, style: TextStyle(fontSize: isBold ? AppFontSize.lg : AppFontSize.md, fontWeight: isBold ? AppFontWeight.bold : AppFontWeight.semiBold, color: color ?? (isBold ? AppColors.primary : null))),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: isBold ? AppFontSize.title : AppFontSize.md,
+            fontWeight: isBold ? AppFontWeight.bold : AppFontWeight.regular,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: isBold ? AppFontSize.lg : AppFontSize.md,
+            fontWeight: isBold ? AppFontWeight.bold : AppFontWeight.semiBold,
+            color: color ?? (isBold ? AppColors.primary : null),
+          ),
+        ),
       ],
     );
   }

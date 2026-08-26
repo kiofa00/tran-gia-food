@@ -1,50 +1,43 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 import { ReloadOutlined } from '@ant-design/icons';
-import { App, Button } from 'antd';
+import { App, Button, Col, Row } from 'antd';
 
 import {
+  DashboardActionAlerts,
   DashboardMetrics,
+  DashboardQuickLinks,
   DashboardStats,
   PageContainer,
   PageHeader,
-  PendingShipperRecord,
-  PendingShipperTable,
-  mapPendingShipperRecord,
+  PaymentSplitChart,
+  ProcessedTrendItem,
+  RevenueTrendChart,
+  useAnalyticsQuery,
   useDashboardStatsQuery,
-  usePendingShippersQuery,
-  useShipperKycColumns,
 } from '@/components';
 import { useLocale } from '@/hooks';
+import { PaymentMethodItem, RevenueTrendItem } from '@/types';
 
 export default function AdminDashboardPage() {
   const { message } = App.useApp();
   const { t } = useLocale();
-
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
 
   const {
     data: statsData,
     isLoading: statsLoading,
     refetch: refetchStats,
   } = useDashboardStatsQuery();
-  const {
-    data: rawShippersData,
-    isLoading: shippersLoading,
-    refetch: refetchShippers,
-  } = usePendingShippersQuery({
-    search: search || undefined,
-    status: statusFilter !== 'ALL' ? statusFilter : undefined,
-    page,
-    limit: pageSize,
-  });
 
-  const loading = statsLoading || shippersLoading;
+  const {
+    data: analyticsData,
+    isLoading: analyticsLoading,
+    refetch: refetchAnalytics,
+  } = useAnalyticsQuery('7d');
+
+  const loading = statsLoading || analyticsLoading;
 
   const stats: DashboardStats = useMemo(
     () =>
@@ -60,44 +53,26 @@ export default function AdminDashboardPage() {
     [statsData],
   );
 
-  const isPaginated =
-    rawShippersData !== null &&
-    typeof rawShippersData === 'object' &&
-    !Array.isArray(rawShippersData) &&
-    'data' in (rawShippersData as object);
-
-  const rawList = useMemo(
+  const trendData = useMemo<ProcessedTrendItem[]>(
     () =>
-      isPaginated
-        ? ((rawShippersData as { data: unknown[] }).data ?? [])
-        : ((rawShippersData as unknown[]) ?? []),
-    [isPaginated, rawShippersData],
+      (analyticsData?.revenueTrend || []).map((item: RevenueTrendItem) => ({
+        date: item.date || item.month || '',
+        gmv: (item.gmv || 0) * (item.gmv > 10000 ? 1 : 100000),
+        revenue: (item.platformRevenue || 0) * (item.platformRevenue > 10000 ? 1 : 100000),
+        orders: item.orders || 0,
+      })),
+    [analyticsData?.revenueTrend],
   );
 
-  const totalItems: number = isPaginated
-    ? ((rawShippersData as { total: number }).total ?? 0)
-    : rawList.length;
-
-  const pendingShippers: PendingShipperRecord[] = useMemo(
-    () => rawList.map((item, idx) => mapPendingShipperRecord(item, idx)),
-    [rawList],
+  const paymentData: PaymentMethodItem[] = useMemo(
+    () => analyticsData?.paymentMethods || analyticsData?.paymentSplit || [],
+    [analyticsData?.paymentMethods, analyticsData?.paymentSplit],
   );
 
-  const handleSearchChange = (val: string) => {
-    setSearch(val);
-    setPage(1);
-  };
-  const handleFilterChange = (val: string) => {
-    setStatusFilter(val);
-    setPage(1);
-  };
-  const handleRefresh = () => {
-    refetchStats();
-    refetchShippers();
+  const handleRefresh = async () => {
+    await Promise.all([refetchStats(), refetchAnalytics()]);
     message.success(t('dashboard.refreshedSuccess', 'Đã cập nhật số liệu mới nhất!'));
   };
-
-  const columns = useShipperKycColumns();
 
   return (
     <PageContainer>
@@ -122,24 +97,24 @@ export default function AdminDashboardPage() {
         }
       />
 
-      <DashboardMetrics stats={stats} loading={loading} />
+      {/* KPI Financial & Scale Metrics */}
+      <DashboardMetrics stats={stats} loading={statsLoading} />
 
-      <PendingShipperTable
-        search={search}
-        onSearchChange={handleSearchChange}
-        statusFilter={statusFilter}
-        onStatusFilterChange={handleFilterChange}
-        pendingShippers={pendingShippers}
-        columns={columns}
-        loading={loading}
-        page={page}
-        pageSize={pageSize}
-        totalItems={totalItems}
-        onPageChange={(p, ps) => {
-          setPage(p);
-          setPageSize(ps);
-        }}
-      />
+      {/* Actionable Alerts & Operations Status */}
+      <DashboardActionAlerts />
+
+      {/* Mini Analytics: Revenue & Payment Split Charts */}
+      <Row gutter={[16, 16]} className="mb-6">
+        <Col xs={24} lg={15}>
+          <RevenueTrendChart trendData={trendData} loading={analyticsLoading} />
+        </Col>
+        <Col xs={24} lg={9}>
+          <PaymentSplitChart paymentData={paymentData} loading={analyticsLoading} />
+        </Col>
+      </Row>
+
+      {/* Quick Module Navigation Hub */}
+      <DashboardQuickLinks />
     </PageContainer>
   );
 }

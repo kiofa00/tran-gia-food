@@ -3,6 +3,7 @@
 import { Card } from 'antd';
 
 import { DataTable } from '@/components/shared-ui';
+import { useLocale } from '@/hooks';
 
 import type { VoucherRecord } from '../types';
 
@@ -25,6 +26,8 @@ export function VoucherTable({
   totalItems,
   onPageChange,
 }: VoucherTableProps) {
+  const { t } = useLocale();
+
   return (
     <Card variant="borderless" className="rounded-xl shadow-xs">
       <DataTable<VoucherRecord>
@@ -33,13 +36,14 @@ export function VoucherTable({
         dataSource={vouchers}
         loading={loading}
         scroll={{ x: 1130 }}
-        emptyDescription="Chưa có mã giảm giá"
+        emptyDescription={t('vouchers.emptyDescription', 'Chưa có mã giảm giá nào')}
         pagination={{
           current: page,
           pageSize,
           total: totalItems,
           showSizeChanger: true,
-          showTotal: (total) => `Tổng ${total} voucher`,
+          showTotal: (total) =>
+            `${t('common.total', 'Tổng')} ${total} ${t('vouchers.voucherUnit', 'mã')}`,
           onChange: onPageChange,
         }}
       />

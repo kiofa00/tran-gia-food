@@ -3,6 +3,7 @@ import type { ColumnsType } from 'antd/es/table';
 
 import { getLocale } from '@/hooks';
 import { PAYOUT_STATUS_COLOR_MAP } from '@/shared-config';
+import { formatCurrency } from '@/utils/formatters';
 
 const { Text } = Typography;
 
@@ -15,10 +16,6 @@ export interface PayoutRecord {
   period: string;
   bankAccount: string;
   createdAt: string;
-}
-
-function formatCurrency(v: number): string {
-  return `${v.toLocaleString('vi-VN')}đ`;
 }
 
 export function getPayoutColumns({
@@ -66,7 +63,7 @@ export function getPayoutColumns({
         };
 
         return (
-          <Tag color={PAYOUT_STATUS_COLOR_MAP[status] ?? 'default'}>
+          <Tag color={(PAYOUT_STATUS_COLOR_MAP as Record<string, string>)[status] ?? 'default'}>
             {PAYOUT_STATUS_LABELS[status] ?? t('payouts.statusFailed', 'Bị từ chối')}
           </Tag>
         );

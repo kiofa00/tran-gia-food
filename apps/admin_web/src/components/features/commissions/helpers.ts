@@ -1,6 +1,12 @@
 import { CommissionRecord } from '@/types';
 
 export function mapCommissionRecord(item: Record<string, unknown>, idx: number): CommissionRecord {
+  const rawStatus = String(
+    item.status || (item.processedAt ? 'PROCESSED' : 'PENDING'),
+  ).toUpperCase();
+  const status: 'PROCESSED' | 'PENDING' =
+    rawStatus === 'PAID' || rawStatus === 'PROCESSED' ? 'PROCESSED' : 'PENDING';
+
   return {
     key: String(item.id || item.key || idx + 1),
     orderId: String(item.orderId || `ORD-${item.id || idx + 1}`),
@@ -10,7 +16,7 @@ export function mapCommissionRecord(item: Record<string, unknown>, idx: number):
     restaurantShare: Number(item.restaurantShare) || 0,
     shipperShare: Number(item.shipperShare) || 0,
     platformShare: Number(item.platformShare || item.platformCommission) || 0,
-    status: item.status === 'PAID' || item.status === 'PROCESSED' ? 'PROCESSED' : 'PENDING',
-    createdAt: String(item.createdAt || ''),
+    status,
+    createdAt: String(item.createdAt || item.processedAt || ''),
   };
 }

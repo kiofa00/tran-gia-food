@@ -23,12 +23,6 @@ export class AdminController {
     return this.adminService.getDashboardOverview();
   }
 
-  @Get('shippers/pending-kyc')
-  @ApiOperation({ summary: '[Admin] Danh sách shipper chờ duyệt eKYC' })
-  getPendingShippers(@Query() query: QueryOptions) {
-    return this.adminService.listPendingShippers(query);
-  }
-
   @Get('kyc/shippers')
   @ApiOperation({
     summary: '[Admin] Danh sách hồ sơ eKYC shipper (Hỗ trợ lọc status, search, pagination)',

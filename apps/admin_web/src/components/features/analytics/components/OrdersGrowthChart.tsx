@@ -5,6 +5,7 @@ import React from 'react';
 import { Card, Empty, Space, Spin, Typography } from 'antd';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
+import { useLocale } from '@/hooks/useLocale';
 import { adminDesignTokens } from '@/theme/tokens';
 
 import { ProcessedTrendItem } from './RevenueTrendChart';
@@ -17,9 +18,11 @@ interface OrdersGrowthChartProps {
 }
 
 export const OrdersGrowthChart: React.FC<OrdersGrowthChartProps> = ({ trendData, loading }) => {
+  const { t } = useLocale();
+
   return (
     <Card
-      title="📦 Tăng Trưởng Số Lượng Đơn Hàng Theo Ngày"
+      title={t('analytics.ordersGrowthTitle', '📦 Tăng Trưởng Số Lượng Đơn Hàng Theo Ngày')}
       variant="borderless"
       className="rounded-xl shadow-xs"
     >
@@ -27,11 +30,14 @@ export const OrdersGrowthChart: React.FC<OrdersGrowthChartProps> = ({ trendData,
         {loading && (
           <Space direction="vertical" align="center">
             <Spin size="large" />
-            <Text type="secondary">Đang tải dữ liệu đơn hàng...</Text>
+            <Text type="secondary">{t('common.loading', 'Đang tải dữ liệu...')}</Text>
           </Space>
         )}
         {!loading && trendData.length === 0 && (
-          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Chưa có dữ liệu đơn hàng" />
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description={t('analytics.noOrderData', 'Chưa có dữ liệu đơn hàng')}
+          />
         )}
         {!loading && trendData.length > 0 && (
           <ResponsiveContainer width="100%" height="100%">
@@ -42,7 +48,7 @@ export const OrdersGrowthChart: React.FC<OrdersGrowthChartProps> = ({ trendData,
               <Tooltip />
               <Bar
                 dataKey="orders"
-                name="Số đơn hàng"
+                name={t('analytics.orderCount', 'Số đơn hàng')}
                 fill={adminDesignTokens.colors.chartBlue}
                 radius={[6, 6, 0, 0]}
               />

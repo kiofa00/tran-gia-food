@@ -48,7 +48,7 @@ export const CmsServerStatusAlert: React.FC<CmsServerStatusAlertProps> = ({
               target="_blank"
               size="large"
             >
-              Mở Trang Quản Trị Strapi CMS Admin Panel
+              {t('cms.openStrapiAdmin', 'Mở Trang Quản Trị Strapi CMS Admin Panel')}
             </Button>
             <Button icon={<ReloadOutlined />} onClick={onRefresh} className="ml-3">
               {t('dashboard.refreshBtn', 'Làm mới số liệu')}

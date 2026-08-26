@@ -8,7 +8,7 @@ export interface DashboardOverviewStats {
   totalRestaurants?: number;
 }
 
-export interface PendingShipperItem {
+export interface ShipperKycItem {
   id: string;
   vehicleType?: string;
   licensePlate?: string;

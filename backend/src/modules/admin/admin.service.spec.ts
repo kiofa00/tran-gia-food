@@ -143,15 +143,17 @@ describe('AdminService', () => {
     it('should update user status', async () => {
       mockPrismaService.user.findUnique = jest
         .fn()
-        .mockResolvedValue({ id: 'user-1', name: 'Test' });
+        .mockResolvedValue({ id: 'user-1', name: 'Test', isActive: true });
       mockPrismaService.user.update = jest
         .fn()
-        .mockResolvedValue({ id: 'user-1', status: 'SUSPENDED' });
+        .mockResolvedValue({ id: 'user-1', isActive: false });
 
-      const result = (await service.updateUserStatus('user-1', { status: 'SUSPENDED' })) as {
-        status?: string;
-      };
+      const result = await service.updateUserStatus('user-1', { status: 'SUSPENDED' });
       expect(result.status).toBe('SUSPENDED');
+      expect(mockPrismaService.user.update).toHaveBeenCalledWith({
+        where: { id: 'user-1' },
+        data: { isActive: false },
+      });
     });
   });
 });

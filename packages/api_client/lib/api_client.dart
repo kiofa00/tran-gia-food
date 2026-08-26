@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
@@ -17,6 +17,8 @@ class ApiClient {
         _http = client ?? http.Client();
 
   static String _resolveBaseUrl() {
+    const envUrl = String.fromEnvironment('API_URL', defaultValue: '');
+    if (envUrl.isNotEmpty) return envUrl;
     if (kIsWeb) return 'http://localhost:3000/api';
     try {
       if (Platform.isAndroid) return 'http://10.0.2.2:3000/api';

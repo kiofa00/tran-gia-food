@@ -5,8 +5,10 @@ import React from 'react';
 import { Badge, Button, Descriptions, Modal, Tag } from 'antd';
 
 import { useLocale } from '@/hooks/useLocale';
+import { formatDateTime } from '@/utils/formatters';
 
 import { UserRecord } from '../types';
+import { getRoleTagProps } from './UserColumns';
 
 interface UserDetailModalProps {
   open: boolean;
@@ -41,7 +43,11 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ open, user, on
             {user.email || '—'}
           </Descriptions.Item>
           <Descriptions.Item label={t('users.role', 'Vai Trò')}>
-            <Tag color="blue">{user.role}</Tag>
+            {(() => {
+              const { color, label } = getRoleTagProps(user.role);
+
+              return <Tag color={color}>{label}</Tag>;
+            })()}
           </Descriptions.Item>
           <Descriptions.Item label={t('users.status', 'Trạng Thái')}>
             <Badge
@@ -54,7 +60,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ open, user, on
             />
           </Descriptions.Item>
           <Descriptions.Item label={t('users.registeredAt', 'Ngày Đăng Ký')}>
-            {user.createdAt ? new Date(user.createdAt).toLocaleString('vi-VN') : '—'}
+            {formatDateTime(user.createdAt)}
           </Descriptions.Item>
         </Descriptions>
       )}

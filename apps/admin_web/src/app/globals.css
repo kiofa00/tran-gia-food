@@ -10,3 +10,52 @@
     padding-inline: 2rem; /* px-8 desktop */
   }
 }
+
+/* Ant Design Table Styles & Empty State Alignment */
+.ant-table-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.ant-table-wrapper .ant-spin-nested-loading,
+.ant-table-wrapper .ant-spin-container,
+.ant-table-wrapper .ant-table,
+.ant-table-wrapper .ant-table-container,
+.ant-table-wrapper .ant-table-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
+
+.ant-table-wrapper .ant-table-content > table {
+  flex: 1 1 auto;
+  height: 100%;
+}
+
+.ant-table-wrapper .ant-table-placeholder {
+  height: 100%;
+}
+
+.ant-table-wrapper .ant-table-placeholder .ant-table-cell,
+.ant-table-wrapper .ant-table-placeholder > td {
+  height: 100%;
+  vertical-align: middle;
+  border-bottom: none !important;
+}
+
+.ant-table-wrapper .ant-table-placeholder .ant-table-expanded-row-fixed {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 220px;
+  height: 100%;
+  padding: 2rem 0;
+}
+
+.ant-table-wrapper .ant-table-placeholder .ant-empty {
+  margin: auto !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}

@@ -194,7 +194,7 @@ async function main() {
     data: {
       phone: '+84912345678',
       email: 'cuong.shipper@trangiafood.vn',
-      name: 'Nguyễn Văn Cường (Tài xế Pro)',
+      name: 'Nguyễn Văn Cường',
       role: UserRole.shipper,
       kycStatus: KycStatus.verified,
       passwordHash: userPasswordHash,
@@ -206,7 +206,7 @@ async function main() {
     data: {
       phone: '+84987654321',
       email: 'nam.shipper@trangiafood.vn',
-      name: 'Lê Hoàng Nam (Chờ duyệt KYC)',
+      name: 'Lê Hoàng Nam',
       role: UserRole.shipper,
       kycStatus: KycStatus.pending,
       passwordHash: userPasswordHash,
@@ -218,7 +218,7 @@ async function main() {
     data: {
       phone: '+84903111222',
       email: 'binh.shipper@trangiafood.vn',
-      name: 'Phan Thanh Bình (Tài xế Active)',
+      name: 'Phan Thanh Bình',
       role: UserRole.shipper,
       kycStatus: KycStatus.verified,
       passwordHash: userPasswordHash,

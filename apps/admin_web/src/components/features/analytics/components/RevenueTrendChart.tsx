@@ -14,6 +14,7 @@ import {
   YAxis,
 } from 'recharts';
 
+import { useLocale } from '@/hooks/useLocale';
 import { adminDesignTokens } from '@/theme/tokens';
 import { formatCurrency } from '@/utils/formatters';
 
@@ -32,9 +33,11 @@ interface RevenueTrendChartProps {
 }
 
 export const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({ trendData, loading }) => {
+  const { t } = useLocale();
+
   return (
     <Card
-      title="📈 Xu Hướng Doanh Số GMV & Hoa Hồng Theo Ngày"
+      title={t('analytics.revenueTrendTitle', '📈 Xu Hướng Doanh Số GMV & Hoa Hồng Theo Ngày')}
       variant="borderless"
       className="rounded-xl shadow-xs"
     >
@@ -42,13 +45,13 @@ export const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({ trendData,
         {loading && (
           <Space direction="vertical" align="center">
             <Spin size="large" />
-            <Text type="secondary">Đang tải dữ liệu xu hướng...</Text>
+            <Text type="secondary">{t('common.loading', 'Đang tải dữ liệu...')}</Text>
           </Space>
         )}
         {!loading && trendData.length === 0 && (
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description="Chưa có dữ liệu xu hướng doanh số"
+            description={t('analytics.noTrendData', 'Chưa có dữ liệu xu hướng doanh số')}
           />
         )}
         {!loading && trendData.length > 0 && (
@@ -84,7 +87,7 @@ export const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({ trendData,
               <Area
                 type="monotone"
                 dataKey="gmv"
-                name="Tổng GMV (VNĐ)"
+                name={t('analytics.totalGmvVnd', 'Tổng GMV (VNĐ)')}
                 stroke={adminDesignTokens.colors.primary}
                 fillOpacity={1}
                 fill="url(#colorGmv)"
@@ -92,7 +95,7 @@ export const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({ trendData,
               <Area
                 type="monotone"
                 dataKey="revenue"
-                name="Hoa Hồng Sàn (VNĐ)"
+                name={t('analytics.platformCommissionVnd', 'Hoa Hồng Sàn (VNĐ)')}
                 stroke={adminDesignTokens.colors.chartGreen}
                 fillOpacity={1}
                 fill="url(#colorRevenue)"

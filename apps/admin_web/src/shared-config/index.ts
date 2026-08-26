@@ -10,3 +10,5 @@ export * from './routes.config';
 export * from './system-settings.config';
 export * from './users.config';
 export * from './vouchers.config';
+export * from './kyc.config';
+export * from './i18n.config';

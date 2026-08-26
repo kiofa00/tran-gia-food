@@ -46,7 +46,7 @@ export const CommissionsTable: React.FC<CommissionsTableProps> = ({
         searchPlaceholder={t('commissions.searchPlaceholder', 'Tìm kiếm theo mã ví hoặc tên...')}
         searchValue={search}
         onSearchChange={onSearchChange}
-        filterLabel={t('commissions.filterRoleLabel', 'Lọc đối tượng:')}
+        filterLabel={t('commissions.filterStatusLabel', 'Lọc trạng thái:')}
         filterValue={statusFilter}
         onFilterChange={onStatusFilterChange}
         filterOptions={COMMISSIONS_STATUS_FILTER_OPTIONS}
@@ -70,7 +70,7 @@ export const CommissionsTable: React.FC<CommissionsTableProps> = ({
             total: totalItems,
             showSizeChanger: true,
             showTotal: (total) =>
-              `${t('dashboard.totalPrefix', 'Tổng')} ${total} ${t('common.items', 'mục')}`,
+              `${t('common.total', 'Tổng')} ${total} ${t('common.items', 'mục')}`,
             onChange: onPageChange,
           }}
         />

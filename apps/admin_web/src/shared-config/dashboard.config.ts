@@ -2,7 +2,7 @@ import type { FilterOptionConfig } from './cms.config';
 
 export const ADMIN_QUERY_KEYS = {
   overview: ['admin', 'overview'],
-  pendingShippers: ['admin', 'shippers', 'pending'],
+  shipperKyc: ['admin', 'kyc'],
 } as const;
 
 export const DASHBOARD_SHIPPER_FILTER_OPTIONS = [

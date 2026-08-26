@@ -5,6 +5,7 @@ import { Tag, Typography } from 'antd';
 import { AppTargetTag } from '@/components/shared-ui';
 import { useLocale } from '@/hooks/useLocale';
 import { CmsBannerItem, CmsFaqItem, CmsTranslationItem } from '@/types';
+import { formatDateTime } from '@/utils/formatters';
 
 const { Text } = Typography;
 
@@ -79,8 +80,19 @@ export function useTranslationColumns(translations: CmsTranslationItem[] = []) {
     });
   });
 
+  const getLangLabel = (langKey: string) => {
+    if (langKey === 'vi') {
+      return t('cms.langVi', 'Tiếng Việt');
+    }
+    if (langKey === 'en') {
+      return t('cms.langEn', 'Tiếng Anh');
+    }
+
+    return KNOWN_LANG_NAMES[langKey] || langKey.toUpperCase();
+  };
+
   const langColumns = Array.from(discoveredLangs).map((langKey) => {
-    const langLabel = KNOWN_LANG_NAMES[langKey] || langKey.toUpperCase();
+    const langLabel = getLangLabel(langKey);
 
     return {
       title: `${langLabel} (${langKey.toUpperCase()})`,
@@ -132,20 +144,7 @@ export function useTranslationColumns(translations: CmsTranslationItem[] = []) {
 
         if (!rawDate) return <Text type="secondary">—</Text>;
 
-        try {
-          const d = new Date(rawDate);
-
-          if (isNaN(d.getTime())) return <Text type="secondary">{String(rawDate)}</Text>;
-
-          return (
-            <Text type="secondary">
-              {d.toLocaleDateString('vi-VN')}{' '}
-              {d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
-            </Text>
-          );
-        } catch {
-          return <Text type="secondary">{String(rawDate)}</Text>;
-        }
+        return <Text type="secondary">{formatDateTime(rawDate)}</Text>;
       },
     },
   ];

@@ -13,7 +13,7 @@ export const ROLE_FILTER_RAW = [
     defaultLabel: 'Khách Hàng',
   },
   {
-    value: 'RESTAURANT_OWNER',
+    value: 'RESTAURANT',
     label: 'Quán Ăn',
     i18nKey: 'users.restaurants',
     defaultLabel: 'Quán Ăn',

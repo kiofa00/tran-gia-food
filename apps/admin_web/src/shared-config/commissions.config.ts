@@ -13,9 +13,9 @@ export const COMMISSIONS_STATUS_FILTER_OPTIONS = [
   },
   {
     value: 'PROCESSED',
-    label: 'Đã Giải Ngân',
-    i18nKey: 'commissions.statusProcessed',
-    defaultLabel: 'Đã Giải Ngân',
+    label: 'Đã Đối Soát',
+    i18nKey: 'commissions.statusSettled',
+    defaultLabel: 'Đã Đối Soát',
   },
   {
     value: 'PENDING',

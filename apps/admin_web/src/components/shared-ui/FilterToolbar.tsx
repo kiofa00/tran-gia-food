@@ -11,10 +11,10 @@ const { Text } = Typography;
 const { Option } = Select;
 
 export interface FilterOption {
-  value: string;
-  label?: string;
-  i18nKey?: TranslationKey;
-  defaultLabel?: string;
+  readonly value: string;
+  readonly label?: string;
+  readonly i18nKey?: TranslationKey;
+  readonly defaultLabel?: string;
 }
 
 interface FilterToolbarProps {
@@ -24,7 +24,7 @@ interface FilterToolbarProps {
   filterLabel?: string;
   filterValue: string;
   onFilterChange: (value: string) => void;
-  filterOptions: FilterOption[];
+  filterOptions: readonly FilterOption[];
   className?: string;
 }
 

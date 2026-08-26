@@ -45,7 +45,7 @@ export const FaqTab: React.FC<FaqTabProps> = ({ faqs, isLoading }) => {
     <Space direction="vertical" className="w-full" size="middle">
       <SearchFilterBox
         searchPlaceholder={t(
-          'common.search',
+          'cms.faqSearchPlaceholder',
           'Tìm kiếm theo câu hỏi, câu trả lời hoặc danh mục...',
         )}
         searchValue={search}
@@ -60,7 +60,7 @@ export const FaqTab: React.FC<FaqTabProps> = ({ faqs, isLoading }) => {
         dataSource={filteredFaqs}
         columns={columns}
         loading={isLoading}
-        emptyDescription={t('common.noData', 'Chưa có câu hỏi hỗ trợ FAQ')}
+        emptyDescription={t('cms.faqEmpty', 'Không tìm thấy FAQ')}
       />
     </Space>
   );

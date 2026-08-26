@@ -38,11 +38,11 @@ export default function AnalyticsPage() {
   );
 
   const comparisonLabel = useMemo(() => {
-    if (timeRange === '30d') return 'so với tháng trước';
-    if (timeRange === 'quarter') return 'so với quý trước';
+    if (timeRange === '30d') return t('analytics.vsLastMonth', 'so với tháng trước');
+    if (timeRange === 'quarter') return t('analytics.vsLastQuarter', 'so với quý trước');
 
-    return 'so với tuần trước';
-  }, [timeRange]);
+    return t('analytics.vsLastWeek', 'so với tuần trước');
+  }, [timeRange, t]);
 
   const summary = useMemo(
     () =>
@@ -92,6 +92,15 @@ export default function AnalyticsPage() {
     [summary.totalOrders, summary.avgOrderValue],
   );
 
+  const timeRangeOptions = useMemo(
+    () =>
+      ANALYTICS_TIME_RANGE_OPTIONS.map((opt) => ({
+        value: opt.value,
+        label: t(opt.i18nKey, opt.defaultLabel),
+      })),
+    [t],
+  );
+
   return (
     <PageContainer>
       <PageHeader
@@ -108,7 +117,7 @@ export default function AnalyticsPage() {
               value={timeRange}
               onChange={(val) => setTimeRange(val)}
               className="w-32 text-left"
-              options={ANALYTICS_TIME_RANGE_OPTIONS}
+              options={timeRangeOptions}
             />
           </Space>
         }

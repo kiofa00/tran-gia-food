@@ -1,58 +1,170 @@
-# ===== Flutter / Dart =====
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.packages
-.pub-cache/
-.pub/
-build/
-*.iml
-*.ipr
-*.iws
-.idea/
-.vscode/settings.json
+# ==============================================================================
+# Tran Gia Food Monorepo — Comprehensive .gitignore
+# (Flutter Apps + NestJS Backend + Next.js Admin + Strapi CMS + Shared Packages)
+# ==============================================================================
 
-# Flutter build outputs
-apps/*/build/
-apps/*/android/.gradle/
-apps/*/android/local.properties
-apps/*/android/key.properties
-apps/*/ios/Pods/
-apps/*/ios/.symlinks/
-apps/*/ios/Flutter/.last_build_id
-apps/*/.dart_tool/
-
-# ===== Node.js / Backend =====
-backend/node_modules/
-backend/dist/
-backend/.env
-backend/.env.*
-!backend/.env.example
-
-# ===== Next.js Admin =====
-apps/admin_web/node_modules/
-apps/admin_web/.next/
-apps/admin_web/out/
-apps/admin_web/.env
-apps/admin_web/.env.*
-!apps/admin_web/.env.example
-
-# ===== General =====
-*.log
-*.DS_Store
-Thumbs.db
+# ===== 1. Environment Variables & Secrets =====
+# Ignore all .env files across root and all subdirectories
 .env
+.env.*
 .env.local
+.env.development
+.env.test
 .env.production
-.turbo/
-.claude/
-node_modules/
+.env.staging
+**/.env
+**/.env.*
+**/.env.local
+**/.env.development
+**/.env.test
+**/.env.production
+**/.env.staging
 
-# ===== Secrets =====
+# Whitelist all .env.example files everywhere
+!.env.example
+!**/.env.example
+
+# Secret keys, certificates, credentials
 google-services.json
 GoogleService-Info.plist
+service-account*.json
 *.p8
 *.p12
 *.jks
 *.keystore
-service-account.json
+*.key
+*.pem
+*.crt
+*.pfx
+*.cer
+
+# ===== 2. Node.js / JavaScript / TypeScript =====
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.turbo/
+**/.turbo/
+.cache/
+**/.cache/
+*.tsbuildinfo
+**/*.tsbuildinfo
+.npm/
+.pnpm-store/
+
+# Next.js (apps/admin_web)
+.next/
+**/.next/
+out/
+**/out/
+
+# Strapi CMS (apps/cms)
+.strapi/
+**/.strapi/
+.strapi-updater.json
+**/.strapi-updater.json
+.tmp/
+**/.tmp/
+public/uploads/
+**/public/uploads/
+
+# ===== 3. Flutter & Dart =====
+# Dart / Flutter build artifacts
+.dart_tool/
+**/.dart_tool/
+.flutter-plugins
+**/.flutter-plugins
+.flutter-plugins-dependencies
+**/.flutter-plugins-dependencies
+.packages
+**/.packages
+.pub-cache/
+**/.pub-cache/
+.pub/
+**/.pub/
+build/
+**/build/
+coverage/
+**/coverage/
+
+# Flutter Android
+**/android/.gradle/
+**/android/local.properties
+**/android/key.properties
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+
+# Flutter iOS & macOS
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/macos/Pods/
+**/macos/.symlinks/
+**/macos/Flutter/ephemeral/
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+
+# Flutter Desktop (Windows / Linux)
+**/windows/flutter/ephemeral/
+**/linux/flutter/ephemeral/
+
+# Symbolication & Obfuscation
+app.*.symbols
+app.*.map.json
+**/doc/api/
+
+# ===== 4. Databases & SQLite =====
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+*.db
+*.db-journal
+
+# ===== 5. Logs & Debugging =====
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+firebase-debug.log*
+
+# ===== 6. OS & Editor Artifacts =====
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# JetBrains / Android Studio
+.idea/
+**/.idea/
+*.iml
+**/*.iml
+*.ipr
+*.iws
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Claude / AI helpers
+.claude/

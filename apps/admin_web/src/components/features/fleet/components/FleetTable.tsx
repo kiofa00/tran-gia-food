@@ -72,7 +72,7 @@ export const FleetTable: React.FC<FleetTableProps> = ({
             total: totalItems,
             showSizeChanger: true,
             showTotal: (total) =>
-              `${t('dashboard.totalPrefix', 'Tổng')} ${total} ${t('users.driverUnit', 'tài xế')}`,
+              `${t('common.total', 'Tổng')} ${total} ${t('users.driverUnit', 'tài xế')}`,
             onChange: onPageChange,
           }}
         />

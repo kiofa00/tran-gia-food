@@ -10,15 +10,15 @@ import { SearchFilterBox } from '@/components/shared-ui/SearchFilterBox';
 import { useLocale } from '@/hooks/useLocale';
 import { DASHBOARD_SHIPPER_FILTER_OPTIONS } from '@/shared-config';
 
-import { PendingShipperRecord } from '../types';
+import { ShipperKycRecord } from '../types';
 
-interface PendingShipperTableProps {
+interface ShipperKycTableProps {
   search: string;
   onSearchChange: (val: string) => void;
   statusFilter: string;
   onStatusFilterChange: (val: string) => void;
-  pendingShippers: PendingShipperRecord[];
-  columns: ColumnsType<PendingShipperRecord>;
+  shippers: ShipperKycRecord[];
+  columns: ColumnsType<ShipperKycRecord>;
   loading: boolean;
   page: number;
   pageSize: number;
@@ -26,12 +26,12 @@ interface PendingShipperTableProps {
   onPageChange: (page: number, pageSize: number) => void;
 }
 
-export const PendingShipperTable: React.FC<PendingShipperTableProps> = ({
+export const ShipperKycTable: React.FC<ShipperKycTableProps> = ({
   search,
   onSearchChange,
   statusFilter,
   onStatusFilterChange,
-  pendingShippers,
+  shippers,
   columns,
   loading,
   page,
@@ -57,24 +57,24 @@ export const PendingShipperTable: React.FC<PendingShipperTableProps> = ({
       />
 
       <Card
-        title={t('dashboard.pendingKycTitle', '📋 Danh Sách Shipper Chờ Duyệt eKYC')}
+        title={t('dashboard.shipperKycTitle', '📋 Danh Sách Hồ Sơ eKYC Shipper')}
         variant="borderless"
         className="rounded-xl shadow-xs"
       >
-        <DataTable<PendingShipperRecord>
+        <DataTable<ShipperKycRecord>
           rowKey="key"
           columns={columns}
-          dataSource={pendingShippers}
+          dataSource={shippers}
           loading={loading}
           scroll={{ x: 1100 }}
-          emptyDescription={t('dashboard.emptyKycDescription', 'Không có tài xế chờ duyệt eKYC')}
+          emptyDescription={t('dashboard.emptyKycDescription', 'Không tìm thấy hồ sơ eKYC phù hợp')}
           pagination={{
             current: page,
             pageSize,
             total: totalItems,
             showSizeChanger: true,
             showTotal: (total) =>
-              `${t('dashboard.totalPrefix', 'Tổng')} ${total} ${t('users.driverUnit', 'tài xế')}`,
+              `${t('common.total', 'Tổng')} ${total} ${t('users.driverUnit', 'tài xế')}`,
             onChange: onPageChange,
           }}
         />

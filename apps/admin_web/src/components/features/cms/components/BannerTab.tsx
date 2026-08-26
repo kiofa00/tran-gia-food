@@ -45,7 +45,7 @@ export const BannerTab: React.FC<BannerTabProps> = ({ banners, isLoading }) => {
   return (
     <Space direction="vertical" className="w-full" size="middle">
       <SearchFilterBox
-        searchPlaceholder={t('common.search', 'Tìm kiếm tên Banner hoặc link...')}
+        searchPlaceholder={t('cms.bannerSearchPlaceholder', 'Tìm kiếm tên Banner hoặc liên kết...')}
         searchValue={search}
         onSearchChange={setSearch}
         filterLabel={t('users.filterStatus', 'Trạng thái:')}
@@ -58,7 +58,7 @@ export const BannerTab: React.FC<BannerTabProps> = ({ banners, isLoading }) => {
         dataSource={filteredBanners}
         columns={columns}
         loading={isLoading}
-        emptyDescription={t('common.noData', 'Chưa có banner quảng cáo')}
+        emptyDescription={t('cms.bannerEmpty', 'Không tìm thấy Banner')}
       />
     </Space>
   );

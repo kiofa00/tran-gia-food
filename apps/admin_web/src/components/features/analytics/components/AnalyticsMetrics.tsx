@@ -96,7 +96,10 @@ export const AnalyticsMetrics: React.FC<AnalyticsMetricsProps> = ({
                 }}
               />
               <Text type="success" className="text-xs">
-                <RiseOutlined /> Chiết khấu {effectiveCommissionRate}% thực tế
+                <RiseOutlined />{' '}
+                {t('analytics.effectiveDiscount', 'Chiết khấu {rate}% thực tế', {
+                  rate: effectiveCommissionRate,
+                })}
               </Text>
             </Card>
           </Col>
@@ -118,7 +121,10 @@ export const AnalyticsMetrics: React.FC<AnalyticsMetricsProps> = ({
                 }}
               />
               <Text type="success" className="text-xs">
-                <CheckCircleOutlined /> Tỷ lệ hoàn tất {completionRate}%
+                <CheckCircleOutlined />{' '}
+                {t('analytics.completionRate', 'Tỷ lệ hoàn tất {rate}%', {
+                  rate: completionRate,
+                })}
               </Text>
             </Card>
           </Col>
@@ -140,7 +146,9 @@ export const AnalyticsMetrics: React.FC<AnalyticsMetricsProps> = ({
                 }}
               />
               <Text type="secondary" className="text-xs">
-                Trung bình {itemsPerOrder} món / đơn
+                {t('analytics.avgItemsPerOrder', 'Trung bình {count} món / đơn', {
+                  count: itemsPerOrder,
+                })}
               </Text>
             </Card>
           </Col>

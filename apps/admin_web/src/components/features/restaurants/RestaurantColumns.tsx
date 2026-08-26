@@ -61,12 +61,13 @@ export function getRestaurantColumns({
       render: (status: string) => {
         const RESTAURANT_STATUS_LABELS: Record<string, string> = {
           PENDING: t('restaurants.pending', 'Chờ duyệt'),
-          APPROVED: t('restaurants.active', 'Hoạt động'),
+          APPROVED: t('restaurants.active', 'Đang mở cửa'),
+          SUSPENDED: t('restaurants.suspend', 'Tạm ngưng'),
         };
 
         return (
-          <Tag color={RESTAURANT_STATUS_COLOR_MAP[status] ?? 'default'}>
-            {RESTAURANT_STATUS_LABELS[status] ?? t('restaurants.suspend', 'Đình chỉ')}
+          <Tag color={(RESTAURANT_STATUS_COLOR_MAP as Record<string, string>)[status] ?? 'default'}>
+            {RESTAURANT_STATUS_LABELS[status] ?? t('restaurants.suspend', 'Tạm ngưng')}
           </Tag>
         );
       },
@@ -82,6 +83,7 @@ export function getRestaurantColumns({
       title: t('analytics.ordersCount', 'Tổng Đơn'),
       dataIndex: 'totalOrders',
       key: 'totalOrders',
+      align: 'center',
       sorter: (a, b) => a.totalOrders - b.totalOrders,
     },
     {
@@ -96,12 +98,22 @@ export function getRestaurantColumns({
           </Tooltip>
           {r.status === 'PENDING' && (
             <Button size="small" type="primary" onClick={() => onApprove(r)}>
-              {t('restaurants.approve', 'Duyệt')}
+              {t('restaurants.approve', 'Duyệt Quán')}
             </Button>
           )}
           {r.status === 'APPROVED' && (
             <Button size="small" danger onClick={() => onSuspend(r)}>
-              {t('restaurants.suspend', 'Đình Chỉ')}
+              {t('restaurants.suspend', 'Tạm Ngưng')}
+            </Button>
+          )}
+          {r.status === 'SUSPENDED' && (
+            <Button
+              size="small"
+              type="primary"
+              className="bg-green-600 border-none"
+              onClick={() => onApprove(r)}
+            >
+              {t('restaurants.reopen', 'Mở Lại')}
             </Button>
           )}
         </Space>

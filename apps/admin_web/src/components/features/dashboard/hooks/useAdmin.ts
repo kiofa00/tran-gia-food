@@ -11,10 +11,10 @@ export function useDashboardStatsQuery() {
   });
 }
 
-export function usePendingShippersQuery(params?: QueryParams) {
+export function useShipperKycQuery(params?: QueryParams) {
   return useQuery({
-    queryKey: [...ADMIN_QUERY_KEYS.pendingShippers, params],
-    queryFn: () => adminService.getPendingShippers(params),
+    queryKey: [...ADMIN_QUERY_KEYS.shipperKyc, params],
+    queryFn: () => adminService.getShipperKycList(params),
   });
 }
 
@@ -25,7 +25,7 @@ export function useVerifyShipperKycMutation() {
     mutationFn: ({ id, action }: { id: string; action: 'approve' | 'reject' }) =>
       adminService.verifyShipperKyc(id, action),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.pendingShippers });
+      queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.shipperKyc });
       queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.overview });
     },
   });

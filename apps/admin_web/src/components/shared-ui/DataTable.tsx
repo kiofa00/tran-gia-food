@@ -46,8 +46,7 @@ export function DataTable<T extends object>({
     ...tableProps.locale,
   };
 
-  const tableClassName =
-    'flex-1 flex flex-col [&_.ant-spin-nested-loading]:flex-1 [&_.ant-spin-nested-loading]:flex [&_.ant-spin-nested-loading]:flex-col [&_.ant-spin-container]:flex-1 [&_.ant-spin-container]:flex [&_.ant-spin-container]:flex-col';
+  const tableClassName = 'flex-1 flex flex-col';
 
   // Pagination disabled
   if (pagination === false) {
@@ -100,7 +99,7 @@ export function DataTable<T extends object>({
       />
 
       {/* Pagination pinned to bottom via mt-auto */}
-      <div className="mt-auto flex justify-end items-center py-3 px-1 border-t border-gray-100">
+      <div className="mt-auto flex justify-end items-center py-3 px-1">
         <Pagination
           current={currentPage}
           pageSize={currentSize}
