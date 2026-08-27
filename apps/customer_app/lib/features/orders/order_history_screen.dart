@@ -4,17 +4,29 @@ import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:shared_ui/shared_ui.dart';
 import 'package:shared_models/enums/index.dart';
+
 import '../../../core/providers/api_client_provider.dart';
+import '../main/main_shell.dart';
 
 // ---------------------------------------------------------------------------
 // Provider
 // ---------------------------------------------------------------------------
 
 final orderHistoryProvider = FutureProvider.autoDispose
-    .family<Map<String, dynamic>, int>((ref, page) async {
-  final api = ref.read(apiClientProvider);
-  return api.get('/users/me/orders', query: {'page': '$page', 'limit': '20'});
-});
+    .family<Map<String, dynamic>?, int>((ref, page) async {
+      final api = ref.read(apiClientProvider);
+      final hasToken = await api.hasToken();
+      if (!hasToken) return null;
+      try {
+        return await api.get(
+          '/users/me/orders',
+          query: {'page': '$page', 'limit': '20'},
+        );
+      } catch (e) {
+        if (e is ApiException && e.isUnauthorized) return null;
+        rethrow;
+      }
+    });
 
 // ---------------------------------------------------------------------------
 // Screen
@@ -32,13 +44,16 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen>
   late final TabController _tabController;
 
   static const _tabs = [
-    ('Đang Xử Lý', [
-      OrderStatus.pending,
-      OrderStatus.confirmed,
-      OrderStatus.pickingUp,
-      OrderStatus.delivering,
-      OrderStatus.delivered,
-    ]),
+    (
+      'Đang Xử Lý',
+      [
+        OrderStatus.pending,
+        OrderStatus.confirmed,
+        OrderStatus.pickingUp,
+        OrderStatus.delivering,
+        OrderStatus.delivered,
+      ],
+    ),
     ('Hoàn Thành', [OrderStatus.completed]),
     ('Đã Hủy', [OrderStatus.cancelled]),
   ];
@@ -68,16 +83,12 @@ class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen>
           labelColor: AppColors.primary,
           unselectedLabelColor: AppColors.textSecondaryLight,
           indicatorColor: AppColors.primary,
-          tabs: _tabs
-              .map((t) => Tab(text: t.$1))
-              .toList(),
+          tabs: _tabs.map((t) => Tab(text: t.$1)).toList(),
         ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: _tabs
-            .map((t) => _OrderTab(statuses: t.$2))
-            .toList(),
+        children: _tabs.map((t) => _OrderTab(statuses: t.$2)).toList(),
       ),
     );
   }
@@ -100,6 +111,9 @@ class _OrderTab extends ConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => _ErrorView(message: e.toString()),
       data: (res) {
+        if (res == null) {
+          return const _UnauthenticatedOrdersView();
+        }
         final allOrders = List<Map<String, dynamic>>.from(res['data'] ?? []);
         final filtered = allOrders.where((o) {
           final raw = o['status'] as String? ?? '';
@@ -128,7 +142,10 @@ class _OrderTab extends ConsumerWidget {
     final parts = raw.split('_');
     if (parts.length <= 1) return raw.toLowerCase();
     return parts.first.toLowerCase() +
-        parts.skip(1).map((p) => p[0].toUpperCase() + p.substring(1).toLowerCase()).join();
+        parts
+            .skip(1)
+            .map((p) => p[0].toUpperCase() + p.substring(1).toLowerCase())
+            .join();
   }
 }
 
@@ -146,12 +163,18 @@ class _OrderCard extends StatelessWidget {
     final restaurant = order['restaurant'] as Map<String, dynamic>? ?? {};
     final items = List<Map<String, dynamic>>.from(order['items'] ?? []);
     final status = order['status'] as String? ?? '';
-    final total = (order['subtotal'] as num? ?? 0) +
+    final total =
+        (order['subtotal'] as num? ?? 0) +
         (order['shipFee'] as num? ?? 0) -
         (order['discountAmount'] as num? ?? 0);
     final orderId = order['id'] as String? ?? '';
-    final isActive = ['pending', 'confirmed', 'picking_up', 'delivering', 'delivered']
-        .contains(status);
+    final isActive = [
+      'pending',
+      'confirmed',
+      'picking_up',
+      'delivering',
+      'delivered',
+    ].contains(status);
 
     return Container(
       decoration: const BoxDecoration(
@@ -174,7 +197,10 @@ class _OrderCard extends StatelessWidget {
                     height: 44,
                     color: AppColors.surfaceAltLight,
                     child: restaurant['avatarUrl'] != null
-                        ? Image.network(restaurant['avatarUrl'] as String, fit: BoxFit.cover)
+                        ? Image.network(
+                            restaurant['avatarUrl'] as String,
+                            fit: BoxFit.cover,
+                          )
                         : const Icon(Iconsax.shop, color: AppColors.primary),
                   ),
                 ),
@@ -250,7 +276,8 @@ class _OrderCard extends StatelessWidget {
                   OutlinedButton.icon(
                     icon: const Icon(Iconsax.refresh, size: 16),
                     label: const Text('Đặt Lại'),
-                    onPressed: () => context.push('/restaurant/${restaurant['id']}'),
+                    onPressed: () =>
+                        context.push('/restaurant/${restaurant['id']}'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
                       side: const BorderSide(color: AppColors.primary),
@@ -278,10 +305,9 @@ class _OrderCard extends StatelessWidget {
   }
 
   String _formatCurrency(num amount) {
-    final formatted = amount.toStringAsFixed(0).replaceAllMapped(
-          RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-          (m) => '${m[1]}.',
-        );
+    final formatted = amount
+        .toStringAsFixed(0)
+        .replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.');
     return '$formattedđ';
   }
 }
@@ -322,38 +348,22 @@ class _StatusBadge extends StatelessWidget {
   }
 }
 
-class _EmptyOrdersView extends StatelessWidget {
+class _EmptyOrdersView extends ConsumerWidget {
   const _EmptyOrdersView();
 
   @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Iconsax.receipt_item, size: 64, color: AppColors.textSecondaryLight),
-          const SizedBox(height: 16),
-          const Text(
-            'Chưa có đơn hàng nào',
-            style: TextStyle(fontSize: AppFontSize.lg, fontWeight: AppFontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Đặt đơn ngay để thưởng thức món ngon!',
-            style: TextStyle(fontSize: AppFontSize.body, color: AppColors.textSecondaryLight),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            icon: const Icon(Iconsax.home_2),
-            label: const Text('Khám Phá Ngay'),
-            onPressed: () => context.go('/main'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-            ),
-          ),
-        ],
-      ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    return AppEmptyState(
+      icon: Iconsax.receipt_item,
+      title: 'Chưa có đơn hàng nào',
+      description:
+          'Khám phá ngay thực đơn hấp dẫn từ các quán ăn và đặt món ngay nhé!',
+      actionText: 'Khám Phá Ngay',
+      actionIcon: Iconsax.discover,
+      onAction: () {
+        ref.read(mainTabProvider.notifier).setTab(0);
+        context.go('/main');
+      },
     );
   }
 }
@@ -365,20 +375,28 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Iconsax.warning_2, size: 48, color: AppColors.error),
-            const SizedBox(height: 12),
-            const Text('Không thể tải đơn hàng', style: TextStyle(fontWeight: AppFontWeight.bold)),
-            const SizedBox(height: 8),
-            Text(message, style: const TextStyle(fontSize: AppFontSize.sm, color: AppColors.textSecondaryLight), textAlign: TextAlign.center),
-          ],
-        ),
-      ),
+    return AppEmptyState(
+      icon: Iconsax.warning_2,
+      iconColor: AppColors.error,
+      title: 'Không thể tải đơn hàng',
+      description: message,
+    );
+  }
+}
+
+class _UnauthenticatedOrdersView extends StatelessWidget {
+  const _UnauthenticatedOrdersView();
+
+  @override
+  Widget build(BuildContext context) {
+    return AppEmptyState(
+      icon: Iconsax.lock,
+      title: 'Đăng nhập để xem đơn hàng',
+      description:
+          'Xem lại lịch sử món đã đặt và theo dõi tiến độ đơn hàng đang giao',
+      actionText: 'Đăng Nhập Ngay',
+      actionIcon: Iconsax.login,
+      onAction: () => context.push('/auth'),
     );
   }
 }

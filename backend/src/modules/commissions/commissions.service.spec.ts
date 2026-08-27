@@ -7,6 +7,9 @@ describe('CommissionsService', () => {
   let service: CommissionsService;
 
   const mockPrismaService = {
+    appConfig: {
+      findUnique: jest.fn().mockResolvedValue({ value: '0.15' }),
+    },
     commission: {
       findUnique: jest.fn(),
       create: jest.fn(),

@@ -1,5 +1,20 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+/// Cho phép kéo vuốt (drag-to-scroll / swipe) trên mọi thiết bị: Chuột (Web/Desktop), Cảm ứng, Trackpad, Bút Stylus
+class AppScrollBehavior extends MaterialScrollBehavior {
+  const AppScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.trackpad,
+    PointerDeviceKind.stylus,
+  };
+}
 
 /// Color tokens for Tran Gia Food Design System
 class AppColors {
@@ -48,6 +63,7 @@ class AppFontSize {
   static const double title = 16.0;
   static const double lg = 18.0;
   static const double xl = 22.0;
+  static const double h3 = 20.0;
   static const double h1 = 24.0;
   static const double h2 = 28.0;
 }
@@ -97,6 +113,12 @@ class AppGradients {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
+
+  static const primaryGradient = LinearGradient(
+    colors: [AppColors.primary, AppColors.primaryLight],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 }
 
 /// App Theme (Light + Dark)
@@ -106,137 +128,97 @@ class AppTheme {
   static ThemeData get lightTheme => light;
   static ThemeData get darkTheme => dark;
 
-  static ThemeData get light => ThemeData(
-    useMaterial3: true,
-    colorScheme: ColorScheme.light(
-      primary: AppColors.primary,
-      onPrimary: Colors.white,
-      secondary: AppColors.secondary,
-      surface: AppColors.backgroundLight,
-      onSurface: AppColors.textPrimaryLight,
-      error: AppColors.error,
-    ),
-    scaffoldBackgroundColor: AppColors.backgroundLight,
-    cardColor: AppColors.surfaceLight,
-    dividerColor: AppColors.dividerLight,
-    fontFamily: GoogleFonts.nunito().fontFamily,
-    textTheme: _textTheme(AppColors.textPrimaryLight),
-    appBarTheme: AppBarTheme(
-      backgroundColor: AppColors.backgroundLight,
-      foregroundColor: AppColors.textPrimaryLight,
-      elevation: 0,
-      centerTitle: true,
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(AppRadius.sm),
+  static ThemeData get light => _buildTheme(
+        brightness: Brightness.light,
+        colorScheme: const ColorScheme.light(
+          primary: AppColors.primary,
+          onPrimary: Colors.white,
+          secondary: AppColors.secondary,
+          surface: AppColors.backgroundLight,
+          onSurface: AppColors.textPrimaryLight,
+          error: AppColors.error,
         ),
-        minimumSize: const Size(64, 48),
-        textStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600),
-      ),
-    ),
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: AppColors.surfaceAltLight,
-      border: const OutlineInputBorder(
-        borderRadius: BorderRadius.all(AppRadius.sm),
-        borderSide: BorderSide.none,
-      ),
-      hintStyle: GoogleFonts.inter(
-        color: AppColors.textHintLight,
-        fontSize: 14,
-      ),
-    ),
-  );
+        scaffoldBg: AppColors.backgroundLight,
+        cardColor: AppColors.surfaceLight,
+        dividerColor: AppColors.dividerLight,
+        surfaceAlt: AppColors.surfaceAltLight,
+        textColor: AppColors.textPrimaryLight,
+        hintColor: AppColors.textHintLight,
+      );
 
-  static ThemeData get dark => ThemeData(
-    useMaterial3: true,
-    colorScheme: const ColorScheme.dark(
-      primary: AppColors.primary,
-      onPrimary: Colors.white,
-      secondary: AppColors.secondary,
-      surface: AppColors.backgroundDark,
-      onSurface: AppColors.textPrimaryDark,
-      error: AppColors.error,
-    ),
-    scaffoldBackgroundColor: AppColors.backgroundDark,
-    cardColor: AppColors.surfaceDark,
-    dividerColor: AppColors.dividerDark,
-    fontFamily: GoogleFonts.nunito().fontFamily,
-    textTheme: _textTheme(AppColors.textPrimaryDark),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: AppColors.backgroundDark,
-      foregroundColor: AppColors.textPrimaryDark,
-      elevation: 0,
-      centerTitle: true,
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(AppRadius.sm),
+  static ThemeData get dark => _buildTheme(
+        brightness: Brightness.dark,
+        colorScheme: const ColorScheme.dark(
+          primary: AppColors.primary,
+          onPrimary: Colors.white,
+          secondary: AppColors.secondary,
+          surface: AppColors.backgroundDark,
+          onSurface: AppColors.textPrimaryDark,
+          error: AppColors.error,
         ),
-        minimumSize: const Size(64, 48),
-      ),
-    ),
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: AppColors.surfaceAltDark,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.all(AppRadius.sm),
-        borderSide: BorderSide.none,
-      ),
-      hintStyle: GoogleFonts.inter(
-        color: AppColors.textSecondaryDark,
-        fontSize: 14,
-      ),
-    ),
-  );
+        scaffoldBg: AppColors.backgroundDark,
+        cardColor: AppColors.surfaceDark,
+        dividerColor: AppColors.dividerDark,
+        surfaceAlt: AppColors.surfaceAltDark,
+        textColor: AppColors.textPrimaryDark,
+        hintColor: AppColors.textSecondaryDark,
+      );
 
-  static TextTheme _textTheme(Color primary) => TextTheme(
-    displayLarge: GoogleFonts.nunito(
-      fontSize: 28,
-      fontWeight: FontWeight.w700,
-      color: primary,
-    ),
-    displayMedium: GoogleFonts.nunito(
-      fontSize: 22,
-      fontWeight: FontWeight.w700,
-      color: primary,
-    ),
-    displaySmall: GoogleFonts.nunito(
-      fontSize: 18,
-      fontWeight: FontWeight.w600,
-      color: primary,
-    ),
-    headlineMedium: GoogleFonts.nunito(
-      fontSize: 16,
-      fontWeight: FontWeight.w600,
-      color: primary,
-    ),
-    bodyLarge: GoogleFonts.inter(
-      fontSize: 16,
-      fontWeight: FontWeight.w400,
-      color: primary,
-    ),
-    bodyMedium: GoogleFonts.inter(
-      fontSize: 14,
-      fontWeight: FontWeight.w400,
-      color: primary,
-    ),
-    bodySmall: GoogleFonts.inter(
-      fontSize: 12,
-      fontWeight: FontWeight.w400,
-      color: primary,
-    ),
-    labelLarge: GoogleFonts.inter(
-      fontSize: 13,
-      fontWeight: FontWeight.w500,
-      color: primary,
-    ),
-  );
+  static ThemeData _buildTheme({
+    required Brightness brightness,
+    required ColorScheme colorScheme,
+    required Color scaffoldBg,
+    required Color cardColor,
+    required Color dividerColor,
+    required Color surfaceAlt,
+    required Color textColor,
+    required Color hintColor,
+  }) {
+    final baseTextTheme = brightness == Brightness.light
+        ? ThemeData.light(useMaterial3: true).textTheme
+        : ThemeData.dark(useMaterial3: true).textTheme;
+
+    final nunitoTheme = GoogleFonts.nunitoTextTheme(baseTextTheme);
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: brightness,
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: scaffoldBg,
+      cardColor: cardColor,
+      dividerColor: dividerColor,
+      textTheme: nunitoTheme.apply(
+        bodyColor: textColor,
+        displayColor: textColor,
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: scaffoldBg,
+        foregroundColor: textColor,
+        elevation: 0,
+        centerTitle: true,
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(AppRadius.sm),
+          ),
+          minimumSize: const Size(64, 48),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: surfaceAlt,
+        border: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(AppRadius.sm),
+          borderSide: BorderSide.none,
+        ),
+        hintStyle: TextStyle(
+          color: hintColor,
+          fontSize: 14,
+        ),
+      ),
+    );
+  }
 }

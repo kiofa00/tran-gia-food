@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:shared_ui/shared_ui.dart';
+import '../../../core/providers/api_client_provider.dart';
 
 /// Màn hình đăng ký tài khoản Customer
 /// Flow: Nhập SĐT → OTP → Nhập tên → Tạo tài khoản
-class RegisterScreen extends StatefulWidget {
+class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _pageController = PageController();
   int _currentStep = 0;
 
@@ -55,28 +57,72 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _handleSendOtp() async {
-    if (_phoneController.text.trim().isEmpty) return;
+    final phone = _phoneController.text.trim();
+    if (phone.isEmpty) return;
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1)); // TODO: gọi API gửi OTP
-    setState(() => _isLoading = false);
-    _nextStep();
+    try {
+      final api = ref.read(apiClientProvider);
+      await api.post('/auth/send-otp', {'phone': phone});
+      if (mounted) _nextStep();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi gửi OTP: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _handleVerifyOtp() async {
     final otp = _otpControllers.map((c) => c.text).join();
     if (otp.length < 6) return;
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1)); // TODO: gọi API verify OTP
-    setState(() => _isLoading = false);
-    _nextStep();
+    try {
+      final api = ref.read(apiClientProvider);
+      final res = await api.post('/auth/verify-otp', {
+        'phone': _phoneController.text.trim(),
+        'otp': otp,
+      });
+      final token = res['accessToken'] as String?;
+      if (token != null) {
+        await api.saveToken(token);
+        final isNew = res['isNewUser'] as bool? ?? false;
+        if (!isNew && mounted) {
+          context.go('/main');
+          return;
+        }
+      }
+      if (mounted) _nextStep();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Mã OTP không hợp lệ hoặc đã hết hạn: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _handleCreateAccount() async {
-    if (_nameController.text.trim().isEmpty) return;
+    final name = _nameController.text.trim();
+    if (name.isEmpty) return;
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1)); // TODO: gọi API tạo account
-    setState(() => _isLoading = false);
-    if (mounted) context.go('/main');
+    try {
+      final api = ref.read(apiClientProvider);
+      await api.patch('/users/me', {'name': name});
+      if (mounted) context.go('/main');
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi hoàn tất đăng ký: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override

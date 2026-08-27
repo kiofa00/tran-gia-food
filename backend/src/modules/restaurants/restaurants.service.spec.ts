@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { User, UserRole } from '@prisma/client';
 
 import { PrismaService } from '../../prisma/prisma.service';
+import { RedisService } from '../../redis/redis.service';
 import { RestaurantsService } from './restaurants.service';
 
 describe('RestaurantsService', () => {
@@ -32,9 +33,19 @@ describe('RestaurantsService', () => {
     $queryRaw: jest.fn(),
   };
 
+  const mockRedisService = {
+    get: jest.fn().mockResolvedValue(null),
+    set: jest.fn().mockResolvedValue(undefined),
+    del: jest.fn().mockResolvedValue(undefined),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [RestaurantsService, { provide: PrismaService, useValue: mockPrismaService }],
+      providers: [
+        RestaurantsService,
+        { provide: PrismaService, useValue: mockPrismaService },
+        { provide: RedisService, useValue: mockRedisService },
+      ],
     }).compile();
 
     service = module.get<RestaurantsService>(RestaurantsService);
@@ -115,6 +126,34 @@ describe('RestaurantsService', () => {
 
       await expect(service.toggleOpen(mockOtherUser as User, 'rest-1', true)).rejects.toThrow(
         ForbiddenException,
+      );
+    });
+  });
+
+  describe('findNearby', () => {
+    it('should query nearby restaurants when app configs are present', async () => {
+      mockPrismaService.appConfig.findUnique.mockImplementation(
+        ({ where }: { where: { key: string } }) => {
+          if (where.key === 'system_radius_km') return Promise.resolve({ value: '10.0' });
+          if (where.key === 'peak_radius_km') return Promise.resolve({ value: '7.0' });
+          if (where.key === 'peak_hours')
+            return Promise.resolve({ value: '11:00-13:00,17:00-19:00' });
+          return Promise.resolve(null);
+        },
+      );
+
+      mockPrismaService.$queryRaw.mockResolvedValue([mockRestaurant]);
+
+      const result = await service.findNearby(10.77, 106.68, 10, 'Cơm');
+      expect(result).toEqual([mockRestaurant]);
+      expect(mockPrismaService.$queryRaw).toHaveBeenCalled();
+    });
+
+    it('should throw InternalServerErrorException when required app config is missing', async () => {
+      mockPrismaService.appConfig.findUnique.mockResolvedValue(null);
+
+      await expect(service.findNearby(10.77, 106.68)).rejects.toThrow(
+        /Missing system configuration/,
       );
     });
   });

@@ -1,211 +1,272 @@
 import 'package:flutter/material.dart';
-import 'package:shared_ui/shared_ui.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:iconsax/iconsax.dart';
+import 'package:shared_ui/shared_ui.dart';
 
-class CartScreen extends StatefulWidget {
+import '../../../core/providers/api_client_provider.dart';
+import '../main/main_shell.dart';
+import 'cart_provider.dart';
+import 'widgets/cart_item_tile.dart';
+import 'widgets/cart_order_summary.dart';
+import 'widgets/cart_voucher_section.dart';
+
+class CartScreen extends ConsumerStatefulWidget {
   const CartScreen({super.key});
 
   @override
-  State<CartScreen> createState() => _CartScreenState();
+  ConsumerState<CartScreen> createState() => _CartScreenState();
 }
 
-class _CartScreenState extends State<CartScreen> {
-  final _voucherController = TextEditingController();
-  int _discount = 0;
+class _CartScreenState extends ConsumerState<CartScreen> {
+  final TextEditingController _voucherController = TextEditingController();
+  bool _isCheckingVoucher = false;
 
-  void _applyVoucher() {
-    if (_voucherController.text.toUpperCase() == 'SUMMER20') {
-      setState(() => _discount = 20000);
+  @override
+  void dispose() {
+    _voucherController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _applyVoucherCode(String rawCode, int subtotal) async {
+    final code = rawCode.trim().toUpperCase();
+    if (code.isEmpty) return;
+
+    setState(() => _isCheckingVoucher = true);
+    final api = ref.read(apiClientProvider);
+
+    try {
+      final res = await api.post('/vouchers/validate', {
+        'code': code,
+        'orderValue': subtotal,
+      });
+
+      final isValid = res['valid'] as bool? ?? false;
+      final discount = (res['discountAmount'] as num?)?.toInt() ?? 0;
+      final message = res['message'] as String? ?? 'Áp dụng mã thành công!';
+
+      if (!isValid) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+
+      ref.read(cartProvider.notifier).setVoucher(code, discount);
+
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Áp dụng mã giảm 20.000đ thành công! 🎉')),
+        SnackBar(
+          content: Text('🎉 $message (-${AppFormatters.currency(discount)})'),
+          backgroundColor: AppColors.success,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Không thể kiểm tra mã: $e'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isCheckingVoucher = false);
+    }
+  }
+
+  Future<void> _proceedToCheckout() async {
+    final api = ref.read(apiClientProvider);
+    if (!await api.hasToken()) {
+      if (!mounted) return;
+      AppDialogs.showLoginPrompt(
+        context,
+        actionText: 'xác nhận đặt đơn và thanh toán',
+        onLogin: () => context.push('/auth'),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+    context.push('/checkout');
+  }
+
+  Future<void> _openVoucherPicker(int subtotal) async {
+    final api = ref.read(apiClientProvider);
+    if (!await api.hasToken()) {
+      if (!mounted) return;
+      AppDialogs.showLoginPrompt(
+        context,
+        actionText: 'xem và áp dụng voucher trong ví',
+        onLogin: () => context.push('/auth'),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+    final selectedCode = await context.push<String>('/vouchers?fromCart=true');
+    if (selectedCode != null && selectedCode.trim().isNotEmpty) {
+      _voucherController.text = selectedCode.trim();
+      await _applyVoucherCode(selectedCode, subtotal);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    const subtotal = 130000;
-    const shipFee = 16000;
-    final total = (subtotal + shipFee - _discount).clamp(0, 9999999);
+    final cart = ref.watch(cartProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    if (cart.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: const Text(
+            'Giỏ Hàng Của Bạn',
+            style: TextStyle(fontWeight: AppFontWeight.bold),
+          ),
+        ),
+        body: AppEmptyState(
+          icon: Iconsax.shopping_cart,
+          title: 'Giỏ hàng của bạn đang trống',
+          description:
+              'Hãy khám phá thực đơn thơm ngon từ các quán ăn và đặt món ngay nhé!',
+          actionText: 'Khám Phá Món Ngon',
+          actionIcon: Iconsax.discover,
+          onAction: () {
+            ref.read(mainTabProvider.notifier).setTab(0);
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/main');
+            }
+          },
+        ),
+      );
+    }
+
+    final itemsList = cart.items.values.toList();
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text(
-          'Giỏ Hàng Của Bạn 🛒',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          'Giỏ Hàng Của Bạn',
+          style: TextStyle(fontWeight: AppFontWeight.bold),
         ),
-        leading: context.canPop()
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new),
-                onPressed: () => context.pop(),
-              )
-            : null,
+        actions: [
+          IconButton(
+            icon: const Icon(Iconsax.trash, color: AppColors.error),
+            tooltip: 'Xóa giỏ hàng',
+            onPressed: () async {
+              final confirm = await AppDialogs.showConfirm(
+                context,
+                title: 'Xóa giỏ hàng?',
+                message: 'Bạn có chắc chắn muốn xóa toàn bộ món trong giỏ không?',
+                confirmText: 'Xóa toàn bộ',
+                isDestructive: true,
+                icon: Iconsax.trash,
+              );
+              if (confirm) {
+                ref.read(cartProvider.notifier).clearCart();
+              }
+            },
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Restaurant Header Card
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: const BoxDecoration(
-                color: AppColors.surfaceAltLight,
-                borderRadius: BorderRadius.all(AppRadius.md),
-              ),
-              child: const Row(
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // Items List
+          ...itemsList.map((item) => CartItemTile(
+                item: item,
+                onQuantityChanged: (q) {
+                  ref.read(cartProvider.notifier).updateQuantity(item.id, q);
+                },
+                onRemove: () {
+                  ref.read(cartProvider.notifier).removeItem(item.id);
+                },
+              )),
+          const SizedBox(height: 12),
+
+          // Voucher Section
+          CartVoucherSection(
+            controller: _voucherController,
+            appliedCode: cart.voucherCode,
+            discountAmount: cart.discountAmount,
+            isLoading: _isCheckingVoucher,
+            onApply: () => _applyVoucherCode(_voucherController.text, cart.subtotal),
+            onRemove: () {
+              _voucherController.clear();
+              ref.read(cartProvider.notifier).removeVoucher();
+            },
+            onOpenPicker: () => _openVoucherPicker(cart.subtotal),
+          ),
+          const SizedBox(height: 16),
+
+          // Cost Summary
+          CartOrderSummary(
+            subtotal: cart.subtotal,
+            shippingFee: cart.shippingFee,
+            discountAmount: cart.discountAmount,
+            total: cart.total,
+          ),
+          const SizedBox(height: 32),
+        ],
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surfaceAltDark : Colors.white,
+          boxShadow: AppShadows.md,
+          border: Border(
+            top: BorderSide(
+              color: isDark ? AppColors.dividerDark : AppColors.dividerLight,
+            ),
+          ),
+        ),
+        child: SafeArea(
+          child: Row(
+            children: [
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Iconsax.shop, color: AppColors.primary),
-                  SizedBox(width: 10),
-                  Text(
-                    'Phở Bắc Hà — Nguyễn Trãi',
+                  const Text(
+                    'Tổng thanh toán',
                     style: TextStyle(
+                      fontSize: AppFontSize.xs,
+                      color: AppColors.textSecondaryLight,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    AppFormatters.currency(cart.total),
+                    style: const TextStyle(
+                      fontSize: AppFontSize.xl,
                       fontWeight: AppFontWeight.bold,
-                      fontSize: AppFontSize.base,
+                      color: AppColors.primary,
                     ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 20),
-
-            // Cart Items
-            _buildCartRow('Phở Bò Tái Nạm', 2, 130000),
-            const Divider(height: 28),
-
-            // Voucher Input
-            Row(
-              children: [
-                Expanded(
-                  child: AppTextField(
-                    hintText: 'Nhập mã voucher (vd: SUMMER20)',
-                    controller: _voucherController,
-                    prefixIcon: Iconsax.ticket_discount,
-                  ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: AppButton(
+                  text: 'Tiến Hành Đặt Hàng',
+                  icon: Iconsax.card_send,
+                  onPressed: _proceedToCheckout,
                 ),
-                const SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: _applyVoucher,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(AppRadius.sm),
-                    ),
-                  ),
-                  child: const Text(
-                    'Áp Dụng',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: AppFontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 28),
-
-            // Order Summary
-            const Text(
-              'Chi Tiết Thanh Toán',
-              style: TextStyle(
-                fontSize: AppFontSize.title,
-                fontWeight: AppFontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            _buildSummaryRow('Tiền đồ ăn', '130.000đ'),
-            const SizedBox(height: 8),
-            _buildSummaryRow('Phí giao hàng (1.8 km)', '16.000đ'),
-            if (_discount > 0) ...[
-              const SizedBox(height: 8),
-              _buildSummaryRow(
-                'Giảm giá Voucher',
-                '-20.000đ',
-                color: AppColors.success,
               ),
             ],
-            const Divider(height: 24),
-            _buildSummaryRow(
-              'Tổng cộng',
-              '${total.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}đ',
-              isBold: true,
-            ),
-            const SizedBox(height: 40),
-
-            // Checkout Button
-            AppButton(
-              text:
-                  'Đặt Đơn Hàng ngay (${total.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}đ)',
-              onPressed: () => context.push('/checkout'),
-            ),
-          ],
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _buildCartRow(String name, int qty, int price) {
-    return Row(
-      children: [
-        Text(
-          '${qty}x',
-          style: const TextStyle(
-            fontWeight: AppFontWeight.bold,
-            color: AppColors.primary,
-            fontSize: AppFontSize.title,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            name,
-            style: const TextStyle(
-              fontWeight: AppFontWeight.semiBold,
-              fontSize: AppFontSize.base,
-            ),
-          ),
-        ),
-        Text(
-          '${price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}đ',
-          style: const TextStyle(
-            fontWeight: AppFontWeight.bold,
-            fontSize: AppFontSize.base,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSummaryRow(
-    String label,
-    String value, {
-    bool isBold = false,
-    Color? color,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: isBold ? AppFontSize.title : AppFontSize.md,
-            fontWeight: isBold ? AppFontWeight.bold : AppFontWeight.regular,
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: isBold ? AppFontSize.lg : AppFontSize.md,
-            fontWeight: isBold ? AppFontWeight.bold : AppFontWeight.semiBold,
-            color: color ?? (isBold ? AppColors.primary : null),
-          ),
-        ),
-      ],
     );
   }
 }

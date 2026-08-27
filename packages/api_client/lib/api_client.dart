@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,13 +15,13 @@ class ApiClient {
         _http = client ?? http.Client();
 
   static String _resolveBaseUrl() {
-    const envUrl = String.fromEnvironment('API_URL', defaultValue: '');
-    if (envUrl.isNotEmpty) return envUrl;
-    if (kIsWeb) return 'http://localhost:3000/api';
-    try {
-      if (Platform.isAndroid) return 'http://10.0.2.2:3000/api';
-    } catch (_) {}
-    return 'http://localhost:3000/api';
+    const envUrl = String.fromEnvironment('API_URL');
+    if (envUrl.isEmpty) {
+      throw StateError(
+        'Missing API_URL configuration. Please run the app with --dart-define-from-file=.env',
+      );
+    }
+    return envUrl;
   }
 
   // --- Token management ---
@@ -31,6 +29,13 @@ class ApiClient {
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_tokenKey);
+  }
+
+  Future<String?> getToken() => _getToken();
+
+  Future<bool> hasToken() async {
+    final token = await _getToken();
+    return token != null && token.isNotEmpty;
   }
 
   Future<void> saveToken(String token) async {
@@ -55,14 +60,24 @@ class ApiClient {
   }
 
   Map<String, dynamic> _parse(http.Response res) {
-    final body = jsonDecode(res.body) as Map<String, dynamic>;
+    if (res.body.isEmpty) return <String, dynamic>{};
+    final decoded = jsonDecode(res.body);
     if (res.statusCode >= 400) {
+      final message = decoded is Map<String, dynamic>
+          ? decoded['message']?.toString()
+          : null;
       throw ApiException(
         statusCode: res.statusCode,
-        message: body['message']?.toString() ?? 'Loi khong xac dinh',
+        message: message ?? 'Lỗi không xác định',
       );
     }
-    return body;
+    if (decoded is List) {
+      return {'data': decoded};
+    }
+    if (decoded is Map<String, dynamic>) {
+      return decoded;
+    }
+    return {'data': decoded};
   }
 
   // --- HTTP Methods ---

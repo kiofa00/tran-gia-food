@@ -21,10 +21,13 @@ export class CommissionsService {
     // Rates (read from system AppConfig or calculated from order subtotal)
     const platformFoodRate = order.subtotal > 0 ? order.platformFee / order.subtotal : 0.2;
 
-    const shipFeeConfig = await this.prisma.appConfig?.findUnique({
+    const shipFeeConfig = await this.prisma.appConfig.findUnique({
       where: { key: 'platform_ship_fee_rate' },
     });
-    const platformShipRate = shipFeeConfig ? parseFloat(shipFeeConfig.value) : 0.15;
+    if (!shipFeeConfig?.value) {
+      throw new Error('Missing required system configuration: platform_ship_fee_rate');
+    }
+    const platformShipRate = parseFloat(shipFeeConfig.value);
     const shipperShareRate = 1 - platformShipRate;
 
     const foodAmount = order.subtotal;

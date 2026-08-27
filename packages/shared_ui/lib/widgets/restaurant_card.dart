@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import '../theme/app_theme.dart';
 
@@ -10,7 +10,7 @@ class RestaurantCard extends StatelessWidget {
   final String? coverImageUrl;
   final double rating;
   final int totalReviews;
-  final double distanceKm;
+  final double? distanceKm;
   final String address;
   final bool isOpen;
   final VoidCallback? onTap;
@@ -20,9 +20,9 @@ class RestaurantCard extends StatelessWidget {
     required this.id,
     required this.name,
     this.coverImageUrl,
-    this.rating = 5.0,
-    this.totalReviews = 0,
-    this.distanceKm = 1.2,
+    required this.rating,
+    required this.totalReviews,
+    this.distanceKm,
     required this.address,
     this.isOpen = true,
     this.onTap,
@@ -31,7 +31,9 @@ class RestaurantCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final estimatedMin = (distanceKm * 5 + 10).round(); // rough ETA calculation
+    final int? estimatedMin = distanceKm != null
+        ? (distanceKm! * 5 + 10).round()
+        : null;
 
     return GestureDetector(
       onTap: onTap,
@@ -50,35 +52,63 @@ class RestaurantCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: AppRadius.md),
-                  child: CachedNetworkImage(
-                    imageUrl: coverImageUrl ?? 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600',
-                    height: 140,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      height: 140,
-                      color: isDark ? AppColors.surfaceAltDark : AppColors.surfaceAltLight,
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      height: 140,
-                      color: AppColors.primaryLight.withValues(alpha: 0.2),
-                      child: const Icon(Iconsax.shop, size: 40, color: AppColors.primary),
-                    ),
-                  ),
+                  child: coverImageUrl != null && coverImageUrl!.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: coverImageUrl!,
+                          height: 140,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            height: 140,
+                            color: isDark
+                                ? AppColors.surfaceAltDark
+                                : AppColors.surfaceAltLight,
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            height: 140,
+                            color: AppColors.primaryLight.withValues(
+                              alpha: 0.2,
+                            ),
+                            child: const Icon(
+                              Iconsax.shop,
+                              size: 40,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        )
+                      : Container(
+                          height: 140,
+                          width: double.infinity,
+                          color: isDark
+                              ? AppColors.surfaceAltDark
+                              : AppColors.surfaceAltLight,
+                          child: const Icon(
+                            Iconsax.shop,
+                            size: 40,
+                            color: AppColors.textSecondaryLight,
+                          ),
+                        ),
                 ),
                 // Status badge
                 Positioned(
                   top: 12,
                   right: 12,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: isOpen ? AppColors.success : AppColors.error,
                       borderRadius: const BorderRadius.all(AppRadius.full),
                     ),
                     child: Text(
                       isOpen ? 'Đang mở' : 'Đã đóng',
-                      style: const TextStyle(color: Colors.white, fontSize: AppFontSize.xs, fontWeight: AppFontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: AppFontSize.xs,
+                        fontWeight: AppFontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -96,7 +126,9 @@ class RestaurantCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: AppFontSize.title,
                       fontWeight: AppFontWeight.bold,
-                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                      color: isDark
+                          ? AppColors.textPrimaryDark
+                          : AppColors.textPrimaryLight,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -106,40 +138,70 @@ class RestaurantCard extends StatelessWidget {
                   // Rating, distance, ETA
                   Row(
                     children: [
-                      const Icon(Icons.star_rounded, size: 18, color: AppColors.warning),
+                      const Icon(
+                        Icons.star_rounded,
+                        size: 18,
+                        color: AppColors.warning,
+                      ),
                       const SizedBox(width: 4),
                       Text(
-                        rating.toStringAsFixed(1),
-                        style: const TextStyle(fontSize: AppFontSize.body, fontWeight: AppFontWeight.bold),
-                      ),
-                      Text(
-                        ' ($totalReviews)',
-                        style: TextStyle(
-                          fontSize: AppFontSize.sm,
-                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Icon(Iconsax.location5, size: 15, color: AppColors.primary),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${distanceKm.toStringAsFixed(1)} km',
-                        style: TextStyle(
+                        rating > 0 ? rating.toStringAsFixed(1) : 'Mới',
+                        style: const TextStyle(
                           fontSize: AppFontSize.body,
-                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                          fontWeight: AppFontWeight.bold,
                         ),
                       ),
-                      const Spacer(),
-                      const Icon(Iconsax.clock5, size: 15, color: AppColors.primary),
-                      const SizedBox(width: 4),
-                      Text(
-                        '$estimatedMin min',
-                        style: TextStyle(
-                          fontSize: AppFontSize.body,
-                          fontWeight: AppFontWeight.semiBold,
-                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                      if (totalReviews > 0)
+                        Text(
+                          ' ($totalReviews)',
+                          style: TextStyle(
+                            fontSize: AppFontSize.sm,
+                            color: isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondaryLight,
+                          ),
                         ),
-                      ),
+                      if (distanceKm != null) ...[
+                        const SizedBox(width: 12),
+                        const Icon(
+                          Iconsax.location5,
+                          size: 15,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            '${distanceKm!.toStringAsFixed(1)} km',
+                            style: TextStyle(
+                              fontSize: AppFontSize.body,
+                              color: isDark
+                                  ? AppColors.textSecondaryDark
+                                  : AppColors.textSecondaryLight,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ] else ...[
+                        const Spacer(),
+                      ],
+                      if (estimatedMin != null) ...[
+                        const SizedBox(width: 8),
+                        const Icon(
+                          Iconsax.clock5,
+                          size: 15,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$estimatedMin phút',
+                          style: TextStyle(
+                            fontSize: AppFontSize.body,
+                            color: isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondaryLight,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ],

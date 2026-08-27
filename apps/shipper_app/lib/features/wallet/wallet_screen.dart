@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:shared_ui/shared_ui.dart';
@@ -67,7 +67,7 @@ class _WalletBody extends ConsumerWidget {
                 const SizedBox(height: 8),
                 Text(
                   _currency(balance),
-                  style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: AppFontWeight.extraBold),
+                  style: const TextStyle(color: Colors.white, fontSize: AppFontSize.h2, fontWeight: AppFontWeight.extraBold),
                 ),
                 const SizedBox(height: 16),
                 const Divider(color: Colors.white30),

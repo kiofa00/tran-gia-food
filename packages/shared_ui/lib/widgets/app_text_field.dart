@@ -7,11 +7,13 @@ class AppTextField extends StatelessWidget {
   final String? labelText;
   final TextEditingController? controller;
   final TextInputType keyboardType;
+  final TextInputAction? textInputAction;
   final bool obscureText;
   final IconData? prefixIcon;
   final Widget? suffixIcon;
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
+  final void Function(String)? onFieldSubmitted;
 
   const AppTextField({
     super.key,
@@ -19,11 +21,13 @@ class AppTextField extends StatelessWidget {
     this.labelText,
     this.controller,
     this.keyboardType = TextInputType.text,
+    this.textInputAction,
     this.obscureText = false,
     this.prefixIcon,
     this.suffixIcon,
     this.validator,
     this.onChanged,
+    this.onFieldSubmitted,
   });
 
   @override
@@ -47,9 +51,11 @@ class AppTextField extends StatelessWidget {
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
+          textInputAction: textInputAction,
           obscureText: obscureText,
           validator: validator,
           onChanged: onChanged,
+          onFieldSubmitted: onFieldSubmitted,
           style: TextStyle(
             fontSize: AppFontSize.base,
             color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,

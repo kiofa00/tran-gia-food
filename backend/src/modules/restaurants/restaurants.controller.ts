@@ -32,12 +32,24 @@ export class RestaurantsController {
   @ApiQuery({ name: 'lat', type: Number, example: 10.7769 })
   @ApiQuery({ name: 'lng', type: Number, example: 106.7009 })
   @ApiQuery({ name: 'radius', type: Number, required: false, example: 10 })
+  @ApiQuery({ name: 'category', type: String, required: false, example: 'Cơm & Phở' })
   findNearby(
     @Query('lat', ParseFloatPipe) lat: number,
     @Query('lng', ParseFloatPipe) lng: number,
-    @Query('radius') radius?: number,
+    @Query('radius') radiusStr?: string,
+    @Query('category') category?: string,
   ) {
-    return this.restaurantsService.findNearby(lat, lng, radius);
+    const radius = radiusStr ? parseFloat(radiusStr) : undefined;
+    return this.restaurantsService.findNearby(lat, lng, radius, category);
+  }
+
+  @Public()
+  @Get()
+  @ApiOperation({ summary: 'Lấy danh sách hoặc tìm kiếm tất cả quán ăn' })
+  @ApiQuery({ name: 'search', type: String, required: false })
+  @ApiQuery({ name: 'category', type: String, required: false })
+  findAll(@Query('search') search?: string, @Query('category') category?: string) {
+    return this.restaurantsService.findAll(search, category);
   }
 
   @Public()

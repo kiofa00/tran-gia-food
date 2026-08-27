@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
@@ -20,7 +20,13 @@ enum KycStatus { notStarted, pending, approved, rejected }
 final kycStatusProvider =
     FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   final api = ref.read(apiClientProvider);
-  return api.get('/users/me/kyc');
+  final hasToken = await api.hasToken();
+  if (!hasToken) return {'status': 'none'};
+  try {
+    return await api.get('/users/me/kyc');
+  } catch (_) {
+    return {'status': 'none'};
+  }
 });
 
 // ---------------------------------------------------------------------------
@@ -59,7 +65,7 @@ class _EkycScreenState extends ConsumerState<EkycScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'XÃ¡c Minh Danh TÃ­nh (eKYC)',
+          'Xác Minh Danh Tính (eKYC)',
           style: TextStyle(fontWeight: AppFontWeight.bold),
         ),
         leading: IconButton(
@@ -69,7 +75,7 @@ class _EkycScreenState extends ConsumerState<EkycScreen> {
       ),
       body: kycAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        // Náº¿u API lá»—i â†’ váº«n hiá»ƒn thá»‹ theo step state
+        // Nếu API lỗi → vẫn hiển thị theo step state
         error: (_, _) => _buildStepContent(),
         data: (data) {
           final statusStr = data['status'] as String? ?? 'not_started';
@@ -83,7 +89,7 @@ class _EkycScreenState extends ConsumerState<EkycScreen> {
             return _ApprovedState();
           }
           if (status == KycStatus.pending) {
-            return _PendingState();
+            return const _PendingState();
           }
           if (status == KycStatus.rejected) {
             return _RejectedState(reason: data['reject_reason'] as String?);
@@ -155,7 +161,7 @@ class _StepIndicator extends StatelessWidget {
   final KycStep currentStep;
   const _StepIndicator({required this.currentStep});
 
-  static const _steps = ['Giá»›i thiá»‡u', 'CCCD', 'Selfie', 'Kiá»ƒm tra'];
+  static const _steps = ['Giới thiệu', 'CCCD', 'Selfie', 'Kiểm tra'];
 
   @override
   Widget build(BuildContext context) {
@@ -238,13 +244,13 @@ class _IntroStep extends StatelessWidget {
         const Icon(Iconsax.shield_tick5, size: 80, color: AppColors.primary),
         const SizedBox(height: 24),
         const Text(
-          'XÃ¡c Minh Danh TÃ­nh',
+          'Xác Minh Danh Tính',
           style: TextStyle(fontSize: AppFontSize.h1, fontWeight: AppFontWeight.bold),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 12),
         const Text(
-          'XÃ¡c minh danh tÃ­nh Ä‘á»ƒ má»Ÿ khÃ³a:\nâ€¢ Thanh toÃ¡n qua ngÃ¢n hÃ ng\nâ€¢ HoÃ n tiá»n tá»± Ä‘á»™ng\nâ€¢ Báº£o máº­t giao dá»‹ch',
+          'Xác minh danh tính để mở khóa:\n• Thanh toán qua ngân hàng\n• Hoàn tiền tự động\n• Bảo mật giao dịch',
           style: TextStyle(
             fontSize: AppFontSize.base,
             color: AppColors.textSecondaryLight,
@@ -254,12 +260,12 @@ class _IntroStep extends StatelessWidget {
         ),
         const SizedBox(height: 32),
         ...[
-          _RequirementItem(icon: Iconsax.personalcard, text: 'áº¢nh CCCD/CMND 2 máº·t'),
-          _RequirementItem(icon: Iconsax.camera, text: 'áº¢nh selfie khuÃ´n máº·t rÃµ nÃ©t'),
-          _RequirementItem(icon: Iconsax.clock, text: 'Duyá»‡t trong vÃ²ng 24 giá»'),
+          const _RequirementItem(icon: Iconsax.personalcard, text: 'Ảnh CCCD/CMND 2 mặt'),
+          const _RequirementItem(icon: Iconsax.camera, text: 'Ảnh selfie khuôn mặt rõ nét'),
+          const _RequirementItem(icon: Iconsax.clock, text: 'Duyệt trong vòng 24 giờ'),
         ],
         const SizedBox(height: 32),
-        AppButton(text: 'Báº¯t Ä‘áº§u xÃ¡c minh', onPressed: onNext),
+        AppButton(text: 'Bắt đầu xác minh', onPressed: onNext),
       ],
     );
   }
@@ -318,27 +324,27 @@ class _CccdStep extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'ThÃ´ng tin CCCD',
+          'Thông tin CCCD',
           style: TextStyle(fontSize: AppFontSize.xl, fontWeight: AppFontWeight.bold),
         ),
         const SizedBox(height: 20),
         AppTextField(
           controller: fullNameController,
-          labelText: 'Há» vÃ  tÃªn (nhÆ° trÃªn CCCD)',
+          labelText: 'Họ và tên (như trên CCCD)',
           hintText: 'NGUYEN VAN A',
           prefixIcon: Iconsax.user,
         ),
         const SizedBox(height: 12),
         AppTextField(
           controller: cccdController,
-          labelText: 'Sá»‘ CCCD / CMND',
+          labelText: 'Số CCCD / CMND',
           hintText: '0xx xxxx xxxx',
           prefixIcon: Iconsax.personalcard,
           keyboardType: TextInputType.number,
         ),
         const SizedBox(height: 24),
         const Text(
-          'áº¢nh CCCD',
+          'Ảnh CCCD',
           style: TextStyle(fontSize: AppFontSize.base, fontWeight: AppFontWeight.bold),
         ),
         const SizedBox(height: 12),
@@ -346,7 +352,7 @@ class _CccdStep extends StatelessWidget {
           children: [
             Expanded(
               child: _PhotoPicker(
-                label: 'Máº·t trÆ°á»›c',
+                label: 'Mặt trước',
                 icon: Iconsax.personalcard,
                 hasPhoto: frontPath != null,
                 onTap: onPickFront,
@@ -355,7 +361,7 @@ class _CccdStep extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: _PhotoPicker(
-                label: 'Máº·t sau',
+                label: 'Mặt sau',
                 icon: Iconsax.personalcard,
                 hasPhoto: backPath != null,
                 onTap: onPickBack,
@@ -365,7 +371,7 @@ class _CccdStep extends StatelessWidget {
         ),
         const SizedBox(height: 32),
         AppButton(
-          text: 'Tiáº¿p theo',
+          text: 'Tiếp theo',
           onPressed: frontPath != null && backPath != null ? onNext : null,
         ),
       ],
@@ -443,12 +449,12 @@ class _SelfieStep extends StatelessWidget {
     return Column(
       children: [
         const Text(
-          'Chá»¥p áº¢nh Selfie',
+          'Chụp Ảnh Selfie',
           style: TextStyle(fontSize: AppFontSize.xl, fontWeight: AppFontWeight.bold),
         ),
         const SizedBox(height: 8),
         const Text(
-          'Chá»¥p áº£nh khuÃ´n máº·t rÃµ nÃ©t, Ä‘á»§ Ã¡nh sÃ¡ng. KhÃ´ng Ä‘eo kÃ­nh, kháº©u trang.',
+          'Chụp ảnh khuôn mặt rõ nét, đủ ánh sáng. Không đeo kính, khẩu trang.',
           style: TextStyle(color: AppColors.textSecondaryLight, fontSize: AppFontSize.base),
           textAlign: TextAlign.center,
         ),
@@ -479,7 +485,7 @@ class _SelfieStep extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  selfiePath != null ? 'áº¢nh Ä‘Ã£ chá»¥p âœ“' : 'Nháº¥n Ä‘á»ƒ chá»¥p',
+                  selfiePath != null ? 'Ảnh đã chụp ✓' : 'Nhấn để chụp',
                   style: TextStyle(
                     color: selfiePath != null ? AppColors.success : AppColors.textSecondaryLight,
                     fontWeight: AppFontWeight.semiBold,
@@ -491,7 +497,7 @@ class _SelfieStep extends StatelessWidget {
         ),
         const SizedBox(height: 40),
         AppButton(
-          text: 'Tiáº¿p theo',
+          text: 'Tiếp theo',
           onPressed: selfiePath != null ? onNext : null,
         ),
       ],
@@ -524,15 +530,15 @@ class _ReviewStep extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Xem Láº¡i ThÃ´ng Tin',
+          'Xem Lại Thông Tin',
           style: TextStyle(fontSize: AppFontSize.xl, fontWeight: AppFontWeight.bold),
         ),
         const SizedBox(height: 20),
-        _ReviewRow(label: 'Há» vÃ  tÃªn', value: fullName.isEmpty ? 'â€”' : fullName),
-        _ReviewRow(label: 'Sá»‘ CCCD', value: cccd.isEmpty ? 'â€”' : cccd),
-        _ReviewRow(label: 'áº¢nh CCCD máº·t trÆ°á»›c', value: hasFront ? 'âœ… ÄÃ£ chá»¥p' : 'âŒ ChÆ°a cÃ³'),
-        _ReviewRow(label: 'áº¢nh CCCD máº·t sau', value: hasBack ? 'âœ… ÄÃ£ chá»¥p' : 'âŒ ChÆ°a cÃ³'),
-        _ReviewRow(label: 'áº¢nh selfie', value: hasSelfie ? 'âœ… ÄÃ£ chá»¥p' : 'âŒ ChÆ°a cÃ³'),
+        _ReviewRow(label: 'Họ và tên', value: fullName.isEmpty ? '—' : fullName),
+        _ReviewRow(label: 'Số CCCD', value: cccd.isEmpty ? '—' : cccd),
+        _ReviewRow(label: 'Ảnh CCCD mặt trước', value: hasFront ? '✅ Đã chụp' : '❌ Chưa có'),
+        _ReviewRow(label: 'Ảnh CCCD mặt sau', value: hasBack ? '✅ Đã chụp' : '❌ Chưa có'),
+        _ReviewRow(label: 'Ảnh selfie', value: hasSelfie ? '✅ Đã chụp' : '❌ Chưa có'),
         const SizedBox(height: 24),
         Container(
           padding: const EdgeInsets.all(14),
@@ -541,13 +547,13 @@ class _ReviewStep extends StatelessWidget {
             borderRadius: const BorderRadius.all(AppRadius.md),
           ),
           child: const Text(
-            'ðŸ“‹ ThÃ´ng tin sáº½ Ä‘Æ°á»£c gá»­i Ä‘áº¿n há»‡ thá»‘ng eKYC Ä‘á»ƒ xÃ¡c minh. Káº¿t quáº£ trong vÃ²ng 24 giá».',
+            '📋 Thông tin sẽ được gửi đến hệ thống eKYC để xác minh. Kết quả trong vòng 24 giờ.',
             style: TextStyle(fontSize: AppFontSize.sm, color: AppColors.textSecondaryLight),
           ),
         ),
         const SizedBox(height: 32),
         AppButton(
-          text: 'Gá»­i XÃ¡c Minh',
+          text: 'Gửi Xác Minh',
           isLoading: isSubmitting,
           onPressed: onSubmit,
         ),
@@ -605,12 +611,12 @@ class _DoneStep extends StatelessWidget {
         const Icon(Iconsax.tick_circle5, size: 80, color: AppColors.success),
         const SizedBox(height: 24),
         const Text(
-          'ÄÃ£ gá»­i há»“ sÆ¡!',
+          'Đã gửi hồ sơ!',
           style: TextStyle(fontSize: AppFontSize.h1, fontWeight: AppFontWeight.bold),
         ),
         const SizedBox(height: 12),
         const Text(
-          'Há»“ sÆ¡ eKYC cá»§a báº¡n Ä‘Ã£ Ä‘Æ°á»£c gá»­i thÃ nh cÃ´ng. ChÃºng tÃ´i sáº½ thÃ´ng bÃ¡o káº¿t quáº£ trong vÃ²ng 24 giá».',
+          'Hồ sơ eKYC của bạn đã được gửi thành công. Chúng tôi sẽ thông báo kết quả trong vòng 24 giờ.',
           style: TextStyle(
             color: AppColors.textSecondaryLight,
             fontSize: AppFontSize.base,
@@ -619,7 +625,7 @@ class _DoneStep extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 40),
-        AppButton(text: 'Vá» trang chá»§', onPressed: onClose),
+        AppButton(text: 'Về trang chủ', onPressed: onClose),
       ],
     );
   }
@@ -639,16 +645,16 @@ class _ApprovedState extends StatelessWidget {
           const Icon(Iconsax.shield_tick5, size: 72, color: AppColors.success),
           const SizedBox(height: 16),
           const Text(
-            'ÄÃ£ xÃ¡c minh thÃ nh cÃ´ng',
+            'Đã xác minh thành công',
             style: TextStyle(fontSize: AppFontSize.xl, fontWeight: AppFontWeight.bold),
           ),
           const SizedBox(height: 8),
           const Text(
-            'TÃ i khoáº£n cá»§a báº¡n Ä‘Ã£ Ä‘Æ°á»£c xÃ¡c minh Ä‘áº§y Ä‘á»§.',
+            'Tài khoản của bạn đã được xác minh đầy đủ.',
             style: TextStyle(color: AppColors.textSecondaryLight),
           ),
           const SizedBox(height: 24),
-          AppButton(text: 'Quay láº¡i', onPressed: () => context.pop()),
+          AppButton(text: 'Quay lại', onPressed: () => context.pop()),
         ],
       ),
     );
@@ -656,6 +662,8 @@ class _ApprovedState extends StatelessWidget {
 }
 
 class _PendingState extends StatelessWidget {
+  const _PendingState();
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -665,17 +673,17 @@ class _PendingState extends StatelessWidget {
           const Icon(Iconsax.clock, size: 72, color: AppColors.warning),
           const SizedBox(height: 16),
           const Text(
-            'Äang chá» duyá»‡t',
+            'Đang chờ duyệt',
             style: TextStyle(fontSize: AppFontSize.xl, fontWeight: AppFontWeight.bold),
           ),
           const SizedBox(height: 8),
           const Text(
-            'Há»“ sÆ¡ eKYC cá»§a báº¡n Ä‘ang Ä‘Æ°á»£c xem xÃ©t.\nThÆ°á»ng máº¥t 24 giá» lÃ m viá»‡c.',
+            'Hồ sơ eKYC của bạn đang được xem xét.\nThường mất 24 giờ làm việc.',
             style: TextStyle(color: AppColors.textSecondaryLight),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
-          AppButton(text: 'Quay láº¡i', onPressed: () => context.pop()),
+          AppButton(text: 'Quay lại', onPressed: () => context.pop()),
         ],
       ),
     );
@@ -697,7 +705,7 @@ class _RejectedState extends StatelessWidget {
             const Icon(Iconsax.close_circle5, size: 72, color: AppColors.error),
             const SizedBox(height: 16),
             const Text(
-              'XÃ¡c minh tháº¥t báº¡i',
+              'Xác minh thất bại',
               style: TextStyle(fontSize: AppFontSize.xl, fontWeight: AppFontWeight.bold),
             ),
             if (reason != null) ...[
@@ -709,17 +717,16 @@ class _RejectedState extends StatelessWidget {
                   borderRadius: const BorderRadius.all(AppRadius.md),
                 ),
                 child: Text(
-                  'LÃ½ do: $reason',
+                  'Lý do: $reason',
                   style: const TextStyle(color: AppColors.error, fontSize: AppFontSize.sm),
                 ),
               ),
             ],
             const SizedBox(height: 24),
-            AppButton(text: 'Thá»­ láº¡i', onPressed: () {}),
+            AppButton(text: 'Thử lại', onPressed: () {}),
           ],
         ),
       ),
     );
   }
 }
-

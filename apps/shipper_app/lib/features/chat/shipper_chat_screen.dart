@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
@@ -45,26 +45,7 @@ class _ShipperChatScreenState extends ConsumerState<ShipperChatScreen>
   final _scrollController = ScrollController();
   bool _isSending = false;
 
-  final List<Map<String, dynamic>> _localMessages = [
-    {
-      'id': '1',
-      'from': 'other',
-      'text': 'Bạn đến quán lấy hàng chưa?',
-      'time': '17:10',
-    },
-    {
-      'id': '2',
-      'from': 'me',
-      'text': 'Tôi đang đến rồi, còn khoảng 3 phút!',
-      'time': '17:11',
-    },
-    {
-      'id': '3',
-      'from': 'other',
-      'text': 'Ok, tôi chờ trước cổng nhé 😊',
-      'time': '17:11',
-    },
-  ];
+  final List<Map<String, dynamic>> _localMessages = [];
 
   static const _shipperQuickReplies = [
     'Tôi đang đến',
@@ -84,17 +65,27 @@ class _ShipperChatScreenState extends ConsumerState<ShipperChatScreen>
 
   void _sendMessage(String text) async {
     if (text.trim().isEmpty || _isSending) return;
+    final content = text.trim();
     _messageController.clear();
     setState(() {
       _isSending = true;
       _localMessages.add({
         'id': DateTime.now().millisecondsSinceEpoch.toString(),
         'from': 'me',
-        'text': text.trim(),
+        'text': content,
         'time': _currentTime(),
       });
     });
-    await Future.delayed(const Duration(milliseconds: 300));
+
+    try {
+      final api = ref.read(apiClientProvider);
+      if (await api.hasToken()) {
+        await api.post('/chat/${widget.orderId}/messages', {
+          'content': content,
+        });
+      }
+    } catch (_) {}
+
     if (mounted) setState(() => _isSending = false);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {

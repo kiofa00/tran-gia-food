@@ -8,18 +8,21 @@ void main() {
   runApp(const ProviderScope(child: TranGiaCustomerApp()));
 }
 
-class TranGiaCustomerApp extends StatelessWidget {
+class TranGiaCustomerApp extends ConsumerWidget {
   const TranGiaCustomerApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeProvider);
+
     return MaterialApp.router(
       title: 'Tran Gia Food',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.light,
+      themeMode: themeMode,
       routerConfig: appRouter,
+      scrollBehavior: const AppScrollBehavior(),
     );
   }
 }

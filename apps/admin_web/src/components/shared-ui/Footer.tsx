@@ -7,6 +7,8 @@ import { Divider, Layout, Space, Typography } from 'antd';
 import { useLocale } from '@/hooks/useLocale';
 import { cn } from '@/utils/cn';
 
+import packageInfo from '../../../package.json';
+
 const { Footer: AntFooter } = Layout;
 const { Text, Link } = Typography;
 
@@ -29,7 +31,9 @@ export const Footer: React.FC<FooterProps> = ({ className }) => {
         <Link href="https://github.com/kiofa00/tran-gia-food" target="_blank">
           {t('footer.apiDocs', 'Tài liệu API & Monorepo')}
         </Link>
-        <Text className="text-gray-600">{`${t('footer.version', 'Phiên bản')} v1.0.0`}</Text>
+        <Text className="text-gray-600">
+          {`${t('footer.version', 'Phiên bản')} v${packageInfo.version}`}
+        </Text>
       </Space>
     </AntFooter>
   );

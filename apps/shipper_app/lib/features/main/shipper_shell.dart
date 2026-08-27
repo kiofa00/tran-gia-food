@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:shared_ui/shared_ui.dart';
@@ -37,7 +37,8 @@ class DeliveryNavigationPage extends StatelessWidget {
   final String orderId;
   const DeliveryNavigationPage({super.key, required this.orderId});
   @override
-  Widget build(BuildContext context) => DeliveryNavigationScreen(orderId: orderId);
+  Widget build(BuildContext context) =>
+      DeliveryNavigationScreen(orderId: orderId);
 }
 
 // Bottom-nav shell
@@ -60,7 +61,10 @@ class ShipperShell extends StatelessWidget {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.textSecondaryLight,
-        selectedLabelStyle: const TextStyle(fontWeight: AppFontWeight.bold, fontSize: AppFontSize.sm),
+        selectedLabelStyle: const TextStyle(
+          fontWeight: AppFontWeight.bold,
+          fontSize: AppFontSize.sm,
+        ),
         unselectedLabelStyle: const TextStyle(fontSize: AppFontSize.sm),
         items: const [
           BottomNavigationBarItem(
@@ -79,8 +83,8 @@ class ShipperShell extends StatelessWidget {
             label: 'Thu Nhập',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Iconsax.user),
-            activeIcon: Icon(Iconsax.user_octagon5),
+            icon: Icon(Iconsax.profile_circle),
+            activeIcon: Icon(Iconsax.profile_circle5),
             label: 'Tài Khoản',
           ),
         ],

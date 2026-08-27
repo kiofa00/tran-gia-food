@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_ui/shared_ui.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/providers/api_client_provider.dart';
 
-class ShipperLoginScreen extends StatefulWidget {
+class ShipperLoginScreen extends ConsumerStatefulWidget {
   const ShipperLoginScreen({super.key});
 
   @override
-  State<ShipperLoginScreen> createState() => _ShipperLoginScreenState();
+  ConsumerState<ShipperLoginScreen> createState() => _ShipperLoginScreenState();
 }
 
-class _ShipperLoginScreenState extends State<ShipperLoginScreen> {
+class _ShipperLoginScreenState extends ConsumerState<ShipperLoginScreen> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
@@ -24,12 +26,23 @@ class _ShipperLoginScreenState extends State<ShipperLoginScreen> {
   }
 
   void _handleLogin() async {
-    if (_phoneController.text.trim().isEmpty) return;
+    final phone = _phoneController.text.trim();
+    if (phone.isEmpty) return;
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1));
-    if (mounted) {
-      setState(() => _isLoading = false);
-      context.go('/orders');
+    try {
+      final api = ref.read(apiClientProvider);
+      await api.post('/auth/send-otp', {'phone': phone});
+      if (mounted) {
+        context.push('/register');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi gửi mã OTP: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -42,7 +55,20 @@ class _ShipperLoginScreenState extends State<ShipperLoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 24),
+              if (context.canPop()) ...[
+                Row(
+                  children: [
+                    IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      icon: const Icon(Icons.arrow_back_ios_new, size: 20, color: AppColors.textPrimaryLight),
+                      onPressed: () => context.pop(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+              ],
+
               // Brand Header
               Row(
                 children: [

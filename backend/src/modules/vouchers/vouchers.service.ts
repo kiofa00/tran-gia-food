@@ -1,8 +1,18 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { User, UserRole } from '@prisma/client';
+import { Prisma, User, UserRole, VoucherType } from '@prisma/client';
 
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateVoucherDto, ValidateVoucherDto } from './dto/voucher.dto';
+
+type VoucherWithUserVouchers = Prisma.VoucherGetPayload<{
+  include: {
+    restaurant: {
+      select: { id: true; name: true; coverImageUrl: true };
+    };
+  };
+}> & {
+  userVouchers?: Array<{ id: string; status: string }>;
+};
 
 @Injectable()
 export class VouchersService {
@@ -78,14 +88,151 @@ export class VouchersService {
     };
   }
 
-  async findAllActive() {
+  async findAllActive(search?: string, type?: string, userId?: string) {
     const now = new Date();
-    return this.prisma.voucher.findMany({
-      where: {
-        validFrom: { lte: now },
-        validTo: { gte: now },
-      },
+    const where: Prisma.VoucherWhereInput = {
+      validFrom: { lte: now },
+      validTo: { gte: now },
+    };
+
+    if (type && type !== 'all') {
+      if (type === 'platform') {
+        where.type = VoucherType.platform;
+      } else if (type === 'restaurant') {
+        where.type = VoucherType.restaurant;
+      } else if (type === 'ship' || type === 'free_ship') {
+        where.type = VoucherType.ship;
+      }
+    }
+
+    if (search && search.trim() !== '') {
+      const q = search.trim();
+      where.code = { contains: q, mode: 'insensitive' };
+    }
+
+    const vouchers = (await this.prisma.voucher.findMany({
+      where,
       orderBy: { createdAt: 'desc' },
+      include: {
+        restaurant: {
+          select: { id: true, name: true, coverImageUrl: true },
+        },
+        ...(userId
+          ? {
+              userVouchers: {
+                where: { userId, status: 'claimed' },
+                select: { id: true, status: true },
+              },
+            }
+          : {}),
+      },
+    })) as VoucherWithUserVouchers[];
+
+    return vouchers.map((v) => ({
+      ...v,
+      isClaimed: userId ? (v.userVouchers?.length ?? 0) > 0 : false,
+    }));
+  }
+
+  async claimVoucher(userId: string, voucherId: string) {
+    const voucher = await this.prisma.voucher.findUnique({
+      where: { id: voucherId },
     });
+
+    if (!voucher) {
+      throw new NotFoundException('Mã voucher không tồn tại');
+    }
+
+    const now = new Date();
+    if (voucher.validFrom > now || voucher.validTo < now) {
+      throw new BadRequestException('Mã voucher đã hết hạn hoặc chưa tới thời gian áp dụng');
+    }
+
+    if (voucher.totalLimit && voucher.usedCount >= voucher.totalLimit) {
+      throw new BadRequestException('Voucher đã hết số lượng phát hành');
+    }
+
+    // Kiểm tra xem user đã lưu voucher này chưa
+    const existingClaim = await this.prisma.userVoucher.findUnique({
+      where: {
+        userId_voucherId: {
+          userId,
+          voucherId,
+        },
+      },
+    });
+
+    if (existingClaim) {
+      if (existingClaim.status === 'claimed') {
+        return {
+          success: true,
+          message: 'Voucher đã có sẵn trong ví của bạn',
+          isAlreadyClaimed: true,
+          data: existingClaim,
+        };
+      }
+      if (existingClaim.status === 'used') {
+        throw new BadRequestException('Bạn đã sử dụng voucher này rồi');
+      }
+    }
+
+    const userVoucher = await this.prisma.userVoucher.create({
+      data: {
+        userId,
+        voucherId,
+        status: 'claimed',
+      },
+      include: {
+        voucher: {
+          include: {
+            restaurant: {
+              select: { id: true, name: true, coverImageUrl: true },
+            },
+          },
+        },
+      },
+    });
+
+    return {
+      success: true,
+      message: 'Lưu voucher vào ví thành công!',
+      isAlreadyClaimed: false,
+      data: userVoucher,
+    };
+  }
+
+  async getMyWallet(userId: string, status?: string) {
+    const where: Prisma.UserVoucherWhereInput = {
+      userId,
+    };
+
+    if (status && (status === 'claimed' || status === 'used' || status === 'expired')) {
+      where.status = status;
+    } else {
+      where.status = 'claimed';
+    }
+
+    const userVouchers = await this.prisma.userVoucher.findMany({
+      where,
+      orderBy: { claimedAt: 'desc' },
+      include: {
+        voucher: {
+          include: {
+            restaurant: {
+              select: { id: true, name: true, coverImageUrl: true },
+            },
+          },
+        },
+      },
+    });
+
+    return userVouchers.map((uv) => ({
+      ...uv.voucher,
+      userVoucherId: uv.id,
+      status: uv.status,
+      claimedAt: uv.claimedAt,
+      usedAt: uv.usedAt,
+      isClaimed: true,
+    }));
   }
 }

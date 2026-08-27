@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:shared_ui/shared_ui.dart';
 import '../../../core/providers/api_client_provider.dart';
@@ -8,16 +9,33 @@ import '../../../core/providers/api_client_provider.dart';
 // Providers
 // ---------------------------------------------------------------------------
 
-final notificationsProvider =
-    FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
+final notificationsProvider = FutureProvider.autoDispose<Map<String, dynamic>>((
+  ref,
+) async {
   final api = ref.read(apiClientProvider);
-  return api.get('/users/me/notifications');
+  final hasToken = await api.hasToken();
+  if (!hasToken) return {'data': [], 'isLoggedIn': false};
+  try {
+    final res = await api.get('/users/me/notifications');
+    return {...res, 'isLoggedIn': true};
+  } catch (e) {
+    if (e is ApiException && e.isUnauthorized) {
+      return {'data': [], 'isLoggedIn': false};
+    }
+    rethrow;
+  }
 });
 
 final unreadCountProvider = FutureProvider.autoDispose<int>((ref) async {
   final api = ref.read(apiClientProvider);
-  final res = await api.get('/users/me/notifications/unread-count');
-  return (res['count'] as num?)?.toInt() ?? 0;
+  final hasToken = await api.hasToken();
+  if (!hasToken) return 0;
+  try {
+    final res = await api.get('/users/me/notifications/unread-count');
+    return (res['count'] as num?)?.toInt() ?? 0;
+  } catch (_) {
+    return 0;
+  }
 });
 
 // ---------------------------------------------------------------------------
@@ -33,39 +51,65 @@ class NotificationScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Thông Báo', style: TextStyle(fontWeight: AppFontWeight.bold)),
+        title: const Text(
+          'Thông Báo',
+          style: TextStyle(fontWeight: AppFontWeight.bold),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.pop(),
         ),
         actions: [
-          TextButton(
-            onPressed: () async {
-              final api = ref.read(apiClientProvider);
-              await api.patch('/users/me/notifications/read-all', {});
-              ref.invalidate(notificationsProvider);
-              ref.invalidate(unreadCountProvider);
+          notifAsync.maybeWhen(
+            data: (res) {
+              final isLoggedIn = res['isLoggedIn'] as bool? ?? false;
+              final notifications = List<Map<String, dynamic>>.from(
+                res['data'] ?? [],
+              );
+              if (!isLoggedIn || notifications.isEmpty) {
+                return const SizedBox.shrink();
+              }
+
+              return TextButton(
+                onPressed: () async {
+                  final api = ref.read(apiClientProvider);
+                  if (!await api.hasToken()) return;
+                  try {
+                    await api.patch('/users/me/notifications/read-all', {});
+                    ref.invalidate(notificationsProvider);
+                    ref.invalidate(unreadCountProvider);
+                  } catch (_) {}
+                },
+                child: const Text(
+                  'Đọc tất cả',
+                  style: TextStyle(color: AppColors.primary),
+                ),
+              );
             },
-            child: const Text('Đọc tất cả', style: TextStyle(color: AppColors.primary)),
+            orElse: () => const SizedBox.shrink(),
           ),
         ],
       ),
       body: notifAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Iconsax.warning_2, size: 48, color: AppColors.error),
-              const SizedBox(height: 12),
-              Text(e.toString(), textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondaryLight)),
-            ],
-          ),
+        error: (e, _) => AppEmptyState(
+          icon: Iconsax.warning_2,
+          iconColor: AppColors.error,
+          title: 'Không thể tải thông báo',
+          description: e.toString(),
+          actionText: 'Thử lại',
+          actionIcon: Icons.refresh_rounded,
+          onAction: () => ref.invalidate(notificationsProvider),
         ),
         data: (res) {
-          final notifications =
-              List<Map<String, dynamic>>.from(res['data'] ?? []);
+          final isLoggedIn = res['isLoggedIn'] as bool? ?? false;
+          if (!isLoggedIn) {
+            return const _UnauthenticatedView();
+          }
 
+          final notifications = List<Map<String, dynamic>>.from(
+            res['data'] ?? [],
+          );
           if (notifications.isEmpty) {
             return const _EmptyView();
           }
@@ -85,15 +129,35 @@ class NotificationScreen extends ConsumerWidget {
                   final id = notifications[i]['id'] as String?;
                   if (id == null) return;
                   final api = ref.read(apiClientProvider);
-                  await api.patch('/users/me/notifications/$id/read', {});
-                  ref.invalidate(notificationsProvider);
-                  ref.invalidate(unreadCountProvider);
+                  if (!await api.hasToken()) return;
+                  try {
+                    await api.patch('/users/me/notifications/$id/read', {});
+                    ref.invalidate(notificationsProvider);
+                    ref.invalidate(unreadCountProvider);
+                  } catch (_) {}
                 },
               ),
             ),
           );
         },
       ),
+    );
+  }
+}
+
+class _UnauthenticatedView extends StatelessWidget {
+  const _UnauthenticatedView();
+
+  @override
+  Widget build(BuildContext context) {
+    return AppEmptyState(
+      icon: Iconsax.notification_status,
+      title: 'Đăng nhập để xem thông báo',
+      description:
+          'Đăng nhập tài khoản để nhận cập nhật đơn hàng, khuyến mãi và thông báo quan trọng.',
+      actionText: 'Đăng Nhập Ngay',
+      actionIcon: Iconsax.login,
+      onAction: () => context.push('/auth'),
     );
   }
 }
@@ -112,64 +176,83 @@ class _NotifTile extends StatelessWidget {
     final type = notif['type'] as String? ?? 'general';
     final createdAt = notif['createdAt'] as String?;
 
-    return ListTile(
-      onTap: onTap,
-      tileColor: isRead ? null : AppColors.primary.withValues(alpha: 0.05),
-      leading: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: _iconColor(type).withValues(alpha: 0.12),
-          shape: BoxShape.circle,
+    return Material(
+      color: isRead
+          ? Colors.transparent
+          : AppColors.primary.withValues(alpha: 0.05),
+      child: ListTile(
+        onTap: onTap,
+        leading: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: _iconColor(type).withValues(alpha: 0.12),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(_iconFor(type), color: _iconColor(type), size: 22),
         ),
-        child: Icon(_iconFor(type), color: _iconColor(type), size: 22),
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontWeight: isRead ? AppFontWeight.medium : AppFontWeight.bold,
-          fontSize: AppFontSize.base,
+        title: Text(
+          title,
+          style: TextStyle(
+            fontWeight: isRead ? AppFontWeight.medium : AppFontWeight.bold,
+            fontSize: AppFontSize.base,
+          ),
         ),
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 2),
-          Text(body, maxLines: 2, overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: AppFontSize.sm, color: AppColors.textSecondaryLight)),
-          if (createdAt != null) ...[
-            const SizedBox(height: 4),
-            Text(_formatTime(createdAt),
-                style: const TextStyle(fontSize: AppFontSize.xs, color: AppColors.textSecondaryLight)),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 2),
+            Text(
+              body,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: AppFontSize.sm,
+                color: AppColors.textSecondaryLight,
+              ),
+            ),
+            if (createdAt != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                _formatTime(createdAt),
+                style: const TextStyle(
+                  fontSize: AppFontSize.xs,
+                  color: AppColors.textSecondaryLight,
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
+        trailing: !isRead
+            ? Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                ),
+              )
+            : null,
       ),
-      trailing: !isRead
-          ? Container(
-              width: 8,
-              height: 8,
-              decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-            )
-          : null,
     );
   }
 
   IconData _iconFor(String type) => switch (type) {
-        'order' => Iconsax.receipt_item,
-        'delivery' => Iconsax.truck_fast,
-        'payment' => Iconsax.card,
-        'voucher' => Iconsax.discount_shape,
-        'system' => Iconsax.info_circle,
-        _ => Iconsax.notification5,
-      };
+    'order' => Iconsax.receipt_item,
+    'delivery' => Iconsax.truck_fast,
+    'payment' => Iconsax.card,
+    'voucher' => Iconsax.discount_shape,
+    'system' => Iconsax.info_circle,
+    _ => Iconsax.notification5,
+  };
 
   Color _iconColor(String type) => switch (type) {
-        'order' => AppColors.primary,
-        'delivery' => AppColors.info,
-        'payment' => AppColors.success,
-        'voucher' => AppColors.warning,
-        _ => AppColors.textSecondaryLight,
-      };
+    'order' => AppColors.primary,
+    'delivery' => AppColors.info,
+    'payment' => AppColors.success,
+    'voucher' => AppColors.warning,
+    _ => AppColors.textSecondaryLight,
+  };
 
   String _formatTime(String iso) {
     try {
@@ -190,17 +273,11 @@ class _EmptyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Iconsax.notification_status, size: 64, color: AppColors.textSecondaryLight),
-          SizedBox(height: 16),
-          Text('Chưa có thông báo nào', style: TextStyle(fontSize: AppFontSize.lg, fontWeight: AppFontWeight.bold)),
-          SizedBox(height: 8),
-          Text('Các thông báo về đơn hàng sẽ hiển thị tại đây', style: TextStyle(fontSize: AppFontSize.body, color: AppColors.textSecondaryLight), textAlign: TextAlign.center),
-        ],
-      ),
+    return const AppEmptyState(
+      icon: Iconsax.notification_status,
+      title: 'Chưa có thông báo nào',
+      description:
+          'Các thông báo mới về đơn hàng và ưu đãi sẽ hiển thị tại đây.',
     );
   }
 }

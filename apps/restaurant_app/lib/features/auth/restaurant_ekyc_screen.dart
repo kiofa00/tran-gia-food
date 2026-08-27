@@ -265,7 +265,7 @@ class _DocUploadBox extends StatelessWidget {
             if (isUploaded)
               const Text(
                 'Đã tải lên ✓',
-                style: TextStyle(fontSize: 10, color: AppColors.success, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: AppFontSize.xs, color: AppColors.success, fontWeight: AppFontWeight.bold),
               ),
           ],
         ),

@@ -1,4 +1,4 @@
-import { ExecutionContext, Injectable, SetMetadata } from '@nestjs/common';
+import { ExecutionContext, Injectable, SetMetadata, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -27,10 +27,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   handleRequest<TUser = unknown>(err: Error | null, user: TUser) {
     if (isAuthDisabled()) {
-      return user ?? null;
+      return user ?? (null as unknown as TUser);
     }
     if (err || !user) {
-      return null;
+      throw err || new UnauthorizedException('Chưa đăng nhập hoặc phiên làm việc đã hết hạn');
     }
     return user;
   }

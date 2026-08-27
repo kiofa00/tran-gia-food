@@ -103,6 +103,12 @@ enum PenaltyReason {
   misconduct
 }
 
+enum UserVoucherStatus {
+  claimed
+  used
+  expired
+}
+
 enum MessageType {
   text
   image
@@ -133,8 +139,10 @@ model User {
   shipper      Shipper?
   ordersAsCustomer Order[] @relation("CustomerOrders")
   voucherUsages VoucherUsage[]
+  userVouchers UserVoucher[]
   notifications Notification[]
   reviews      Review[]  @relation("CustomerReviews")
+  appFeedbacks AppFeedback[] @relation("UserAppFeedbacks")
   chatsSent    ChatMessage[] @relation("SentMessages")
   chatsReceived ChatMessage[] @relation("ReceivedMessages")
 
@@ -357,11 +365,26 @@ model Voucher {
   issuedById   String
 
   usages       VoucherUsage[]
+  userVouchers UserVoucher[]
   orders       Order[]
 
   createdAt    DateTime @default(now())
 
   @@map("vouchers")
+}
+
+model UserVoucher {
+  id        String            @id @default(cuid())
+  userId    String
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  voucherId String
+  voucher   Voucher           @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+  status    UserVoucherStatus @default(claimed)
+  claimedAt DateTime          @default(now())
+  usedAt    DateTime?
+
+  @@unique([userId, voucherId])
+  @@map("user_vouchers")
 }
 
 model VoucherUsage {
@@ -480,4 +503,20 @@ model ChatMessage {
   createdAt  DateTime    @default(now())
 
   @@map("chat_messages")
+}
+
+model AppFeedback {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation("UserAppFeedbacks", fields: [userId], references: [id], onDelete: SetNull)
+  rating     Int
+  comment    String?
+  platform   String?  // 'android' | 'ios' | 'web'
+  appVersion String?
+
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([platform])
+  @@map("app_feedbacks")
 }

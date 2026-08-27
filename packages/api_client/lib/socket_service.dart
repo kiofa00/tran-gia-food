@@ -1,15 +1,18 @@
-﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 // ---------------------------------------------------------------------------
-// Resolve base URL (same logic as ApiClient)
+// Resolve base URL
 // ---------------------------------------------------------------------------
 
 String _resolveWsBaseUrl() {
-  // In production, replace with your actual domain
-  const env = String.fromEnvironment('WS_URL', defaultValue: '');
-  if (env.isNotEmpty) return env;
-  return 'http://10.0.2.2:3000'; // Android emulator default
+  const env = String.fromEnvironment('WS_URL');
+  if (env.isEmpty) {
+    throw StateError(
+      'Missing WS_URL configuration. Please run the app with --dart-define-from-file=.env',
+    );
+  }
+  return env;
 }
 
 // ---------------------------------------------------------------------------

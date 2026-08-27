@@ -3,10 +3,19 @@ import {
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { OrderStatus, OrderType, PaymentStatus, Prisma, User, UserRole } from '@prisma/client';
+import {
+  OrderStatus,
+  OrderType,
+  PaymentStatus,
+  Prisma,
+  User,
+  UserRole,
+  UserVoucherStatus,
+} from '@prisma/client';
 
 import { DeliveryGateway } from '../../gateways/delivery.gateway';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -14,6 +23,8 @@ import { CancelOrderDto, CreateOrderDto } from './dto/order.dto';
 
 @Injectable()
 export class OrdersService {
+  private readonly logger = new Logger(OrdersService.name);
+
   constructor(
     private prisma: PrismaService,
     private eventEmitter: EventEmitter2,
@@ -143,6 +154,41 @@ export class OrdersService {
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown DB error';
       throw new InternalServerErrorException(`Không thể tạo đơn hàng: ${message}`);
+    }
+
+    // Record voucher usage if applied
+    if (voucherId) {
+      try {
+        await Promise.allSettled([
+          this.prisma.voucher.update({
+            where: { id: voucherId },
+            data: { usedCount: { increment: 1 } },
+          }),
+          this.prisma.voucherUsage.create({
+            data: {
+              voucherId,
+              userId: customer.id,
+              orderId: order.id,
+              discountApplied: discountAmount,
+            },
+          }),
+          this.prisma.userVoucher.updateMany({
+            where: {
+              userId: customer.id,
+              voucherId,
+              status: UserVoucherStatus.claimed,
+            },
+            data: {
+              status: UserVoucherStatus.used,
+              usedAt: new Date(),
+            },
+          }),
+        ]);
+      } catch (err: unknown) {
+        this.logger.warn(
+          `Failed to update voucher usage: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
     }
 
     // 5. Trigger notifications & auto-assign events

@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 
 class CmsBanner {
@@ -31,22 +29,22 @@ class CmsService {
   final String cmsBaseUrl;
 
   CmsService({String? customBaseUrl})
-      : cmsBaseUrl = customBaseUrl ?? _getDefaultBaseUrl();
+      : cmsBaseUrl = customBaseUrl ?? _getBaseUrl();
 
-  static String _getDefaultBaseUrl() {
-    if (kIsWeb) return 'http://localhost:1337/api';
-    try {
-      if (Platform.isAndroid) return 'http://10.0.2.2:1337/api';
-    } catch (_) {}
-    return 'http://localhost:1337/api';
+  static String _getBaseUrl() {
+    const envUrl = String.fromEnvironment('CMS_URL');
+    if (envUrl.isNotEmpty) return envUrl;
+    throw StateError(
+      'Biến môi trường CMS_URL chưa được cấu hình. Vui lòng truyền qua --dart-define-from-file=.env',
+    );
   }
 
-  /// Fetch active promotional marketing banners from Strapi CMS
+  /// Fetch active promotional marketing banners from CMS
   Future<List<CmsBanner>> fetchBanners() async {
     try {
       final response = await http
           .get(Uri.parse('$cmsBaseUrl/banners'))
-          .timeout(const Duration(seconds: 3));
+          .timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
@@ -58,12 +56,12 @@ class CmsService {
     return [];
   }
 
-  /// Fetch dynamic i18n text copy translations from Strapi CMS
+  /// Fetch dynamic i18n text copy translations from CMS
   Future<Map<String, String>> fetchTranslations({String locale = 'vi'}) async {
     try {
       final response = await http
           .get(Uri.parse('$cmsBaseUrl/translations?locale=$locale'))
-          .timeout(const Duration(seconds: 3));
+          .timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
@@ -77,13 +75,8 @@ class CmsService {
         }
         return resultMap;
       }
-    } catch (_) {
-      // Fallback translations map
-    }
+    } catch (_) {}
 
-    return {
-      'home.search_placeholder': 'Tìm món ăn, quán ngon xung quanh...',
-      'order.status_picking_up': 'Tài xế đang đến quán lấy món',
-    };
+    return {};
   }
 }

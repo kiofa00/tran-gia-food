@@ -1,17 +1,24 @@
-# MONOREPO BOUNDARIES & WORKSPACE DEPENDENCIES
+# RANH GIỚI MONOREPO & QUẢN LÝ PHỤ THUỘC WORKSPACE
 
-## 1. WORKSPACE ARCHITECTURE
+---
 
-- **Root**: Managed by `pnpm catalog:` and `Turborepo v2.10.8`.
-- **Flutter Workspaces**: Managed by `Melos v8.2.2` and Dart 3.5 native Pub Workspaces (`workspace:` in root `pubspec.yaml`).
+## 1. KIẾN TRÚC WORKSPACE
 
-## 2. SHARED PACKAGES
+- **Gốc (Root Workspace)**: Quản lý thông qua `pnpm catalog:` và `Turborepo v2.10.8`.
+- **Flutter Workspaces**: Quản lý thông qua `Melos v8.2.2` và Dart 3.5 native Pub Workspaces (`workspace:` trong `pubspec.yaml` gốc).
 
-- **`packages/shared_ui`**: Contains reusable Flutter theme tokens (`AppColors`, `AppGradients`, `AppFontSize`, `AppFontWeight`), atomic UI widgets (`AppButton`, `AppTextField`, `RestaurantCard`), and central JSON design tokens (`tokens/base.json`, `customer-app.json`, `admin-web.json`...).
-- **`packages/shared_models`**: Shared Dart models, DTOs, and Enums (`enums_test.dart`).
-- **`backend`**: NestJS REST API, WebSocket Gateway (`delivery.gateway.ts`), and Prisma ORM.
+---
 
-## 3. DEPENDENCY DIRECTION
+## 2. CÁC GÓI DÙNG CHUNG (SHARED PACKAGES)
 
-- Apps (`apps/*`) and Backend (`backend`) may import shared packages (`packages/*`).
-- Shared packages MUST NOT import application-specific modules from `apps/*` or `backend`.
+- **`packages/shared_ui`**: Chứa toàn bộ Design Tokens Flutter (`AppColors`, `AppGradients`, `AppFontSize`, `AppFontWeight`, `AppRadius`, `AppShadows`), các component giao diện cơ bản (`AppButton`, `AppTextField`, `RestaurantCard`), và tệp JSON token thiết kế trung tâm (`tokens/base.json`, `customer-app.json`, `admin-web.json`...).
+- **`packages/shared_models`**: Chứa các Dart Models, DTOs, và Enums dùng chung cho toàn bộ dự án (`OrderStatus`, `UserRole`, `PaymentMethod`, `TransactionType`, ...).
+- **`packages/api_client`**: Client gọi HTTP REST API và WebSocket Service dùng chung cho các ứng dụng Flutter.
+- **`backend`**: NestJS REST API, WebSocket Gateway (`delivery.gateway.ts`), và Prisma ORM kết nối cơ sở dữ liệu PostgreSQL.
+
+---
+
+## 3. CHIỀU PHỤ THUỘC BẮT BUỘC (DEPENDENCY DIRECTION)
+
+- **Được phép**: Các ứng dụng con (`apps/*`) và Backend (`backend`) được phép import và sử dụng các gói dùng chung (`packages/*`).
+- **🛑 CẤM TUYỆT ĐỐI**: Các gói dùng chung (`packages/*`) KHÔNG ĐƯỢC PHÉP import ngược lại các mô-đun thuộc các ứng dụng cụ thể trong `apps/*` hoặc `backend`.

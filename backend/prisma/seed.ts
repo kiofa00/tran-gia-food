@@ -59,9 +59,31 @@ async function main() {
   // =========================================================================
   const configs = [
     {
+      key: 'system_radius_km',
+      value: '10.0',
+      description: 'Bán kính tìm kiếm quán ăn mặc định của hệ thống (km)',
+    },
+    {
+      key: 'peak_radius_km',
+      value: '7.0',
+      description:
+        'Bán kính tìm kiếm tối đa trong giờ cao điểm để đảm bảo chất lượng giao hàng (km)',
+    },
+    {
+      key: 'peak_hours',
+      value: '11:00-13:00,17:00-19:00',
+      description:
+        'Các khung giờ cao điểm trong ngày (định dạng HH:mm-HH:mm, ngăn cách bởi dấu phẩy)',
+    },
+    {
       key: 'platform_fee_rate',
       value: '0.20',
-      description: 'Tỷ lệ phí hoa hồng nền tảng mặc định (20%)',
+      description: 'Tỷ lệ phí hoa hồng nền tảng mặc định cho món ăn (20%)',
+    },
+    {
+      key: 'platform_ship_fee_rate',
+      value: '0.15',
+      description: 'Tỷ lệ phí hoa hồng nền tảng cho phí vận chuyển (15%)',
     },
     { key: 'base_ship_fee', value: '15000', description: 'Phí ship cơ bản cho 2km đầu tiên (VND)' },
     { key: 'base_ship_distance_km', value: '2.0', description: 'Khoảng cách ship cơ bản (km)' },

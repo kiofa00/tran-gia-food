@@ -419,17 +419,20 @@ class _AddMenuItemSheetState extends ConsumerState<_AddMenuItemSheet> {
                   ),
                   if (_hasToppings) ...[
                     const Divider(),
-                    ..._toppings.map((t) => CheckboxListTile(
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(t['name'] as String, style: const TextStyle(fontSize: AppFontSize.xs)),
-                          subtitle: Text('+${(t['price'] as num).toInt()}đ',
-                              style: const TextStyle(
-                                  fontSize: AppFontSize.xs,
-                                  color: AppColors.primary,
-                                  fontWeight: AppFontWeight.bold)),
-                          value: t['selected'] as bool,
-                          onChanged: (val) => setState(() => t['selected'] = val ?? false),
+                    ..._toppings.map((t) => Material(
+                          color: Colors.transparent,
+                          child: CheckboxListTile(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(t['name'] as String, style: const TextStyle(fontSize: AppFontSize.xs)),
+                            subtitle: Text('+${(t['price'] as num).toInt()}đ',
+                                style: const TextStyle(
+                                    fontSize: AppFontSize.xs,
+                                    color: AppColors.primary,
+                                    fontWeight: AppFontWeight.bold)),
+                            value: t['selected'] as bool,
+                            onChanged: (val) => setState(() => t['selected'] = val ?? false),
+                          ),
                         )),
                   ],
                 ],

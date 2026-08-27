@@ -2,22 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:shared_ui/shared_ui.dart';
+
 import '../cart/cart_screen.dart';
 import '../home/home_screen.dart';
 import '../orders/order_history_screen.dart';
 import '../profile/profile_screen.dart';
 
-class MainShell extends ConsumerStatefulWidget {
-  const MainShell({super.key});
-
+class _MainTabNotifier extends Notifier<int> {
   @override
-  ConsumerState<MainShell> createState() => _MainShellState();
+  int build() => 0;
+
+  void setTab(int index) => state = index;
 }
 
-class _MainShellState extends ConsumerState<MainShell> {
-  int _currentIndex = 0;
+final mainTabProvider = NotifierProvider<_MainTabNotifier, int>(
+  _MainTabNotifier.new,
+);
 
-  final List<Widget> _pages = const [
+class MainShell extends ConsumerWidget {
+  const MainShell({super.key});
+
+  static const List<Widget> _pages = [
     HomeScreen(),
     OrderHistoryScreen(),
     CartScreen(),
@@ -25,12 +30,14 @@ class _MainShellState extends ConsumerState<MainShell> {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentIndex = ref.watch(mainTabProvider);
+
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _pages),
+      body: IndexedStack(index: currentIndex, children: _pages),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
+        currentIndex: currentIndex,
+        onTap: (index) => ref.read(mainTabProvider.notifier).setTab(index),
         type: BottomNavigationBarType.fixed,
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.textSecondaryLight,
@@ -59,8 +66,8 @@ class _MainShellState extends ConsumerState<MainShell> {
             label: 'Giỏ Hàng',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Iconsax.user),
-            activeIcon: Icon(Iconsax.user_octagon5),
+            icon: Icon(Iconsax.profile_circle),
+            activeIcon: Icon(Iconsax.profile_circle5),
             label: 'Tài Khoản',
           ),
         ],

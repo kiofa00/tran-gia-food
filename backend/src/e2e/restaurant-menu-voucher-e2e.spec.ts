@@ -6,6 +6,7 @@ import { MenuService } from '../modules/menu/menu.service';
 import { RestaurantsService } from '../modules/restaurants/restaurants.service';
 import { VouchersService } from '../modules/vouchers/vouchers.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { RedisService } from '../redis/redis.service';
 
 describe('E2E Flow 2 & 3: Restaurant, Menu & Voucher Management Workflow', () => {
   let restaurantsService: RestaurantsService;
@@ -49,6 +50,12 @@ describe('E2E Flow 2 & 3: Restaurant, Menu & Voucher Management Workflow', () =>
     },
   };
 
+  const mockRedisService = {
+    get: jest.fn().mockResolvedValue(null),
+    set: jest.fn().mockResolvedValue(undefined),
+    del: jest.fn().mockResolvedValue(undefined),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -56,6 +63,7 @@ describe('E2E Flow 2 & 3: Restaurant, Menu & Voucher Management Workflow', () =>
         MenuService,
         VouchersService,
         { provide: PrismaService, useValue: mockPrismaService },
+        { provide: RedisService, useValue: mockRedisService },
       ],
     }).compile();
 

@@ -10,6 +10,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { CmsModule } from './modules/cms/cms.module';
 import { CommissionsModule } from './modules/commissions/commissions.module';
+import { FeedbackModule } from './modules/feedback/feedback.module';
 import { MailModule } from './modules/mail/mail.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
@@ -57,6 +58,7 @@ import { RedisModule } from './redis/redis.module';
     MailModule,
     ChatModule,
     ReviewsModule,
+    FeedbackModule,
     AdminModule,
     CmsModule,
   ],

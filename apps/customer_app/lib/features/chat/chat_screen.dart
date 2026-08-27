@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
@@ -12,9 +12,16 @@ import '../../../core/providers/api_client_provider.dart';
 final chatMessagesProvider = FutureProvider.autoDispose
     .family<List<Map<String, dynamic>>, String>((ref, orderId) async {
   final api = ref.read(apiClientProvider);
-  final result = await api.get('/chat/$orderId/messages');
-  final list = result['data'] as List? ?? [];
-  return list.cast<Map<String, dynamic>>();
+  final hasToken = await api.hasToken();
+  if (!hasToken) return [];
+  try {
+    final result = await api.get('/chat/$orderId/messages');
+    final list = result['data'] as List? ?? [];
+    return list.cast<Map<String, dynamic>>();
+  } catch (e) {
+    if (e is ApiException && e.isUnauthorized) return [];
+    rethrow;
+  }
 });
 
 // ---------------------------------------------------------------------------
@@ -44,37 +51,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _scrollController = ScrollController();
   bool _isSending = false;
 
-  // Mock messages khi API chÆ°a cÃ³ dá»¯ liá»‡u
-  final List<Map<String, dynamic>> _localMessages = [
-    {
-      'id': '1',
-      'from': 'other',
-      'text': 'ChÃ o báº¡n! TÃ´i Ä‘ang trÃªn Ä‘Æ°á»ng Ä‘áº¿n quÃ¡n láº¥y Ä‘á»“.',
-      'time': '16:30',
-      'type': 'text',
-    },
-    {
-      'id': '2',
-      'from': 'me',
-      'text': 'Ok báº¡n nhÃ©! MÃ¬nh á»Ÿ Ä‘áº§u ngÃµ 45.',
-      'time': '16:31',
-      'type': 'text',
-    },
-    {
-      'id': '3',
-      'from': 'other',
-      'text': 'TÃ´i tá»›i nÆ¡i rá»“i, báº¡n cÃ³ thá»ƒ ra láº¥y khÃ´ng?',
-      'time': '16:45',
-      'type': 'text',
-    },
-  ];
+  final List<Map<String, dynamic>> _localMessages = [];
 
   static const _quickReplies = [
-    'Giao trÆ°á»›c cá»•ng nhÃ©',
-    'TÃ´i ra ngay',
-    'Gá»i khi tá»›i nÆ¡i',
-    'Äang Ä‘á»£i báº¡n ðŸ˜Š',
-    'á»”n rá»“i, cáº£m Æ¡n!',
+    'Giao trước cổng nhé',
+    'Tôi ra ngay',
+    'Gọi khi tới nơi',
+    'Đang đợi bạn 😊',
+    'Ổn rồi, cảm ơn!',
   ];
 
   @override
@@ -86,20 +70,28 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   void _sendMessage(String text) async {
     if (text.trim().isEmpty || _isSending) return;
+    final content = text.trim();
     _messageController.clear();
     setState(() {
       _isSending = true;
       _localMessages.add({
         'id': DateTime.now().millisecondsSinceEpoch.toString(),
         'from': 'me',
-        'text': text.trim(),
+        'text': content,
         'time': _currentTime(),
         'type': 'text',
       });
     });
 
-    // Simulate API send
-    await Future.delayed(const Duration(milliseconds: 300));
+    try {
+      final api = ref.read(apiClientProvider);
+      if (await api.hasToken()) {
+        await api.post('/chat/${widget.orderId}/messages', {
+          'content': content,
+        });
+      }
+    } catch (_) {}
+
     if (mounted) setState(() => _isSending = false);
 
     // Scroll to bottom

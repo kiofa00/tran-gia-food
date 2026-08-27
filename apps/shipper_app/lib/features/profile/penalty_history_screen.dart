@@ -119,8 +119,8 @@ class _SummaryCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isClean
-              ? [AppColors.success, const Color(0xFF2ECC71)]
-              : [AppColors.error, const Color(0xFFE74C3C)],
+              ? [AppColors.success, AppColors.success.withValues(alpha: 0.8)]
+              : [AppColors.error, AppColors.error.withValues(alpha: 0.8)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
