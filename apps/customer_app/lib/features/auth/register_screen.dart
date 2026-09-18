@@ -8,15 +8,22 @@ import '../../../core/providers/api_client_provider.dart';
 /// Màn hình đăng ký tài khoản Customer
 /// Flow: Nhập SĐT → OTP → Nhập tên → Tạo tài khoản
 class RegisterScreen extends ConsumerStatefulWidget {
-  const RegisterScreen({super.key});
+  final String? initialPhone;
+  final int initialStep;
+
+  const RegisterScreen({
+    super.key,
+    this.initialPhone,
+    this.initialStep = 0,
+  });
 
   @override
   ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
-  final _pageController = PageController();
-  int _currentStep = 0;
+  late final PageController _pageController;
+  late int _currentStep;
 
   // Step 1 — Phone
   final _phoneController = TextEditingController();
@@ -30,6 +37,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _nameController = TextEditingController();
 
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentStep = widget.initialStep.clamp(0, 2);
+    _pageController = PageController(initialPage: _currentStep);
+    if (widget.initialPhone != null && widget.initialPhone!.isNotEmpty) {
+      _phoneController.text = widget.initialPhone!;
+    }
+  }
 
   @override
   void dispose() {

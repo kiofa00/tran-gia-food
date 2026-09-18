@@ -67,10 +67,10 @@ class _SettingsBottomSheetState extends ConsumerState<SettingsBottomSheet> {
                           .setTheme(ThemeMode.light);
                     },
                   ),
-                  const Divider(
+                  Divider(
                     height: 1,
                     indent: 48,
-                    color: AppColors.dividerLight,
+                    color: isDark ? AppColors.dividerDark : AppColors.dividerLight,
                   ),
                   _buildThemeOption(
                     title: 'Chế độ Tối (Dark)',
@@ -82,10 +82,10 @@ class _SettingsBottomSheetState extends ConsumerState<SettingsBottomSheet> {
                       ref.read(themeProvider.notifier).setTheme(ThemeMode.dark);
                     },
                   ),
-                  const Divider(
+                  Divider(
                     height: 1,
                     indent: 48,
-                    color: AppColors.dividerLight,
+                    color: isDark ? AppColors.dividerDark : AppColors.dividerLight,
                   ),
                   _buildThemeOption(
                     title: 'Theo hệ thống (System)',
@@ -132,10 +132,10 @@ class _SettingsBottomSheetState extends ConsumerState<SettingsBottomSheet> {
                     title: 'Tiếng Việt (Mặc định)',
                     code: 'vi',
                   ),
-                  const Divider(
+                  Divider(
                     height: 1,
                     indent: 48,
-                    color: AppColors.dividerLight,
+                    color: isDark ? AppColors.dividerDark : AppColors.dividerLight,
                   ),
                   _buildLanguageOption(
                     flag: '🇬🇧',
@@ -206,7 +206,7 @@ class _SettingsBottomSheetState extends ConsumerState<SettingsBottomSheet> {
                                 ),
                               ),
                               loading: () => const SizedBox.shrink(),
-                              error: (_, __) => const SizedBox.shrink(),
+                              error: (_, _) => const SizedBox.shrink(),
                             ),
                       ],
                     ),
@@ -237,6 +237,7 @@ class _SettingsBottomSheetState extends ConsumerState<SettingsBottomSheet> {
     required VoidCallback onTap,
   }) {
     final isSelected = mode == currentMode;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -252,7 +253,10 @@ class _SettingsBottomSheetState extends ConsumerState<SettingsBottomSheet> {
                   fontWeight: isSelected
                       ? AppFontWeight.bold
                       : AppFontWeight.regular,
-                  color: isSelected ? AppColors.primary : null,
+                  color: isSelected
+                      ? AppColors.primary
+                      : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),
+                  fontSize: AppFontSize.md,
                 ),
               ),
             ),

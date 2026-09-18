@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:shared_ui/shared_ui.dart';
 
-import '../../../core/providers/api_client_provider.dart';
+import '../../../core/providers/auth_provider.dart';
 import '../main/main_shell.dart';
 import 'profile_provider.dart';
 import 'widgets/help_center_bottom_sheet.dart';
@@ -12,6 +12,7 @@ import 'widgets/profile_menu_section.dart';
 import 'widgets/rate_app_dialog.dart';
 import 'widgets/saved_addresses_bottom_sheet.dart';
 import 'widgets/settings_bottom_sheet.dart';
+import 'widgets/update_profile_bottom_sheet.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -110,7 +111,11 @@ class _ProfileBody extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isLoggedIn ? name : 'Chào mừng quý khách 👋',
+                      isLoggedIn
+                          ? (name.isNotEmpty && name != 'Khách'
+                              ? name
+                              : (phone.isNotEmpty ? 'Khách hàng $phone' : 'Khách hàng'))
+                          : 'Chào mừng quý khách 👋',
                       style: const TextStyle(
                         fontSize: AppFontSize.xl,
                         fontWeight: AppFontWeight.bold,
@@ -149,15 +154,9 @@ class _ProfileBody extends ConsumerWidget {
               else
                 IconButton(
                   icon: const Icon(Iconsax.edit, color: Colors.white),
+                  tooltip: 'Chỉnh sửa thông tin',
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Chức năng chỉnh sửa thông tin cá nhân đang cập nhật',
-                        ),
-                        backgroundColor: AppColors.info,
-                      ),
-                    );
+                    UpdateProfileBottomSheet.show(context, profile: profile);
                   },
                 ),
             ],
@@ -168,8 +167,17 @@ class _ProfileBody extends ConsumerWidget {
 
         // Menu Sections
         ProfileMenuSection(
-          title: 'Đơn Hàng & Địa Chỉ',
+          title: 'Tài Khoản & Địa Chỉ',
           items: [
+            ProfileMenuItem(
+              icon: Iconsax.user_edit,
+              label: 'Thông Tin Cá Nhân',
+              onTap: () => _requireAuth(
+                context,
+                'chỉnh sửa thông tin cá nhân',
+                () => UpdateProfileBottomSheet.show(context, profile: profile),
+              ),
+            ),
             ProfileMenuItem(
               icon: Iconsax.receipt_item,
               label: 'Lịch Sử Đơn Hàng',
@@ -264,8 +272,7 @@ class _ProfileBody extends ConsumerWidget {
                     );
                     if (!confirm) return;
 
-                    final api = ref.read(apiClientProvider);
-                    await api.clearToken();
+                    await ref.read(authStateProvider.notifier).logout();
                     ref.invalidate(myProfileProvider);
                     if (context.mounted) context.go('/auth');
                   },

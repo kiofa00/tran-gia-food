@@ -145,6 +145,7 @@ model User {
   appFeedbacks AppFeedback[] @relation("UserAppFeedbacks")
   chatsSent    ChatMessage[] @relation("SentMessages")
   chatsReceived ChatMessage[] @relation("ReceivedMessages")
+  addresses    UserAddress[]
 
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -519,4 +520,28 @@ model AppFeedback {
   @@index([createdAt])
   @@index([platform])
   @@map("app_feedbacks")
+}
+
+model UserAddress {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String   @default("Nhà riêng")
+  recipientName String?
+  phone         String?
+  street        String
+  ward          String
+  district      String
+  city          String
+  fullAddress   String
+  lat           Float
+  lng           Float
+  isDefault     Boolean  @default(false)
+  deliveryNote  String?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+  @@map("user_addresses")
 }

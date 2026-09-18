@@ -21,6 +21,7 @@ class TranGiaCustomerApp extends ConsumerWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
+      themeAnimationDuration: Duration.zero,
       routerConfig: appRouter,
       scrollBehavior: const AppScrollBehavior(),
     );

@@ -23,10 +23,10 @@ class MainShell extends ConsumerWidget {
   const MainShell({super.key});
 
   static const List<Widget> _pages = [
-    HomeScreen(),
-    OrderHistoryScreen(),
-    CartScreen(),
-    ProfileScreen(),
+    RepaintBoundary(child: HomeScreen()),
+    RepaintBoundary(child: OrderHistoryScreen()),
+    RepaintBoundary(child: CartScreen()),
+    RepaintBoundary(child: ProfileScreen()),
   ];
 
   @override

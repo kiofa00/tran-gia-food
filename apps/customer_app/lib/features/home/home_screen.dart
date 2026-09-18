@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:shared_ui/shared_ui.dart';
 
 import '../../../core/providers/api_client_provider.dart';
 import '../../../core/providers/location_provider.dart';
+import '../address/providers/address_provider.dart';
 import 'widgets/home_location_header.dart';
 import 'widgets/home_promo_banner.dart';
 
@@ -33,7 +35,15 @@ final nearbyRestaurantsProvider = FutureProvider.autoDispose
       ref.onDispose(() => timer.cancel());
 
       final api = ref.read(apiClientProvider);
-      final position = await ref.watch(userLocationProvider.future);
+
+      // Ưu tiên tọa độ từ địa chỉ giao hàng được chọn (in-memory hoặc saved),
+      // nếu chưa có thì fallback theo GPS của thiết bị
+      final selectedAddress = ref.watch(selectedAddressProvider);
+      final locationAsync = ref.watch(userLocationProvider);
+      final Position? position = locationAsync.asData?.value;
+
+      final double? targetLat = selectedAddress?.lat ?? position?.latitude;
+      final double? targetLng = selectedAddress?.lng ?? position?.longitude;
 
       try {
         final queryParams = <String, String>{};
@@ -42,10 +52,10 @@ final nearbyRestaurantsProvider = FutureProvider.autoDispose
         }
 
         final String endpoint;
-        if (position != null) {
+        if (targetLat != null && targetLng != null) {
           endpoint = '/restaurants/nearby';
-          queryParams['lat'] = position.latitude.toString();
-          queryParams['lng'] = position.longitude.toString();
+          queryParams['lat'] = targetLat.toString();
+          queryParams['lng'] = targetLng.toString();
         } else {
           endpoint = '/restaurants';
         }
@@ -116,6 +126,7 @@ class HomeScreen extends ConsumerWidget {
         child: RefreshIndicator(
           color: AppColors.primary,
           onRefresh: () async {
+            ref.invalidate(userLocationProvider);
             ref.invalidate(nearbyRestaurantsProvider(selectedCategory));
             ref.invalidate(homeVouchersProvider);
           },

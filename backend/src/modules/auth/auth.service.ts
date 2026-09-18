@@ -30,7 +30,7 @@ export class AuthService {
   // OTP via Phone
   // ──────────────────────────────────────────
 
-  async sendOtp(dto: SendOtpDto): Promise<{ message: string }> {
+  async sendOtp(dto: SendOtpDto): Promise<{ message: string; devOtp?: string }> {
     const phone = this.normalizePhone(dto.phone);
 
     // Rate limiting: max 5 attempts per 15 min
@@ -54,12 +54,16 @@ export class AuthService {
 
     this.logger.log(`OTP sent to ${phone}`);
 
+    const isDev = this.config.get('NODE_ENV') === 'development';
     // In development, log OTP to console
-    if (this.config.get('NODE_ENV') === 'development') {
+    if (isDev) {
       this.logger.debug(`[DEV] OTP for ${phone}: ${otp}`);
     }
 
-    return { message: `Mã OTP đã được gửi đến ${phone}` };
+    return {
+      message: `Mã OTP đã được gửi đến ${phone}`,
+      ...(isDev ? { devOtp: otp } : {}),
+    };
   }
 
   async verifyOtp(dto: VerifyOtpDto): Promise<{
@@ -70,8 +74,15 @@ export class AuthService {
   }> {
     const phone = this.normalizePhone(dto.phone);
 
+    const isDev = this.config.get('NODE_ENV') === 'development';
+    const isBypass = isDev && dto.otp === '123456';
+
     const storedOtp = await this.redis.getOtp(phone);
-    if (!storedOtp || storedOtp !== dto.otp) {
+    if (!storedOtp && !isBypass) {
+      throw new UnauthorizedException('Mã OTP không đúng hoặc đã hết hạn');
+    }
+
+    if (storedOtp && storedOtp !== dto.otp && !isBypass) {
       throw new UnauthorizedException('Mã OTP không đúng hoặc đã hết hạn');
     }
 

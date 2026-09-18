@@ -15,6 +15,9 @@ class AppTextField extends StatelessWidget {
   final void Function(String)? onChanged;
   final void Function(String)? onFieldSubmitted;
 
+  final bool enabled;
+  final bool readOnly;
+
   const AppTextField({
     super.key,
     required this.hintText,
@@ -23,6 +26,8 @@ class AppTextField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.textInputAction,
     this.obscureText = false,
+    this.enabled = true,
+    this.readOnly = false,
     this.prefixIcon,
     this.suffixIcon,
     this.validator,
@@ -53,19 +58,33 @@ class AppTextField extends StatelessWidget {
           keyboardType: keyboardType,
           textInputAction: textInputAction,
           obscureText: obscureText,
+          enabled: enabled,
+          readOnly: readOnly,
           validator: validator,
           onChanged: onChanged,
           onFieldSubmitted: onFieldSubmitted,
           style: TextStyle(
             fontSize: AppFontSize.base,
-            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+            color: (!enabled || readOnly)
+                ? (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)
+                : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),
           ),
           decoration: InputDecoration(
             hintText: hintText,
-            prefixIcon: prefixIcon != null ? Icon(prefixIcon, size: 20, color: AppColors.primary) : null,
+            prefixIcon: prefixIcon != null
+                ? Icon(
+                    prefixIcon,
+                    size: 20,
+                    color: (!enabled || readOnly)
+                        ? AppColors.textHintLight
+                        : AppColors.primary,
+                  )
+                : null,
             suffixIcon: suffixIcon,
             filled: true,
-            fillColor: isDark ? AppColors.surfaceAltDark : AppColors.surfaceAltLight,
+            fillColor: (!enabled || readOnly)
+                ? (isDark ? AppColors.surfaceDark : AppColors.dividerLight.withValues(alpha: 0.5))
+                : (isDark ? AppColors.surfaceAltDark : AppColors.surfaceAltLight),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             border: const OutlineInputBorder(
               borderRadius: BorderRadius.all(AppRadius.sm),
@@ -78,6 +97,10 @@ class AppTextField extends StatelessWidget {
             focusedBorder: const OutlineInputBorder(
               borderRadius: BorderRadius.all(AppRadius.sm),
               borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+            ),
+            disabledBorder: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(AppRadius.sm),
+              borderSide: BorderSide.none,
             ),
           ),
         ),

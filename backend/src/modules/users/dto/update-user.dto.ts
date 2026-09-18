@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsNumber, IsOptional, IsString, IsUrl } from 'class-validator';
+import { IsEmail, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateUserDto {
   @ApiPropertyOptional({ example: 'Nguyễn Văn A' })
@@ -29,7 +29,7 @@ export class UpdateUserDto {
 
   @ApiPropertyOptional({ example: 'https://example.com/avatar.jpg' })
   @IsOptional()
-  @IsUrl()
+  @IsString()
   avatarUrl?: string;
 
   @ApiPropertyOptional({ description: 'FCM token cho push notification' })

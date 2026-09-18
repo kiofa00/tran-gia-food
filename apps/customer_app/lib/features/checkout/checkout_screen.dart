@@ -5,7 +5,9 @@ import 'package:iconsax/iconsax.dart';
 import 'package:shared_ui/shared_ui.dart';
 
 import '../../../core/providers/api_client_provider.dart';
+import '../address/providers/address_provider.dart';
 import '../cart/cart_provider.dart';
+import '../profile/widgets/saved_addresses_bottom_sheet.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
@@ -63,6 +65,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     setState(() => _isPlacingOrder = true);
     try {
+      final selectedAddr = ref.read(selectedAddressProvider);
+      final deliveryAddress = selectedAddr?.fullAddress ?? '123 Nguyễn Trãi, Phường 2, Quận 5, TP.HCM';
+      final deliveryLat = selectedAddr?.lat ?? 10.7580;
+      final deliveryLng = selectedAddr?.lng ?? 106.6810;
+
       final payload = <String, dynamic>{
         'restaurantId': cart.restaurantId,
         'items': cart.items.values
@@ -74,9 +81,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         if (cart.appliedVoucher != null) 'voucherCode': cart.appliedVoucher!.code,
         'orderType': 'delivery',
         'paymentMethod': _paymentMethod == 'vnpay' ? 'bank' : _paymentMethod,
-        'deliveryAddress': '123 Nguyễn Trãi, Phường 2, Quận 5, TP.HCM',
-        'deliveryLat': 10.7580,
-        'deliveryLng': 106.6810,
+        'deliveryAddress': deliveryAddress,
+        'deliveryLat': deliveryLat,
+        'deliveryLng': deliveryLng,
         'note': _noteController.text.trim().isNotEmpty ? _noteController.text.trim() : null,
       };
 
@@ -162,30 +169,68 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             ],
 
             // Delivery Address Card
-            const Text('Địa Chỉ Giao Hàng', style: TextStyle(fontSize: AppFontSize.title, fontWeight: AppFontWeight.bold)),
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.surfaceDark : Colors.white,
-                borderRadius: const BorderRadius.all(AppRadius.md),
-                boxShadow: AppShadows.sm,
-              ),
-              child: const Row(
-                children: [
-                  Icon(Iconsax.location5, color: AppColors.primary, size: 28),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Địa chỉ giao nhận', style: TextStyle(fontWeight: AppFontWeight.bold, fontSize: AppFontSize.md)),
-                        SizedBox(height: 4),
-                        Text('123 Nguyễn Trãi, Phường 2, Quận 5, TP.HCM', style: TextStyle(fontSize: AppFontSize.body, color: AppColors.textSecondaryLight)),
-                      ],
-                    ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Địa Chỉ Giao Hàng', style: TextStyle(fontSize: AppFontSize.title, fontWeight: AppFontWeight.bold)),
+                TextButton(
+                  onPressed: () => SavedAddressesBottomSheet.show(context),
+                  child: const Text('Thay đổi', style: TextStyle(color: AppColors.primary, fontWeight: AppFontWeight.bold)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            InkWell(
+              borderRadius: const BorderRadius.all(AppRadius.md),
+              onTap: () => SavedAddressesBottomSheet.show(context),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.surfaceDark : Colors.white,
+                  borderRadius: const BorderRadius.all(AppRadius.md),
+                  boxShadow: AppShadows.sm,
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.2),
                   ),
-                ],
+                ),
+                child: Builder(
+                  builder: (ctx) {
+                    final selectedAddr = ref.watch(selectedAddressProvider);
+                    return Row(
+                      children: [
+                        const Icon(Iconsax.location5, color: AppColors.primary, size: 28),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                selectedAddr != null
+                                    ? selectedAddr.title
+                                    : 'Địa chỉ giao nhận',
+                                style: const TextStyle(
+                                  fontWeight: AppFontWeight.bold,
+                                  fontSize: AppFontSize.md,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                selectedAddr != null
+                                    ? selectedAddr.fullAddress
+                                    : 'Bấm vào đây để chọn hoặc thêm địa chỉ giao hàng',
+                                style: const TextStyle(
+                                  fontSize: AppFontSize.body,
+                                  color: AppColors.textSecondaryLight,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.textHintLight),
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 24),

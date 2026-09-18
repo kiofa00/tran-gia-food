@@ -112,7 +112,7 @@ export default function AnalyticsPage() {
         )}
         action={
           <Space align="center">
-            <Text strong>{t('vouchers.validity', 'Khoảng thời gian:')}</Text>
+            <Text strong>{t('cms.timeDuration', 'Khoảng thời gian:')}</Text>
             <Select
               value={timeRange}
               onChange={(val) => setTimeRange(val)}

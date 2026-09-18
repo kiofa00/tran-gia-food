@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Order, PayoutStatus } from '@prisma/client';
 
 import { AdminService } from '../modules/admin/admin.service';
+import { CloudinaryService } from '../modules/cloudinary/cloudinary.service';
 import { CmsService } from '../modules/cms/cms.service';
 import { CommissionsService } from '../modules/commissions/commissions.service';
 import { MailService } from '../modules/mail/mail.service';
@@ -95,6 +96,7 @@ describe('E2E Flow 5 & 6: Commission, Payouts, Admin KPI & CMS Management Workfl
         { provide: RedisService, useValue: mockRedisService },
         { provide: MailService, useValue: mockMailService },
         { provide: ConfigService, useValue: mockConfigService },
+        { provide: CloudinaryService, useValue: { uploadAvatar: jest.fn() } },
       ],
     }).compile();
 

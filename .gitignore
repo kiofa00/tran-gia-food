@@ -67,6 +67,12 @@ out/
 **/.tmp/
 public/uploads/
 **/public/uploads/
+backend/uploads/*
+!backend/uploads/.gitkeep
+backend/uploads/avatars/*
+!backend/uploads/avatars/.gitkeep
+uploads/
+**/uploads/
 
 # ===== 3. Flutter & Dart =====
 # Dart / Flutter build artifacts
@@ -168,3 +174,5 @@ $RECYCLE.BIN/
 
 # Claude / AI helpers
 .claude/
+scratch/
+**/scratch/

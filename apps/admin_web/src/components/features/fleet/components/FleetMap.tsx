@@ -44,10 +44,10 @@ export function FleetMap({ activeShippers, className }: FleetMapProps) {
       )}
 
       {/* Top Floating Control Overlay */}
-      <div className="absolute top-3 left-3 right-3 z-400 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+      <div className="absolute top-3 left-3 right-3 z-1000 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
         {/* Status Badge */}
         <div className="pointer-events-auto bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-lg shadow-md border border-gray-200/80 flex items-center gap-2">
-          <Badge status="processing" color="#16a34a" />
+          <Badge status="success" />
           <span className="text-xs font-semibold text-gray-800">
             {t('fleet.liveOnlineCount', 'Trực tiếp: {count} tài xế đang Online', {
               count: activeShippers.length,
@@ -80,7 +80,7 @@ export function FleetMap({ activeShippers, className }: FleetMapProps) {
 
       {/* Selected Shipper Floating Card (Bottom-Left) */}
       {selectedShipper && (
-        <div className="absolute bottom-3 left-3 z-400 bg-white/95 backdrop-blur-md p-3 rounded-xl shadow-lg border border-gray-200/90 max-w-xs animate-fade-in">
+        <div className="absolute bottom-3 left-3 z-1000 bg-white/95 backdrop-blur-md p-3 rounded-xl shadow-lg border border-gray-200/90 max-w-xs animate-fade-in">
           <div className="flex items-center justify-between gap-2 mb-1.5">
             <span className="font-bold text-gray-900 text-sm">🛵 {selectedShipper.name}</span>
             <Tag

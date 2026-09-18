@@ -6,6 +6,7 @@ import { KycStatus, User, UserRole, VehicleType } from '@prisma/client';
 
 import { AdminService } from '../modules/admin/admin.service';
 import { AuthService } from '../modules/auth/auth.service';
+import { CloudinaryService } from '../modules/cloudinary/cloudinary.service';
 import { ShippersService } from '../modules/shippers/shippers.service';
 import { UsersService } from '../modules/users/users.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -76,6 +77,7 @@ describe('E2E Flow 1: Auth, Multi-Role Registration & eKYC Workflow', () => {
         { provide: RedisService, useValue: mockRedisService },
         { provide: JwtService, useValue: mockJwtService },
         { provide: ConfigService, useValue: mockConfigService },
+        { provide: CloudinaryService, useValue: { uploadAvatar: jest.fn() } },
       ],
     }).compile();
 

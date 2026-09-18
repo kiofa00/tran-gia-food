@@ -59,20 +59,11 @@ export const AdminProfileModal: React.FC<AdminProfileModalProps> = ({ open, onCl
         .getMe()
         .then((data) => setProfile(data))
         .catch(() => {
-          // Fallback to basic state
-          setProfile({
-            id: 'admin-01',
-            email: 'admin@trangiafood.vn',
-            name: 'Tran Gia Admin',
-            phone: '0901234567',
-            role: 'ADMIN',
-            isActive: true,
-            createdAt: new Date().toISOString(),
-          });
+          message.error(t('profile.loadError', 'Không thể tải thông tin hồ sơ quản trị viên.'));
         })
         .finally(() => setLoading(false));
     }
-  }, [open]);
+  }, [open, t]);
 
   const handleChangePassword = async (values: {
     currentPassword: string;
@@ -80,7 +71,7 @@ export const AdminProfileModal: React.FC<AdminProfileModalProps> = ({ open, onCl
     confirmPassword: string;
   }) => {
     if (values.newPassword !== values.confirmPassword) {
-      message.error(t('common.errorTryAgain', 'Mật khẩu xác nhận không khớp!'));
+      message.error(t('profile.passwordMismatch', 'Mật khẩu xác nhận không khớp!'));
 
       return;
     }
@@ -88,12 +79,12 @@ export const AdminProfileModal: React.FC<AdminProfileModalProps> = ({ open, onCl
     try {
       setSubmittingPassword(true);
       await authService.changePassword(values.currentPassword, values.newPassword);
-      message.success(t('common.success', 'Đổi mật khẩu thành công!'));
+      message.success(t('profile.changePasswordSuccess', 'Đổi mật khẩu thành công!'));
       form.resetFields();
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        t('common.errorTryAgain', 'Đổi mật khẩu thất bại, vui lòng thử lại.');
+        t('profile.changePasswordError', 'Đổi mật khẩu thất bại, vui lòng thử lại.');
 
       message.error(msg);
     } finally {
@@ -132,8 +123,13 @@ export const AdminProfileModal: React.FC<AdminProfileModalProps> = ({ open, onCl
               <Tag color="orange" icon={<SafetyOutlined />}>
                 {profile?.role || 'ADMIN'}
               </Tag>
-              <Tag color="success" icon={<CheckCircleOutlined />}>
-                {t('users.active', 'Đang hoạt động')}
+              <Tag
+                color={profile?.isActive !== false ? 'success' : 'error'}
+                icon={profile?.isActive !== false ? <CheckCircleOutlined /> : undefined}
+              >
+                {profile?.isActive !== false
+                  ? t('users.active', 'Hoạt Động')
+                  : t('users.suspended', 'Tạm Khóa')}
               </Tag>
             </div>
             <Text type="secondary" className="block text-xs mt-1">
@@ -151,32 +147,32 @@ export const AdminProfileModal: React.FC<AdminProfileModalProps> = ({ open, onCl
               label: (
                 <Space>
                   <UserOutlined />
-                  <span>{t('common.details', 'Thông tin tài khoản')}</span>
+                  <span>{t('profile.accountInfo', 'Thông tin tài khoản')}</span>
                 </Space>
               ),
               children: (
                 <Card loading={loading} className="border-slate-200">
                   <Descriptions column={1} bordered size="small">
-                    <Descriptions.Item label={t('restaurants.owner', 'Họ và tên')}>
+                    <Descriptions.Item label={t('users.fullName', 'Họ và Tên')}>
                       <Text strong>{profile?.name || '—'}</Text>
                     </Descriptions.Item>
-                    <Descriptions.Item label={t('auth.phoneOrEmail', 'Địa chỉ Email')}>
+                    <Descriptions.Item label={t('users.email', 'Email')}>
                       <Text copyable>{profile?.email || '—'}</Text>
                     </Descriptions.Item>
-                    <Descriptions.Item label={t('restaurants.phone', 'Số điện thoại')}>
+                    <Descriptions.Item label={t('users.phone', 'Số Điện Thoại')}>
                       <Text>
                         <PhoneOutlined className="mr-1 text-slate-400" />
-                        {profile?.phone || '0901234567'}
+                        {profile?.phone || '—'}
                       </Text>
                     </Descriptions.Item>
-                    <Descriptions.Item label={t('header.adminRole', 'Phân quyền')}>
+                    <Descriptions.Item label={t('users.role', 'Vai Trò')}>
                       <Tag color="volcano">{profile?.role || 'ADMIN'}</Tag>
                     </Descriptions.Item>
-                    <Descriptions.Item label={t('restaurants.status', 'Trạng thái')}>
-                      <Tag color="success">
+                    <Descriptions.Item label={t('users.status', 'Trạng Thái')}>
+                      <Tag color={profile?.isActive !== false ? 'success' : 'error'}>
                         {profile?.isActive !== false
-                          ? t('restaurants.active', 'Đang hoạt động')
-                          : t('common.inactive', 'Tạm khóa')}
+                          ? t('users.active', 'Hoạt Động')
+                          : t('users.suspended', 'Tạm Khóa')}
                       </Tag>
                     </Descriptions.Item>
                   </Descriptions>
@@ -188,14 +184,16 @@ export const AdminProfileModal: React.FC<AdminProfileModalProps> = ({ open, onCl
               label: (
                 <Space>
                   <KeyOutlined />
-                  <span>{t('header.settings', 'Đổi mật khẩu')}</span>
+                  <span>{t('profile.changePassword', 'Đổi mật khẩu')}</span>
                 </Space>
               ),
               children: (
                 <div className="p-2">
                   <Text type="secondary" className="block mb-4 text-xs">
-                    Để bảo mật tài khoản quản trị viên, mật khẩu mới cần có độ dài tối thiểu 6 ký
-                    tự.
+                    {t(
+                      'profile.passwordNote',
+                      'Để bảo mật tài khoản quản trị viên, mật khẩu mới cần có độ dài tối thiểu 6 ký tự.',
+                    )}
                   </Text>
                   <Form
                     form={form}
@@ -205,54 +203,82 @@ export const AdminProfileModal: React.FC<AdminProfileModalProps> = ({ open, onCl
                   >
                     <Form.Item
                       name="currentPassword"
-                      label={t('auth.password', 'Mật khẩu hiện tại')}
+                      label={t('profile.currentPassword', 'Mật khẩu hiện tại')}
                       rules={[
                         {
                           required: true,
-                          message: t('auth.passwordRequired', 'Vui lòng nhập mật khẩu hiện tại!'),
+                          message: t(
+                            'profile.currentPasswordRequired',
+                            'Vui lòng nhập mật khẩu hiện tại!',
+                          ),
                         },
                       ]}
                     >
                       <Input.Password
                         prefix={<LockOutlined className="text-slate-400" />}
-                        placeholder="Nhập mật khẩu hiện tại..."
+                        placeholder={t(
+                          'profile.currentPasswordPlaceholder',
+                          'Nhập mật khẩu hiện tại...',
+                        )}
                       />
                     </Form.Item>
 
                     <Form.Item
                       name="newPassword"
-                      label="Mật khẩu mới"
+                      label={t('profile.newPassword', 'Mật khẩu mới')}
                       rules={[
-                        { required: true, message: 'Vui lòng nhập mật khẩu mới!' },
-                        { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' },
+                        {
+                          required: true,
+                          message: t('profile.newPasswordRequired', 'Vui lòng nhập mật khẩu mới!'),
+                        },
+                        {
+                          min: 6,
+                          message: t('profile.newPasswordMin', 'Mật khẩu phải có ít nhất 6 ký tự!'),
+                        },
                       ]}
                     >
                       <Input.Password
                         prefix={<KeyOutlined className="text-slate-400" />}
-                        placeholder="Nhập mật khẩu mới (>= 6 ký tự)..."
+                        placeholder={t(
+                          'profile.newPasswordPlaceholder',
+                          'Nhập mật khẩu mới (tối thiểu 6 ký tự)...',
+                        )}
                       />
                     </Form.Item>
 
                     <Form.Item
                       name="confirmPassword"
-                      label="Xác nhận mật khẩu mới"
+                      label={t('profile.confirmPassword', 'Xác nhận mật khẩu mới')}
                       dependencies={['newPassword']}
                       rules={[
-                        { required: true, message: 'Vui lòng xác nhận mật khẩu mới!' },
+                        {
+                          required: true,
+                          message: t(
+                            'profile.confirmPasswordRequired',
+                            'Vui lòng xác nhận mật khẩu mới!',
+                          ),
+                        },
                         ({ getFieldValue }) => ({
                           validator(_, value) {
                             if (!value || getFieldValue('newPassword') === value) {
                               return Promise.resolve();
                             }
 
-                            return Promise.reject(new Error('Mật khẩu xác nhận không khớp!'));
+                            return Promise.reject(
+                              new Error(
+                                t('profile.passwordMismatch', 'Mật khẩu xác nhận không khớp!'),
+                              ),
+                            );
                           },
                         }),
                       ]}
                     >
                       <Input.Password
                         prefix={<KeyOutlined className="text-slate-400" />}
-                        placeholder="Nhập lại mật khẩu mới..."
+                        placeholder={t(
+                          'profile.confirmPasswordPlaceholder',
+                          'Nhập lại mật khẩu mới...',
+                        )}
                       />
                     </Form.Item>
 
@@ -268,7 +294,7 @@ export const AdminProfileModal: React.FC<AdminProfileModalProps> = ({ open, onCl
                         loading={submittingPassword}
                         className="bg-orange-500 hover:bg-orange-600"
                       >
-                        {t('common.save', 'Cập nhật mật khẩu')}
+                        {t('profile.updatePasswordBtn', 'Cập nhật mật khẩu')}
                       </Button>
                     </div>
                   </Form>

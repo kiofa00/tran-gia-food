@@ -6,6 +6,7 @@ import 'package:shared_ui/shared_ui.dart';
 import 'package:shared_models/enums/index.dart';
 
 import '../../../core/providers/api_client_provider.dart';
+import '../../../core/providers/auth_provider.dart';
 import '../main/main_shell.dart';
 
 // ---------------------------------------------------------------------------
@@ -14,9 +15,10 @@ import '../main/main_shell.dart';
 
 final orderHistoryProvider = FutureProvider.autoDispose
     .family<Map<String, dynamic>?, int>((ref, page) async {
+      final authState = ref.watch(authStateProvider);
+      if (!authState.isAuthenticated) return null;
+
       final api = ref.read(apiClientProvider);
-      final hasToken = await api.hasToken();
-      if (!hasToken) return null;
       try {
         return await api.get(
           '/users/me/orders',

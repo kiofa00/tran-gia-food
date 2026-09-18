@@ -64,6 +64,12 @@ export function useFleetMap({ activeShippers }: UseFleetMapProps) {
       document.body.appendChild(script);
     } else if (L) {
       setIsMapReady(true);
+    } else {
+      const existingScript = document.getElementById(jsId) as HTMLScriptElement | null;
+
+      if (existingScript) {
+        existingScript.addEventListener('load', () => setIsMapReady(true));
+      }
     }
   }, []);
 
@@ -95,6 +101,13 @@ export function useFleetMap({ activeShippers }: UseFleetMapProps) {
 
       markersLayerRef.current = markersLayer;
       mapInstanceRef.current = map;
+
+      // Ensure proper sizing when rendered inside Ant Design Card/flex container
+      setTimeout(() => {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.invalidateSize();
+        }
+      }, 250);
     }
 
     return () => {
@@ -110,7 +123,7 @@ export function useFleetMap({ activeShippers }: UseFleetMapProps) {
   useEffect(() => {
     const L = getLeaflet();
 
-    if (!mapInstanceRef.current || !markersLayerRef.current || !L) return;
+    if (!isMapReady || !mapInstanceRef.current || !markersLayerRef.current || !L) return;
 
     const markersLayer = markersLayerRef.current;
 
@@ -134,7 +147,7 @@ export function useFleetMap({ activeShippers }: UseFleetMapProps) {
       markersLayer.addLayer(marker);
       bounds.extend([shipper.lat, shipper.lng]);
     });
-  }, [shippersWithCoords]);
+  }, [shippersWithCoords, isMapReady]);
 
   // Handler: Fit Bounds to all shippers
   const handleFitBounds = () => {

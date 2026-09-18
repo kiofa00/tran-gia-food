@@ -59,9 +59,9 @@ class AppModalBottomSheet extends StatelessWidget {
               margin: const EdgeInsets.only(top: 12, bottom: 8),
               width: 40,
               height: 4,
-              decoration: const BoxDecoration(
-                color: AppColors.dividerLight,
-                borderRadius: BorderRadius.all(AppRadius.full),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.dividerDark : AppColors.dividerLight,
+                borderRadius: const BorderRadius.all(AppRadius.full),
               ),
             ),
           ),
@@ -98,7 +98,10 @@ class AppModalBottomSheet extends StatelessWidget {
           ),
 
           if (showDivider)
-            const Divider(height: 1, color: AppColors.dividerLight),
+            Container(
+              height: 1,
+              color: isDark ? AppColors.dividerDark : AppColors.dividerLight,
+            ),
 
           // Content body
           Expanded(

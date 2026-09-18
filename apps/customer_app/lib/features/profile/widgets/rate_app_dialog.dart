@@ -62,7 +62,7 @@ class _RateAppDialogState extends ConsumerState<RateAppDialog> {
         'rating': rating,
         if (comment.isNotEmpty) 'comment': comment,
         'platform': _detectPlatform(),
-        if (appVersion != null) 'appVersion': appVersion,
+        'appVersion': ?appVersion,
       }, auth: false);
 
       if (!mounted) return;

@@ -1,6 +1,9 @@
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as express from 'express';
+import * as fs from 'fs';
+import * as path from 'path';
 
 import { AppModule } from './app.module';
 
@@ -9,6 +12,21 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log', 'debug'],
   });
+
+  // Serve static uploads (e.g. user avatars)
+  const uploadsDir = path.join(process.cwd(), 'uploads', 'avatars');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+  app.use(
+    '/uploads',
+    express.static(path.join(process.cwd(), 'uploads'), {
+      setHeaders: (res) => {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+      },
+    }),
+  );
 
   // Global prefix
   app.setGlobalPrefix('api/v1');

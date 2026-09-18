@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+export 'package:http_parser/http_parser.dart' show MediaType;
 
 /// Central HTTP client for all NestJS backend requests.
 /// Automatically attaches JWT Bearer token from local storage.
@@ -63,12 +66,20 @@ class ApiClient {
     if (res.body.isEmpty) return <String, dynamic>{};
     final decoded = jsonDecode(res.body);
     if (res.statusCode >= 400) {
-      final message = decoded is Map<String, dynamic>
-          ? decoded['message']?.toString()
-          : null;
+      String message = 'Lỗi không xác định';
+      if (decoded is Map<String, dynamic>) {
+        final rawMsg = decoded['message'];
+        if (rawMsg is List) {
+          message = rawMsg.map((e) => e.toString()).join('\n');
+        } else if (rawMsg != null && rawMsg.toString().isNotEmpty) {
+          message = rawMsg.toString();
+        } else if (decoded['error'] != null) {
+          message = decoded['error'].toString();
+        }
+      }
       throw ApiException(
         statusCode: res.statusCode,
-        message: message ?? 'Lỗi không xác định',
+        message: message,
       );
     }
     if (decoded is List) {
@@ -78,6 +89,25 @@ class ApiClient {
       return decoded;
     }
     return {'data': decoded};
+  }
+
+  static MediaType _resolveMediaType(String filename) {
+    final clean = filename.split('?').first.split('#').first;
+    final dotIndex = clean.lastIndexOf('.');
+    final ext = dotIndex != -1 ? clean.substring(dotIndex + 1).toLowerCase() : '';
+    switch (ext) {
+      case 'jpg':
+      case 'jpeg':
+        return MediaType('image', 'jpeg');
+      case 'png':
+        return MediaType('image', 'png');
+      case 'webp':
+        return MediaType('image', 'webp');
+      case 'gif':
+        return MediaType('image', 'gif');
+      default:
+        return MediaType('application', 'octet-stream');
+    }
   }
 
   // --- HTTP Methods ---
@@ -138,6 +168,38 @@ class ApiClient {
     final res = await _http
         .delete(uri, headers: await _headers(auth: auth))
         .timeout(const Duration(seconds: 15));
+    return _parse(res);
+  }
+
+  Future<Map<String, dynamic>> uploadFile(
+    String path, {
+    required List<int> fileBytes,
+    required String filename,
+    MediaType? contentType,
+    String fieldName = 'file',
+    Map<String, String>? fields,
+    bool auth = true,
+  }) async {
+    final uri = Uri.parse('$baseUrl$path');
+    final request = http.MultipartRequest('POST', uri);
+    if (auth) {
+      final token = await _getToken();
+      if (token != null) request.headers['Authorization'] = 'Bearer $token';
+    }
+    if (fields != null) {
+      request.fields.addAll(fields);
+    }
+    final resolvedType = contentType ?? _resolveMediaType(filename);
+    request.files.add(http.MultipartFile.fromBytes(
+      fieldName,
+      fileBytes,
+      filename: filename,
+      contentType: resolvedType,
+    ));
+    final streamedRes = await _http
+        .send(request)
+        .timeout(const Duration(seconds: 30));
+    final res = await http.Response.fromStream(streamedRes);
     return _parse(res);
   }
 }

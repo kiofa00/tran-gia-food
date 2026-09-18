@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:shared_ui/shared_ui.dart';
 import '../../../core/providers/api_client_provider.dart';
+import '../../../core/providers/auth_provider.dart';
 
 // ---------------------------------------------------------------------------
 // Providers
@@ -12,9 +13,10 @@ import '../../../core/providers/api_client_provider.dart';
 final notificationsProvider = FutureProvider.autoDispose<Map<String, dynamic>>((
   ref,
 ) async {
+  final authState = ref.watch(authStateProvider);
+  if (!authState.isAuthenticated) return {'data': [], 'isLoggedIn': false};
+
   final api = ref.read(apiClientProvider);
-  final hasToken = await api.hasToken();
-  if (!hasToken) return {'data': [], 'isLoggedIn': false};
   try {
     final res = await api.get('/users/me/notifications');
     return {...res, 'isLoggedIn': true};
@@ -27,9 +29,10 @@ final notificationsProvider = FutureProvider.autoDispose<Map<String, dynamic>>((
 });
 
 final unreadCountProvider = FutureProvider.autoDispose<int>((ref) async {
+  final authState = ref.watch(authStateProvider);
+  if (!authState.isAuthenticated) return 0;
+
   final api = ref.read(apiClientProvider);
-  final hasToken = await api.hasToken();
-  if (!hasToken) return 0;
   try {
     final res = await api.get('/users/me/notifications/unread-count');
     return (res['count'] as num?)?.toInt() ?? 0;

@@ -128,7 +128,7 @@ class AppTheme {
   static ThemeData get lightTheme => light;
   static ThemeData get darkTheme => dark;
 
-  static ThemeData get light => _buildTheme(
+  static final ThemeData light = _buildTheme(
         brightness: Brightness.light,
         colorScheme: const ColorScheme.light(
           primary: AppColors.primary,
@@ -146,7 +146,7 @@ class AppTheme {
         hintColor: AppColors.textHintLight,
       );
 
-  static ThemeData get dark => _buildTheme(
+  static final ThemeData dark = _buildTheme(
         brightness: Brightness.dark,
         colorScheme: const ColorScheme.dark(
           primary: AppColors.primary,

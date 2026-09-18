@@ -5,6 +5,7 @@ import { mapShipperStatus } from '@/utils/formatters';
 export interface LeafletMap {
   setView: (center: [number, number], zoom: number) => void;
   fitBounds: (bounds: unknown, options?: { padding?: [number, number]; maxZoom?: number }) => void;
+  invalidateSize: () => void;
   remove: () => void;
 }
 
@@ -115,9 +116,9 @@ export function createShipperCustomIcon(L: LeafletNamespace, colorHex: string): 
   return L.divIcon({
     className: 'custom-fleet-pin',
     html: `
-      <div class="relative flex items-center justify-center size-9.5">
-        <div class="absolute size-9.5 rounded-full animate-ping" style="background: ${colorHex}33;"></div>
-        <div class="size-7.5 rounded-full border-2 border-white shadow-md flex items-center justify-center text-sm cursor-pointer transition-transform" style="background: ${colorHex};">
+      <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 38px; height: 38px;">
+        <div style="position: absolute; width: 38px; height: 38px; border-radius: 9999px; background: ${colorHex}33; animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
+        <div style="width: 30px; height: 30px; border-radius: 9999px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; background: ${colorHex}; position: relative; z-index: 1;">
           🛵
         </div>
       </div>
